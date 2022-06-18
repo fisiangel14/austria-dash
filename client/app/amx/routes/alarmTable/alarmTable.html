@@ -1,0 +1,278 @@
+<div id="main-div">
+
+  <h3 class="sub-header">
+    <span class="input-group btn-group pull-left">
+      <a class="btn btn-primary dropdown-toggle no-margins no-padding" data-toggle="dropdown" aria-haspopup="true"
+        aria-expanded="false">
+        <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a href="/export-alarm-report"><i class="fa fa-fw fa-file"></i> Export alarm report</a></li>
+      </ul>
+    </span>
+    &nbsp;
+
+    <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+    {{entry.state.data.title}}
+    <small> - {{entry.currDay}}</small>
+  </h3>
+
+  <div class="row">
+    <div class="col-md-4 text-left">
+
+    </div>
+    <div class="col-md-4 text-center">
+      <h4 class="sub-header">
+        <i class="fa fa-calendar fa-fw"></i>
+        {{workMonth}}
+      </h4>
+    </div>
+    <div class="col-md-4 text-right">
+
+    </div>
+  </div>
+
+
+  <!-- Navigate -->
+  <div class="row hidden-print" layout="row">
+
+    <div class="col-md-2 text-left">
+      <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;"
+        ng-href="/alarms?month={{prevMonth}}&opcoId={{entry.OPCO_ID}}">
+        <i class="fa fa-chevron-left fa-fw"></i>
+        {{prevMonthText}}
+      </a>
+    </div>
+
+    <div class="col-md-8 text-center">
+      <div layout="row" layout-align="space-between center">
+
+        <div style="margin-left: 5px">
+          <select class="form-control input-sm" ng-model="entry.searchAlarm.alarmLevel" ng-change="filterChanged()">
+            <option value="%">Any level</option>
+            <option value="ERROR">Error</option>
+            <option value="WARNING">Warning</option>
+            <option value="INFO">Info</option>
+          </select>
+        </div>
+
+        <div style="margin-left: 5px">
+          <select class="form-control input-sm" ng-model="entry.searchAlarm.alarmSource" ng-change="filterChanged()">
+            <option value="%">Any type</option>
+            <option value="CONTROL">Control</option>
+            <option value="METRIC">Metric</option>
+            <option value="DATO">Dato</option>
+            <option value="JOB">Job</option>
+          </select>
+        </div>
+
+        <div style="margin-left: 5px">
+          <select class="form-control input-sm" ng-model="entry.searchAlarm.alarmStatus" ng-change="filterChanged()">
+            <option value="%">Any status</option>
+            <option value="Pending">Pending</option>
+            <option value="In progress">In progress</option>
+            <option value="Closed">Closed</option>
+            <option value="Not closed">Not closed</option>
+          </select>
+        </div>
+
+        <div style="margin-left: 5px" class="input-group">
+          <input class="form-control input-sm" type="text" ng-model="entry.searchAlarm.searchText"
+            ng-change="filterChanged()" placeholder="Assigned to | Description | ID" focus-me="true">
+        </div>
+
+        <div style="margin-left: 5px">
+          <md-switch class="md-primary md-hue-1 no-margins" ng-true-value="true" ng-false-value="false"
+            ng-model="entry.searchAlarm.isIncident" ng-change="filterChanged()" aria-label="Incidents only">
+            Incidents only
+          </md-switch>
+        </div>
+
+        <!-- Spinner -->
+        <div style="min-width: 100px; max-width: 100px;">
+          <div ng-if="!loadFinished">
+            <i class="fa fa-spinner fa-pulse fa-2x"></i>
+          </div>
+        </div>
+        <!-- Spinner -->
+
+      </div>
+    </div>
+
+    <div class="col-md-2 text-right" layout="row" layout-align="end center">
+      <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;"
+        href="/alarms?month={{nextMonth}}&opcoId={{entry.OPCO_ID}}" ng-if="currMonth >= nextMonth">
+        {{nextMonthText}}
+        <i class="fa fa-chevron-right fa-fw"></i>
+      </a>
+      <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;"
+        ng-href="/alarms?month={{currMonth}}&opcoId={{entry.OPCO_ID}}" ng-if="nextMonth <= currMonth"
+        uib-tooltip="Slide to present" tooltip-trigger="mouseenter" tooltip-placement="bottom"
+        tooltip-popup-delay="300">
+        <i class="fa fa-step-forward fa-fw"></i>
+      </a>
+    </div>
+
+  </div>
+  <!-- Navigate -->
+  <br>
+
+  <div class="panel panel-default md-whiteframe-4dp md-padding">
+
+    <div ng-if="loadFinished">
+      <span ng-if="_und.size(alarms)"><strong>{{_und.size(alarmsFiltered)}}</strong> of
+        <strong>{{_und.size(alarms)}}</strong> alarms</span>
+      <small ng-if="_und.size(alarmsFiltered) < _und.size(alarms)"><a class="pointer-row"
+          ng-click="removeAllFilters()">Clear all filters</a></small>
+    </div>
+    <div class="small no-margins" ng-if="entry.searchAlarm">
+      <ul class="list-inline no-margins">
+        <li><strong>Filters: </strong></li>
+        <li ng-repeat="(element, filter) in entry.searchAlarm" class="filter-alert">
+          <a ng-click="removeFilter(element)" class="btn-xs  close"
+            style="font-size: 10px; vertical-align: text-top;"><i class="fa fa-times"></i></a>
+          {{element}} <em>is like</em> <strong>"{{filter}}"</strong>
+        </li>
+      </ul>
+    </div>
+
+
+
+    <div class="table-responsive">
+      <table class="table table-hover table-condensed">
+        <thead>
+          <tr>
+            <th width="70px">ID</th>
+            <th width="2px"></th>
+            <th>Description</th>
+            <th>Created</th>
+            <th width="60px"></th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody infinite-scroll="infiniteScrollGetData()" infinite-scroll-distance-from-bottom="1500">
+          <tr ng-if="!_und.size(alarmsFiltered) && loadFinished">
+            <td colspan="7">
+              <h4>No alarms to show</h4>
+            </td>
+          </tr>
+          <tr ng-repeat="alarm in alarmsFilteredInf" ng-click="">
+            <td style="vertical-align:middle">
+              <span
+                ng-class="{'btn-red':alarm.SEVERITY_ID == 3, 'btn-orange':alarm.SEVERITY_ID == 2, 'btn-blue':alarm.SEVERITY_ID == 1}">
+                <i class="fa fa-lg fa-fw fa-bell"></i>
+              </span>
+              <strong>{{alarm.ALARM_ID}}</strong>
+            </td>
+            <td
+              ng-class="{'panel-red':alarm.SEVERITY_ID == 3, 'panel-orange':alarm.SEVERITY_ID == 2, 'panel-blue':alarm.SEVERITY_ID == 1}">
+            </td>
+            <td style="vertical-align:middle; padding-left: 5px;">
+              <div>
+                <strong>
+                  <i class="fa fa-lg fa-fw fa-cog"
+                    ng-class="{'fa-cube':alarm.SOURCE=='DATO', 'fa-line-chart':alarm.SOURCE=='METRIC', 'fa-area-chart':alarm.SOURCE=='CONTROL', 'fa-edit':alarm.SOURCE=='CHANGE', 'fa-file-text':alarm.SOURCE=='FILE'}"></i>
+                  <span class="alarm-object">{{alarm.OBJECT_ID}}</span>
+                  <span class="alarm-object">
+                    <i class="fa fa-calendar fa-fw"></i>
+                    <span ng-if="!alarm.FREQUENCY">{{alarm.OBJECT_DATE | date:"dd.MM.yyyy"}}</span>
+                    <span ng-if="alarm.FREQUENCY === 'D'">{{alarm.OBJECT_DATE | date:"dd.MM.yyyy"}}</span>
+                    <span ng-if="alarm.FREQUENCY === 'M'">{{alarm.OBJECT_DATE | date:"MMM yyyy"}}</span>
+                    <span ng-if="alarm.FREQUENCY === 'C'">{{alarm.OBJECT_DATE | date:"MMM yyyy"}}</span>
+                  </span>
+                </strong>
+                <span class="label label-primary" ng-if="alarm.HOLIDAY">{{alarm.HOLIDAY.substr(0, 50)}}</span>
+              </div>
+              <small>{{alarm.DESCRIPTION}} </smal>
+                <span ng-if="alarm.FREQUENCY"> | <span class="label"
+                    ng-class="{'btn-day':alarm.FREQUENCY=='D', 'btn-month':alarm.FREQUENCY=='M', 'btn-cycle':alarm.FREQUENCY=='C'}">{{alarm.FREQUENCY}}</span></span>
+                <span ng-if="alarm.FREQUENCY =='C'"><strong>{{alarm.OBJECT_VERSION}}</strong></span>
+                <span ng-if="alarm.LINK">| <a ng-href="{{alarm.LINK}}">Details</a></span>
+            </td>
+            <td style="vertical-align:middle">
+              <i class="fa fa-fw fa-clock-o"></i>&nbsp;{{alarm.CREATED | date:"dd.MM.yyyy"}}&nbsp;<small
+                class="btn-grey">{{alarm.CREATED | date:"HH:mm"}}</small>
+            </td>
+            <td style="vertical-align:middle">
+              <span class="input-group btn-group btn-block dropdown">
+                <button class="btn btn-sm dropdown-toggle btn-block"
+                  ng-class="{'btn-default': alarm.STATUS == 'Pending', 'btn-primary': alarm.STATUS == 'In progress', 'btn-success': alarm.STATUS == 'Closed'}"
+                  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                  ng-disabled="entry.currentUser.userOpcoId != entry.OPCO_ID">
+                  <span><i class="fa fa-fw"
+                      ng-class="{'fa-hourglass-half':alarm.STATUS == 'Pending', 'fa-cog fa-spin':alarm.STATUS == 'In progress', 'fa-check':alarm.STATUS == 'Closed'}"></i>
+                  </span>
+                  <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                  <li ng-if="alarm.STATUS == 'Pending'"><a href="" ng-click="assignToMe(alarm.ALARM_ID)"><i
+                        class="fa fa-user-plus fa-fw"></i> Start analysis (assign to me)</a></li>
+                  <li ng-if="(alarm.STATUS == 'In progress' && alarm.ASSIGNED_TO == entry.currentUser.userName)"><a
+                      href="" ng-click="unAssign(alarm.ALARM_ID)"><i class="fa fa-user-times fa-fw"></i> Stop analysis
+                      (un-assign)</a></li>
+                  <li ng-if="alarm.STATUS == 'Pending' || alarm.STATUS == 'In progress'"><a href=""
+                      ng-click="assignToSomeoneElse(alarm)"><i class="fa fa-users fa-fw"></i> Assign to someone else</a>
+                  </li>
+                  <li
+                    ng-if="((alarm.STATUS == 'In progress' && alarm.ASSIGNED_TO == entry.currentUser.userName)  || alarm.STATUS == 'Pending') && alarm.SOURCE == 'METRIC'">
+                    <a href="" ng-click="newIncidentMetric(alarm.ALARM_ID)"><i
+                        class="fa fa-exclamation-circle fa-fw"></i>
+                      Create new incident</a></li>
+                  <li
+                    ng-if="((alarm.STATUS == 'In progress' && alarm.ASSIGNED_TO == entry.currentUser.userName)  || alarm.STATUS == 'Pending') && alarm.SOURCE == 'CONTROL'">
+                    <a href="" ng-click="newIncidentControl(alarm)"><i class="fa fa-exclamation-circle fa-fw"></i>
+                      Create
+                      new incident</a></li>
+                  <li
+                    ng-if="((alarm.STATUS == 'In progress' && alarm.ASSIGNED_TO == entry.currentUser.userName)  || alarm.STATUS == 'Pending') && (alarm.SOURCE == 'METRIC' || alarm.SOURCE == 'CONTROL')">
+                    <a href="" ng-click="linkIncident(alarm.ALARM_ID)"><i class="fa fa-exclamation-circle fa-fw"></i>
+                      Link
+                      alarm to existing incident</a></li>
+                  <li
+                    ng-if="((alarm.STATUS == 'In progress' && alarm.ASSIGNED_TO == entry.currentUser.userName) || alarm.STATUS == 'Pending') && alarm.SEVERITY_ID < 3">
+                    <a href="" ng-click="closeMinorAlarm(alarm.ALARM_ID)"><i class="fa fa-check fa-fw"></i> Quick close
+                      (minor warning)</a></li>
+                  <li
+                    ng-if="alarm.STATUS == 'Closed' || alarm.INCIDENT_ID || (alarm.ASSIGNED_TO && alarm.ASSIGNED_TO != entry.currentUser.userName)">
+                    <a href="" ng-click="reopenAlarm(alarm.ALARM_ID)"><i class="fa fa-times-rectangle fa-fw"></i> Reset
+                      alarm status</a></li>
+                  <li
+                    ng-if="(alarm.STATUS == 'In progress' && alarm.ASSIGNED_TO == entry.currentUser.userName) || alarm.STATUS == 'Pending'">
+                    <a href="" ng-click="closeAlarm(alarm.ALARM_ID)"><i class="fa fa-check fa-fw"></i> Close</a></li>
+                </ul>
+              </span>
+            </td>
+            <td style="vertical-align:middle">
+              <strong
+                ng-class="{'btn-green':alarm.STATUS == 'Closed', 'btn-red':alarm.STATUS == 'Expired', 'btn-blue':alarm.STATUS == 'In progress'}">{{alarm.STATUS}}</strong>
+              <i ng-if="alarm.NOTE" class="fa fa-fw fa-comment pointer-row" uib-popover="{{alarm.NOTE}}"
+                popover-trigger="outsideClick" popover-placement="left"></i><br>
+              <span
+                ng-if="moment(alarm.CREATED).format('DD.MM.YYYY HH:mm') !== moment(alarm.MODIFIED).format('DD.MM.YYYY HH:mm')"><i
+                  class="fa fa-fw fa-clock-o"></i>&nbsp;{{alarm.MODIFIED | date:"dd.MM.yyyy"}}&nbsp;<small
+                  class="btn-grey">{{alarm.MODIFIED | date:"HH:mm"}}</small></span>
+              <div layout="row" ng-if="alarm.ASSIGNED_TO">
+                <i class="fa fa-fw fa-user"></i>
+                <small>{{alarm.ASSIGNED_TO}}</small>
+              </div>
+              <div ng-if="alarm.INCIDENT_ID" class="btn-red">
+                <i class="fa fa-fw fa-exclamation-circle"></i>&nbsp;<a ng-if="alarm.INCIDENT_ID" ng-href="/incident-info/{{alarm.INCIDENT_ID}}">I_{{alarm.OPCO_ID}}_{{Lpad(alarm.INCIDENT_ID, 3, '0')}}</a>
+              </div>
+            </td>
+
+            <!-- Infinite load spinner -->
+            <tr ng-if="_und.size(alarmsFiltered) > _und.size(alarmsFilteredInf) && _und.size(alarmsFiltered) && loadFinished">
+                <td class="text-center panel-grey pointer-row" colspan="7" ng-click="infiniteScrollGetData()">
+                  <i class="fa fa-spinner fa-pulse"></i>
+                  Rendering {{_und.size(alarmsFilteredInf)}} from {{_und.size(alarmsFiltered)}} rows ... click to fetch more data 
+                </td>
+            </tr>
+            <!-- Spinner -->
+            
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

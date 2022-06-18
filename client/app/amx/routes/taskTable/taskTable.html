@@ -1,0 +1,145 @@
+<h3 class="sub-header">
+    <span class="input-group btn-group pull-left">
+      <a class="btn btn-primary dropdown-toggle no-margins no-padding" ng-disabled="isDisabled && entry.currentUser.userOpcoId" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a ng-href="#" ng-click="newTask(entry.OPCO_ID)"><i class="fa fa-check-square-o fa-fw"></i> New task</a></li>
+      </ul>
+    </span> 
+    &nbsp;
+    <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+    {{entry.state.data.title}} 
+</h3> 
+
+<div class="panel panel-default md-whiteframe-4dp md-padding">
+
+    <!-- Filters -->
+    <div class="small no-margins" ng-if="!entry.searchTask">
+        <ul class="list-inline no-margins">
+            <li><strong>Filters: </strong></li>
+            <li class="filter-alert"> None </li>
+        </ul>
+    </div>
+
+    <div class="small no-margins" ng-if="entry.searchTask">
+        <ul class="list-inline no-margins">
+            <li><strong>Filters: </strong></li>
+            <li ng-repeat="(element, filter) in entry.searchTask" class="filter-alert" ng-if="filter">
+                <a ng-click="removeFilter(element)" class="btn-xs  close" style="font-size: 10px; vertical-align: text-top;" data-dismiss="alert"><i class="fa fa-times"></i></a>
+                {{element}} <em>is like</em> <strong>"{{filter}}"</strong>
+            </li>
+        </ul>
+    </div>
+    <!-- Filters -->
+
+    <div class="table-responsive" >
+        <table class="table table-hover table-condensed">
+            <thead>
+                <tr>
+                    <th width="90px">ID</th>
+                    <th width="120px">Timestamp</th>
+                    <th ng-if="!entry.OPCO_ID" width="60px" align="center"></th>
+                    <th width="80px">Object</th>
+                    <th width="5px"></th>
+                    <th>Description / Notes</th>
+                    <th width="80px">Status</th>
+                    <th width="250px"></th>
+                </tr>
+                <tr>                
+                    <th></th>
+                    <th></th>
+                    <th ng-if="!entry.OPCO_ID"></th>
+                    <th><input class="no-borders-title" type="text" ng-model="entry.searchTask.OBJECT_ID" ng-change="filterChanged()" placeholder="Object"/></th>
+                    <th></th>
+                    <th><input class="no-borders-title" type="text" ng-model="entry.searchTask.DESCRIPTION" ng-change="filterChanged()" placeholder="Description"/></th>
+                    <th><input class="no-borders-title" type="text" ng-model="entry.searchTask.STATUS" ng-change="filterChanged()" placeholder="Status"/></th>
+                    <th><input class="no-borders-title" type="text" ng-model="entry.searchTask.ASSIGNED_TO" ng-change="filterChanged()" placeholder="Assigned to"/></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-if="!tasks.length && !loadFinished">
+                    <td colspan="9">
+                        <!-- Spinner -->
+                          <div class="col-sm-12 text-center">
+                            <br><br>
+                            <i class="fa fa-spinner fa-pulse fa-3x"></i>
+                          </div>
+                        <!-- Spinner -->                
+                    </td>
+                </tr>   
+                <tr ng-if="!tasks.length && loadFinished">
+                    <td colspan="9">
+                        <h4>No tasks found.</h4>
+                    </td>
+                </tr>             
+                <tr class="animation pointer-row" ng-class="{'btn-not-relevant':task.RELEVANT=='N'}" ng-repeat="task in tasks | filter:entry.searchTask" ng-click="$event.originalEvent.dropdown || $event.originalEvent.menuclick || taskEditModal(task.TASK_ID)" >
+                    <td style="vertical-align:middle; text-align:left">
+                        <span ng-class="{'btn-red':task.STATUS == 'Open - OPCO', 'btn-black':task.STATUS == 'Open - TAG', 'btn-green':task.STATUS == 'Closed'}"> <i class="fa fa-lg fa-fw fa-check-square"></i></span>
+                        <strong>T_{{task.OPCO_ID}}_{{Lpad(task.TASK_ID, 3, '0')}}</strong></td>                              
+                    <td style="vertical-align:middle"><i class="fa fa-fw fa-clock-o"></i> {{task.CREATED | date:"dd.MM.yyyy"}} <small class="btn-grey">{{task.CREATED | date:"HH:mm"}}</small></td> 
+                    <td ng-if="!entry.OPCO_ID" style="vertical-align:middle; text-align:center"><strong>{{entry.lookup.getOpcoById(task.OPCO_ID).COUNTRY_CODE}}</strong></td>                    
+                    <td style="vertical-align:middle">
+                        <a class="btn btn-default btn-sm btn-block" 
+                            href="/{{task.SOURCE | lowercase}}-info/{{task.OPCO_ID>0?task.OPCO_ID:36}}/{{task.OBJECT_ID}}"
+                            ng-click="$event.stopPropagation();">
+                            <span ng-class="{'btn-red':task.STATUS == 'Open - OPCO', 'btn-black':task.STATUS == 'Open - TAG', 'btn-green':task.STATUS == 'Closed'}">
+                                <i class="fa fa-lg fa-fw" ng-class="{'fa-cube':task.SOURCE=='DATO', 'fa-line-chart':task.SOURCE=='METRIC', 'fa-edit':task.SOURCE=='CHANGE', 'fa-file-text':task.SOURCE=='FILE'}" ></i>
+                            </span>
+                            | &nbsp;<strong>{{task.OBJECT_ID}}</strong>
+                        </a>
+                    </td>
+                    <td ng-class="{'panel-red':task.STATUS == 'Open - OPCO', 'panel-black':task.STATUS == 'Open - TAG', 'panel-green':task.STATUS == 'Closed'}"></td>                    
+                    <td style="vertical-align:middle; padding-left:10px;"><span ng-if="task.DESCRIPTION">{{task.DESCRIPTION}}</br><small ng-if="task.NOTE"><strong>Notes:</strong> {{task.NOTE}}</small></span></td>
+                    <td style="vertical-align:middle;">
+                      <span class="input-group btn-group btn-block dropdown">
+                        <button class="btn btn-sm dropdown-toggle btn-block" ng-click="$event.originalEvent.dropdown = true" data-toggle="dropdown"
+                            ng-class="{
+                                'btn-default': task.STATUS == 'Pending', 
+                                'btn-primary': (task.STATUS == 'Open - OPCO' && task.ASSIGNED_TO), 
+                                'btn-default': (task.STATUS == 'Open - TAG' || task.STATUS == 'Open - OPCO'), 
+                                'btn-success': task.STATUS == 'Closed'}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" 
+                            ng-disabled="(task.ASSIGNED_TO && task.ASSIGNED_TO != entry.currentUser.userName && entry.currentUser.userOpcoId) 
+                                        || (entry.currentUser.userOpcoId != entry.OPCO_ID && entry.currentUser.userOpcoId)
+                                        || (task.STATUS !== 'Open - OPCO' && task.ASSIGNED_TO != entry.currentUser.userName && entry.currentUser.userOpcoId)
+                                        ">
+                            <span>
+                                <i class="fa fa-fw" 
+                                    ng-class="{
+                                        'fa-hourglass-half': task.STATUS == 'Open - OPCO' && !task.ASSIGNED_TO, 
+                                        'fa-flag-checkered': task.STATUS == 'Open - TAG', 
+                                        'fa-lg fa-cog fa-spin': task.STATUS == 'Open - OPCO' && task.ASSIGNED_TO && task.STATUS !== 'Closed', 
+                                        'fa-check':task.STATUS == 'Closed'
+                                        }">
+                                </i> 
+                            </span>
+                          <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                          <!-- Open - OPCO -->
+                          <li ng-if="task.STATUS === 'Open - OPCO' && !task.ASSIGNED_TO && entry.currentUser.userOpcoId"><a href="" ng-click="$event.originalEvent.menuclick = true; assignTaskToMe(task.TASK_ID);"><i class="fa fa-user-plus fa-fw"></i> Assign task to me</a></li>
+                          <li ng-if="task.STATUS === 'Open - OPCO' && task.ASSIGNED_TO === entry.currentUser.userName && entry.currentUser.userOpcoId"><a href="" ng-click="$event.originalEvent.menuclick = true; unAssignTask(task.TASK_ID);"><i class="fa fa-user-times fa-fw"></i> Un-assign</a></li>
+                          <li ng-if="task.STATUS === 'Open - OPCO' && (!task.ASSIGNED_TO || task.ASSIGNED_TO === entry.currentUser.userName) && entry.currentUser.userOpcoId"><a href="" ng-click="$event.originalEvent.menuclick = true; closeTaskOpco(task.TASK_ID);"><i class="fa fa-check fa-fw"></i> Close</a></li>
+
+                          <!-- In progress -->
+                          <li ng-if="task.STATUS == 'Open - TAG' && !entry.currentUser.userOpcoId"><a href="" ng-click="$event.originalEvent.menuclick = true; returnTaskToOpco(task.TASK_ID);"><i class="fa fa-unlock fa-fw"></i> Return task to OPCO</a></li>
+                          <li ng-if="task.STATUS == 'Open - TAG' && entry.currentUser.userOpcoId && task.ASSIGNED_TO === entry.currentUser.userName"><a href="" ng-click="$event.originalEvent.menuclick = true; returnTaskToOpco(task.TASK_ID);"><i class="fa fa-user-plus fa-fw"></i> Re-assign task to me</a></li>
+                          <li ng-if="(task.STATUS == 'Open - OPCO' || task.STATUS == 'Open - TAG') && !entry.currentUser.userOpcoId "><a href="" ng-click="$event.originalEvent.menuclick = true; closeTaskTag(task.TASK_ID);"><i class="fa fa-check fa-fw"></i> Close</a></li>
+                                                    
+                          <!-- Closed -->
+                          <li ng-if="(task.STATUS == 'Closed' && task.ASSIGNED_TO === entry.currentUser.userName) || (task.STATUS == 'Closed' && !entry.currentUser.opcoId)"><a href="" ng-click="$event.originalEvent.menuclick = true; returnTaskToOpco(task.TASK_ID);"><i class="fa fa-unlock fa-fw"></i> Re-open & return task to OPCO</a></li>
+                        </ul>
+                      </span>
+                    </td>
+                    <td style="vertical-align:middle">
+                        <span ng-class="{'btn-red':task.STATUS == 'Open - OPCO', 'btn-black':task.STATUS == 'Open - TAG', 'btn-green':task.STATUS == 'Closed'}"> <strong>{{task.STATUS}}</strong></span></br>
+                        <i class="fa fa-fw fa-clock-o"></i> {{task.MODIFIED | date:"dd.MM.yyyy"}} <small class="btn-grey">{{task.MODIFIED | date:"HH:mm"}}</small></br>
+                        <div ng-if="task.ASSIGNED_TO"><i class="fa fa-fw fa-user"></i> <small>{{task.ASSIGNED_TO}}</small></div>
+                        <div ng-if="!task.ASSIGNED_TO"><i class="fa fa-fw fa-user-times"></i> <small>Not assigned</small></div>
+                    </td>
+              
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

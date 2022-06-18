@@ -1,0 +1,149 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li><a href="/metric-catalogue?opcoId={{entry.OPCO_ID}}"><i class="fa fa-line-chart fa-fw"></i> Metric catalogue</a></li>
+  <li><a href="/metric-results-overview?opcoId={{entry.OPCO_ID}}&month={{entry.searchMDmonth}}"><i class="fa fa-th-list fa-fw"></i> Metrics overview</a></li>
+  <li class="active"><i class="fa fa-fw" ng-class="{'fa-list-alt':frequency=='D', 'fa-table': frequency=='M'}"></i> <span ng-if="frequency=='D'">Daily</span><span ng-if="frequency=='M'">Monthly</span> metrics results table</li>
+  <li><a href="/metric-result-table?opcoId={{entry.OPCO_ID}}&month={{workMonth}}&frequency={{frequency=='D'?'M':'D'}}&finetuned={{entry.overviewShowFineTunedOnly}}"><i class="fa fa-fw" ng-class="{'fa-list-alt':frequency=='M', 'fa-table': frequency=='D'}"></i> <span ng-if="frequency=='M'">Daily</span><span ng-if="frequency=='D'">Monthly</span> metrics results table</a></li>
+</ol>
+<!-- Breadcrumbs -->
+
+<div class="row">
+  <div class="col-md-9 text-left">
+    <h3 class="sub-header">
+        <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+        <span ng-if="frequency=='D'">Daily</span><span ng-if="frequency=='M'">Monthly</span> Metrics results
+    </h3> 
+  </div>
+  <div class="col-md-3 text-right hidden-print">
+    <md-switch class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'" ng-model="entry.overviewShowFineTunedOnly" ng-change="reloadOverview()" focus-me="true" aria-label="Finetuned Metrics Only">
+        <span ng-if="entry.overviewShowFineTunedOnly == 'Y'"> Fine-tuned metric</span>
+        <span ng-if="entry.overviewShowFineTunedOnly == 'N'"> All relevant metrics</span>
+    </md-switch>
+  </div>  
+</div>
+
+
+<!-- Navigate months -->
+<div class="row">
+  <div class="col-md-4 text-left">
+
+  </div>
+  <div class="col-md-4 text-center">
+    <h4 class="sub-header">
+      <i class="fa fa-calendar fa-fw"></i>
+      {{workMonthText}}
+    </h4>
+  </div>
+  <div class="col-md-4 text-right">
+
+  </div>
+</div>
+<!-- Navigate months -->
+
+
+<!-- Navigate months -->
+<div class="row hidden-print">
+  <div class="col-md-3 text-left">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/metric-result-table?opcoId={{entry.OPCO_ID}}&month={{prevMonth}}&frequency={{frequency}}&finetuned={{finetuned != '%'?finetuned:'%25'}}">
+      <i class="fa fa-chevron-left fa-fw"></i>
+      {{prevMonthText}}
+    </a>
+  </div>
+  <div class="col-md-6 text-center">
+    <div class="input-group" style="padding-left:7px">
+      <span class = "input-group-btn" data-toggle="buttons">
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchResultTable.GREEN}"  ng-click="searchResultTableToggle('GREEN')"> 
+          <i class="fa fa-lg btn-green" ng-class="{'fa-check-circle':entry.searchResultTable.GREEN, 'fa-circle-o':!entry.searchResultTable.GREEN}"></i>
+        </button>
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchResultTable.YELLOW}"  ng-click="searchResultTableToggle('YELLOW')"> 
+          <i class="fa fa-lg btn-yellow" ng-class="{'fa-minus-circle':entry.searchResultTable.YELLOW, 'fa-circle-o':!entry.searchResultTable.YELLOW}"></i>
+        </button>        
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchResultTable.RED}"  ng-click="searchResultTableToggle('RED')"> 
+          <i class="fa fa-lg btn-red" ng-class="{'fa-times-circle':entry.searchResultTable.RED, 'fa-circle-o':!entry.searchResultTable.RED}"></i>
+        </button>
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchResultTable.ORANGE}" ng-click="searchResultTableToggle('ORANGE')"> 
+          <i class="fa fa-lg btn-orange" ng-class="{'fa-times-circle':entry.searchResultTable.ORANGE, 'fa-circle-o':!entry.searchResultTable.ORANGE}"></i>
+        </button>
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchResultTable.NO_RESULT}"  ng-click="searchResultTableToggle('NO_RESULT')"> 
+          <i class="fa fa-lg btn-blue" ng-class="{'fa-question-circle':entry.searchResultTable.NO_RESULT, 'fa-circle-o':!entry.searchResultTable.NO_RESULT}"></i>
+        </button>
+        
+        <button class="btn btn-default btn-sm disabled" > 
+          <i class="fa"></i>
+        </button>               
+      </span>  
+
+      <input class="form-control input-sm" type="text" ng-model="entry.searchResultTable.text" placeholder="Search" focus-me="true">
+      <span class = "input-group-btn">
+        <button class="btn btn-default btn-sm" ng-click="searchResultTableClear()">
+         <i class="fa fa-times"></i>
+        </button>
+      </span>      
+    </div>
+  </div>
+  <div class="col-md-3 text-right">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/metric-result-table?opcoId={{entry.OPCO_ID}}&month={{nextMonth}}&frequency={{frequency}}&finetuned={{finetuned != '%'?finetuned:'%25'}}" ng-if="currMonth >= nextMonth"> 
+      {{nextMonthText}}
+      <i class="fa fa-chevron-right fa-fw"></i>
+    </a>
+  </div>
+</div>
+<!-- Navigate months -->
+
+
+<!-- Spinner -->
+<div ng-if="!metricDataHeader.length">
+  <div class="col-sm-12 text-center">
+    <br><br>
+    <i class="fa fa-spinner fa-pulse fa-3x"></i>
+  </div>
+</div>
+<!-- Spinner -->
+
+<br>
+
+    <!-- Metric results Table -->
+    <div class="row" ng-if="metricDataHeader.length">
+      <div class="col-sm-12">
+        <div class="table-full-page">
+        <table name="metricTABLE" class="table table-condensed" width="500px">
+            <thead>
+              <tr>
+                <th ng-class="{'metric-results-table-fileds':frequency=='D'}">Metric ID</th>
+                <th class="text-center" ng-if="frequency=='M'">Cycle</th>
+
+                <th class="text-right" width="150px" ng-repeat="metricHeader in metricDataHeader">
+                  <span ng-if="frequency=='D'">{{metricHeader.DATE | date:'dd.MM'}}</span>
+                  <span ng-if="frequency=='M'">{{metricHeader.DATE | date:'MMM'}}</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="metricResults in metric = (metricData | metricTableResultsFilter:entry.searchResultTable)" ng-class="{'table-segment-top': metricResults[0].METRIC_ID != (metricData | metricTableResultsFilter:entry.searchResultTable)[$index-1][0].METRIC_ID}">
+                <!-- Metric -->
+                
+                <td class="active metric-results-table-fileds"><a class="btn btn-xs btn-default btn-block" ng-class="{'btn-not-relevant': metricResults[0].RELEVANT=='N', 'btn-implemented': metricResults[0].IMPLEMENTED=='Y'}"  ng-href="/metric-result/{{metricResults[0].OPCO_ID}}/{{metricResults[0].METRIC_ID}}?month={{frequency=='M'?getMaxMetricDate(metricResults):metricResults[0].DATE | date:'yyyy-MM'}}" popover-title="{{metricResults[0].NAME}}" uib-popover="Formula: {{metricResults[0].FORMULA}} Objective:{{metricResults[0].OBJECTIVE}}|{{metricResults[0].TOLERANCE}}" popover-trigger="mouseenter" popover-placement="right"><i class="fa fa-line-chart"></i> <strong>{{metricResults[0].METRIC_ID}}</strong></a></td>
+                <td class="active metric-results-table-fileds-buffer"><a class="btn btn-xs btn-default btn-block" ng-class="{'btn-not-relevant': metricResults[0].RELEVANT=='N', 'btn-implemented': metricResults[0].IMPLEMENTED=='Y'}"  ng-href="/metric-result/{{metricResults[0].OPCO_ID}}/{{metricResults[0].METRIC_ID}}?month={{metricResults[0].DATE | date:'yyyy-MM'}}"><i class="fa fa-line-chart"></i> <strong>{{metricResults[0].METRIC_ID}}</strong></a></td>
+                <!-- Bill cycle -->
+                <td class="metric-results-table-cycle" ng-if="frequency=='M'">
+                  <span ng-if="metricResults[0].BILL_CYCLE"><i class="fa fa-calendar-check-o fa-fw"></i><strong>{{metricResults[0].BILL_CYCLE}}</strong></span>
+                  <span ng-if="!metricResults[0].BILL_CYCLE"><span class="label" ng-class="{'btn-day':frequency=='D', 'btn-month':frequency=='M', 'btn-cycle':frequency=='C'}">{{frequency}}</span></span>
+                </td>
+                <!-- Value --> 
+                <td ng-class="{'active metric-results-table-saturday': metricResult.DAY_OF_WEEK == 6, 'active metric-results-table-sunday': metricResult.DAY_OF_WEEK == 7}" ng-repeat="metricResult in metricResults">
+                  <div class="metric-results-table-value" ng-class="{'info btn-blue': metricResult.ERROR_CODE != null, 'success btn-green':(metricResult.VALUE != null && metricResult.VALUE <= metricResult.OBJECTIVE) || ((metricResult.VALUE>metricResult.OBJECTIVE && metricResult.VALUE <=  metricResult.OBJECTIVE + metricResult.TOLERANCE) && metricResult.TREND == 'Y'), 'danger btn-red': (metricResult.VALUE>metricResult.OBJECTIVE + metricResult.TOLERANCE) && metricResult.TREND=='N', 'danger btn-orange': (metricResult.VALUE>metricResult.OBJECTIVE + metricResult.TOLERANCE) && metricResult.TREND=='Y', 'warning btn-yellow':(metricResult.VALUE>metricResult.OBJECTIVE && metricResult.VALUE <=  metricResult.OBJECTIVE + metricResult.TOLERANCE) && metricResult.TREND == 'N'}">
+                    <a ng-if="(metricResult.START_DATE <= metricResult.DATE) && (metricResult.VALUE != null || metricResult.ERROR_CODE != null)" ng-href="/metric-composite-result?opcoId={{metricResult.OPCO_ID}}&metricId={{metricResult.METRIC_ID}}&billCycle={{metricResult.BILL_CYCLE}}&date={{metricResult.DATE | date: 'yyyy-MM-dd'}}">
+                      <span ng-if="frequency=='D'">{{metricResult.VALUE | number:3}}</span>
+                      <span ng-if="frequency=='M'">{{metricResult.VALUE | number:5}}</span>
+                      <span ng-if="metricResult.ERROR_CODE != null">{{metricResult.ERROR_CODE.substr(7, 3)}}</span>
+                    </a>
+                      <span ng-if="metricResult.START_DATE <= metricResult.DATE && !metricResult.RESULT_ID && metricResult.DAYS_LATE > 1" class="text-center btn-blue"><i class="fa fa-question-circle"></i></span>
+                      <span ng-if="(metricResult.START_DATE >= metricResult.DATE) || (metricResult.VALUE == null && metricResult.ERROR_CODE == null && metricResult.DAYS_LATE <= 1)">-</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+        </table>    
+        </div>
+      </div>
+    </div>

@@ -1,0 +1,167 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li class="active"><i class="fa fa-fw fa-exclamation-circle"></i> Incidents</a></li>
+  <li><a href="/stakeholder-reports?opcoId={{entry.OPCO_ID}}"><i class="fa fa-wpforms fa-fw"></i> Stakeholder reports</a></li>  
+  <li><a href="/balanced-scorecard?year={{entry.currYear}}&opcoId={{entry.OPCO_ID}}"><i class="fa fa-vcard fa-fw"></i> Balanced scorecard</a></li>
+</ol>
+<!-- Breadcrumbs -->
+
+<h3 class="sub-header">
+	<span class="input-group btn-group pull-left">
+		<a class="btn btn-primary dropdown-toggle no-margins no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			<span class="caret"></span>
+		</a>
+		<ul class="dropdown-menu">
+			<li><a ui-sref="incidentNew"><i class="fa fa-plus fa-fw"></i> New incident</a></li>
+			<li class="divider"></li>
+			<li><a href="/export-incident-report"><i class="fa fa-fw fa-file"></i> Export incident report</a></li>
+		</ul>
+	</span> 
+	&nbsp;
+  <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>		
+	{{entry.state.data.title}} 
+	<span ng-if="showArchive == 'Y'">archive <a href="/incidents?opcoId={{entry.OPCO_ID}}"><i class="fa fa-reply fa-fw"></i></a></span>
+</h3> 
+
+<div class="panel panel-default md-whiteframe-4dp md-padding">
+
+    <!-- Incidents count -->
+    <div ng-if="loadFinished">
+      <span ng-if="_und.size(incidents)"><strong>{{_und.size(filteredIncidents)}}</strong> of
+        <strong>{{_und.size(incidents)}}</strong> incidents</span>
+        <small ng-if="_und.size(filteredIncidents) < _und.size(incidents)"><a class="pointer-row" ng-click="removeAllFilters()">Clear all filters</a></small>
+    </div>
+
+    <!-- Area summary -->
+    <div layout="row">
+      <div ng-repeat="s in filteredIncidentsSumsOpco" flex="30%" ng-click="addAreaFilter(s.AREA)" class="btn">
+        {{s.AREA?s.AREA:'N/A'}}
+        <uib-progressbar class="sm-margins" type="info" max="100" value="s.COUNT/_und.size(filteredIncidents)*100" flex>
+          <span class="btn-sm" style="color: #333;">{{s.COUNT|number:0}} ({{(s.COUNT/_und.size(filteredIncidents)*100)|number:0}}%)</span>
+        </uib-progressbar>
+        <span class="xs-padding">&nbsp; </span>
+      </div>
+    </div>      
+      
+      <!-- Filters -->
+    <div class="small no-margins" ng-if="!entry.searchIncident">
+      <ul class="list-inline no-margins">
+          <li><strong>Filters: </strong></li>
+          <li class="filter-alert"> None </li>
+      </ul>
+    </div>
+
+  <div class="small no-margins" ng-if="entry.searchIncident">
+      <ul class="list-inline no-margins">
+          <li><strong>Filters: </strong></li>
+          <li ng-repeat="(element, filter) in entry.searchIncident" class="filter-alert" ng-if="filter">
+              <a ng-click="removeFilter(element)" class="btn-xs  close" style="font-size: 10px; vertical-align: text-top;" data-dismiss="alert"><i class="fa fa-times"></i></a>
+              {{element}} <em>is like</em> <strong>"{{filter}}"</strong>
+          </li>
+      </ul>
+  </div>
+  <!-- Filters -->  
+
+<div class="table-responsive">
+		<table class="table table-hover table-condensed" >
+				<thead>
+						<tr>
+								<th width="70px">ID</th>
+								<th width="150px">Name / Opening date</th>
+								<th width="60px" align="center"></th>
+								<th>Problem / Cause / Responsible</th>
+								<th width="180px">Impact type</th>
+								<th width="90px" class="text-right">Impact</th>
+								<th width="10px"></th>
+								<th width="200px">Status / Date / Owner</th>
+						</tr>
+            <tr>                
+              <th><input class="no-borders-title" type="text" ng-model="entry.searchIncident.INCIDENT_ID" placeholder="ID"/></th>
+              <th><span layout="row"><input class="no-borders-title" flex="40" type="text" ng-model="entry.searchIncident.NAME" placeholder="Name"/> <span class="xs-padding">&nbsp;</span> <input class="no-borders-title" flex type="text" ng-model="entry.searchIncident.OPENING_DATE_SEARCH" placeholder="Date"/> <span class="xs-padding"></span></th>
+              <th></th>
+              <th><span layout="row"><input class="no-borders-title" flex="30" type="text" ng-model="entry.searchIncident.PROBLEM_DESCRIPTION" placeholder="Problem"/> <span class="xs-padding">&nbsp;</span> <input class="no-borders-title" flex type="text" ng-model="entry.searchIncident.ROOT_CAUSE" placeholder="Cause"/> <span class="xs-padding">&nbsp;</span> <input class="no-borders-title" flex type="text" ng-model="entry.searchIncident.RESPONSIBLE_PERSON" placeholder="Responsible"/> </span></th>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th>
+                <span layout="row">
+                  <select class="no-borders-title" flex="30" ng-model="entry.searchIncident.STATUS">
+                    <option value="">All</option>
+                    <option value="In progress">In progress</option>
+                    <option value="Closed">Closed</option>
+                    <option value="Pending">Pending</option>
+                  </select>                  
+                  <span class="xs-padding">&nbsp;</span> 
+                  <input class="no-borders-title" flex="30" type="text" ng-model="entry.searchIncident.STATUS_DATE_SEARCH" placeholder="Date"/> 
+                  <span class="xs-padding">&nbsp;</span> 
+                  <input class="no-borders-title" flex type="text" ng-model="entry.searchIncident.CREATED_BY" placeholder="Owner"/> 
+                </span>
+              </th>
+              <th></th>
+          </tr>            
+				</thead>
+				<tbody>
+            <tr ng-if="!filteredIncidents.length && !loadFinished">
+                <td colspan="9">
+                    <!-- Spinner -->
+                      <div class="col-sm-12 text-center">
+                        <br><br>
+                        <i class="fa fa-spinner fa-pulse fa-3x"></i>
+                      </div>
+                    <!-- Spinner -->                
+                </td>
+            </tr>   
+            <tr ng-if="!filteredIncidents.length && loadFinished">
+                <td colspan="9">
+                    <h4>No open incidents found.</h4>
+                </td>
+            </tr>      				
+						<tr ng-repeat="incident in filteredIncidents | startFrom: (currentPage-1) * pageSize  | limitTo:pageSize" ng-click="">
+								<td>
+									<strong>I_{{incident.OPCO_ID}}_{{Lpad(incident.INCIDENT_ID, 3, '0')}}</strong><br>
+								</td>								
+								<td><a class="btn btn-default btn-sm btn-block" ng-class="{'btn-green':incident.STATUS == 'Closed', 'btn-red':incident.STATUS == 'Expired'}" href="/incident-info/{{incident.INCIDENT_ID}}"><strong>{{incident.METRIC_ID.length>30?incident.METRIC_ID.substr(0,30)+' ...':incident.METRIC_ID}}</strong><br>{{incident.OPENING_DATE | date:'dd.MM.yyyy'}}</a></td>
+								<td style="text-align:center"><strong>{{entry.lookup.getOpcoById(incident.OPCO_ID).COUNTRY_CODE}}</strong></td>
+								<td>
+                  <strong>{{incident.PROBLEM_DESCRIPTION}}</strong>
+                  <small ng-if="incident.ROOT_CAUSE"><br><strong>Cause:</strong> {{incident.ROOT_CAUSE}}</small>
+                  <small class="btn-blue" ng-if="incident.RESPONSIBLE_PERSON"><br><strong>Responsible:</strong> {{incident.RESPONSIBLE_PERSON}} <span ng-if="incident.RESPONSIBLE_TEAM"> ({{incident.RESPONSIBLE_TEAM}})</span></small>
+                </td>
+								<td style="text-align:left">
+										<span ng-if="!incident.IMPACT && !incident.RECOVERED && !incident.PREVENTED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 1)}}) {{getTypeOfImpactText(incident.IMPACT_TYPE, 1)}}<br></span>
+										<span ng-if="incident.IMPACT && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 1)}}) {{getTypeOfImpactText(incident.IMPACT_TYPE, 1)}}<br></span>
+										<span ng-if="incident.RECOVERED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 2)}}) {{getTypeOfImpactText(incident.IMPACT_TYPE, 2)}}<br></span>
+										<span ng-if="incident.PREVENTED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 3)}}) {{getTypeOfImpactText(incident.IMPACT_TYPE, 3)}}</span>
+										<span ng-if="incident.IMPACT_TYPE == 'No loss'">No loss</span>
+										<span ng-if="incident.IMPACT_TYPE == 'Unknown'">Unknown</span>
+								</td>
+								<td style="text-align:left">
+										<span ng-if="!incident.IMPACT && !incident.RECOVERED && !incident.PREVENTED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 1)}}) <strong class='btn-red pull-right'>{{0 | number:0}}</strong><br></span>
+										<span ng-if="incident.IMPACT && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 1)}}) <strong class='btn-red pull-right'>{{incident.IMPACT | number:0}}</strong><br></span>
+										<span ng-if="incident.RECOVERED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 2)}}) <strong class='btn-green pull-right'>{{incident.RECOVERED | number:0}}</strong><br></span>
+										<span ng-if="incident.PREVENTED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 3)}}) <strong class='btn-blue pull-right'>{{incident.PREVENTED | number:0}}</strong></span>
+										<span ng-if="incident.IMPACT_TYPE == 'No loss'"><strong class='pull-right'>{{0 | number:0}}</strong></span>
+										<span ng-if="incident.IMPACT_TYPE == 'Unknown'"><strong class='pull-right'>Unknown</strong></span>
+								</td>
+								<td>    								
+								</td>    								
+								<td>
+									<strong ng-class="{'btn-green':incident.STATUS == 'Closed', 'btn-red':incident.STATUS == 'Expired', 'btn-blue':incident.STATUS == 'In progress'}">{{incident.STATUS}}</strong></br>
+									<i class="fa fa-fw fa-clock-o"></i> {{incident.STATUS_DATE | date:'dd.MM.yyyy'}} <small class="btn-grey">{{incident.STATUS_DATE | date:'HH:mm'}}</small></br>
+									<small><i class="fa fa-fw fa-user"></i> {{incident.CREATED_BY}}</small><br>
+								</td>
+								<!-- <td>
+										<span class="input-group">             
+												<div ng-if="incident.OPCO_ID == entry.currentUser.userOpcoId" class="pointer-div" ng-click="deleteIncident(incident.INCIDENT_ID)">Delete </div>
+										</span>
+								</td> -->
+						</tr>
+				</tbody>
+		</table>
+    <div ng-if="filteredIncidents.length > pageSize" class="no-margins" layout="row" layout-align="center">
+      <ul uib-pagination total-items="filteredIncidents.length" items-per-page="pageSize" max-size="10" ng-model="currentPage" ng-change="setCurrentPage(currentPage)" boundary-link-numbers="true" previous-text="<" next-text=">"></ul>
+  </div>
+
+</div>
+
+</div>

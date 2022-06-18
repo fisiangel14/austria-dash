@@ -1,0 +1,7 @@
+.mark-control-assigned {
+  border-bottom: 1px dashed #3f76b7;
+}
+
+.mark-control-assigned-to-me {
+  border-bottom: 1px solid #3f76b7;
+}

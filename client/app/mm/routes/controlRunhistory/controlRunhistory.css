@@ -1,0 +1,56 @@
+.dd-menu {
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    float: left;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 0;
+    list-style: none;
+  }
+  .dd-menu.pull-right {
+    right: 0;
+    left: auto;
+  }
+  .dd-menu .divider {
+    height: 1px;
+    margin: 9px 0;
+    overflow: hidden;
+    background-color: #e5e5e5;
+  }
+  .dd-menu > li > a {
+    display: block;
+    padding: 3px 20px;
+    clear: both;
+    font-weight: normal;
+    line-height: 1.42857143;
+    color: #333;
+    white-space: nowrap;
+  }
+  .dd-menu > li > a:hover,
+  .dd-menu > li > a:focus {
+    color: #262626;
+    text-decoration: none;
+    background-color: #f5f5f5;
+  }
+  .dd-menu > .active > a,
+  .dd-menu > .active > a:hover,
+  .dd-menu > .active > a:focus {
+    color: #fff;
+    text-decoration: none;
+    background-color: #428bca;
+    outline: 0;
+  }
+  .dd-menu > .disabled > a,
+  .dd-menu > .disabled > a:hover,
+  .dd-menu > .disabled > a:focus {
+    color: #999;
+  }
+  .dd-menu > .disabled > a:hover,
+  .dd-menu > .disabled > a:focus {
+    text-decoration: none;
+    cursor: not-allowed;
+    background-color: transparent;
+    background-image: none;
+    filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
+  }

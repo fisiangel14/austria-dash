@@ -1,0 +1,402 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li><a href="/dato-catalogue?opcoId={{entry.OPCO_ID}}"><i class="fa fa-cubes fa-fw"></i> Dato catalogue</a></li>
+  <li><a href="/dato-results-overview?month={{entry.searchMDmonth}}&opcoId={{entry.OPCO_ID}}"><i class="fa fa-th-list fa-fw"></i> Dato overview</a></li>  
+  <li class="active"><i class="fa fa-edit fa-fw"></i> Dato <strong>{{dato.DATO_ID}}</strong></li>
+  <li><a href="/dato-result/{{dato.OPCO_ID}}/{{dato.DATO_ID}}?&month={{entry.searchMDmonth}}"><i class="fa fa-cube fa-fw"></i> Dato <strong>{{dato.DATO_ID}}</strong> results</a></li>
+  <li ng-if="dato.PROCEDURE_ID"><a ng-href="/procedure-info?procedureId={{dato.PROCEDURE_ID}}"><i class="fa fa-sitemap fa-fw"></i> Dato <strong>{{dato.DATO_ID}}</strong> dataflow</a></li>
+</ol>
+<!-- Breadcrumbs -->
+
+<h3 class="sub-header">
+    <span class="input-group btn-group pull-left">
+      <a class="btn btn-primary dropdown-toggle no-margins no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a ui-sref="datoNew"><i class="fa fa-plus fa-fw"></i> New dato</a></li>
+      </ul>
+    </span> 
+    &nbsp;
+    <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+    {{entry.state.data.title}} 
+</h3> 
+
+<form class="form-horizontal" name="datoForm">
+<div ng-if="dato.DATO_ID || newDato || changeRequest">
+<div class="panel panel-default md-whiteframe-4dp" ng-class="{'panel-danger':dato.IMPLEMENTED=='N' && dato.RELEVANT=='Y', 'panel-success':dato.IMPLEMENTED=='Y'}">
+  
+  <div class="panel-heading no-margins">
+
+    <h4 class="no-margins">
+      <strong>
+        <i class="fa fa-cube fa-fw"></i> 
+        {{dato.DATO_ID}}
+        <i class="fa fa-ban btn-red fa-fw" ng-if="dato.RELEVANT=='N'"></i>
+      </strong> 
+      <small>{{entry.lookup.getOpcoById(dato.OPCO_ID).OPCO_NAME}}</small>
+      
+      <small ng-if="changeRequest" class="alert-danger"> change request </small>
+      <small ng-if="newDato" class="alert-danger"> new dato </small>
+      
+      <span class="label pull-right" ng-class="{'btn-day':dato.FREQUENCY=='D', 'btn-month':dato.FREQUENCY=='M', 'btn-cycle':dato.FREQUENCY=='C'}">{{dato.FREQUENCY}}</span>
+      <span class="small label pull-right"><small ng-if="!changeRequest && !newDato">{{flashMessage}}</small></span>
+
+    </h4> 
+  </div>
+
+  <div class="panel-body" ng-cloak>
+
+      <div class="form-group">
+          <div class="col-sm-2">
+            <label for="datoID">Dato ID</label>
+            <input type="text" name="datoID" minlength="3" maxlength="3" class="form-control" placeholder="Dato ID" ng-model="dato.DATO_ID" required ng-disabled="!changeRequest && !newDato">
+            <div ng-messages="datoForm.datoID.$error"> 
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+              <div ng-message="minlength" ng-message="maxlength"><small class="label label-danger">Must be exactly 3 characters long</small></div>
+            </div>             
+          </div>  
+
+          <div class="col-sm-2">
+            <label for="datoFREQUENCY">Frequency</label>
+            <select name="datoFREQUENCY" class="form-control" ng-model="dato.FREQUENCY" ng-disabled="!changeRequest && !newDato" required>
+              <option value="D">Daily</option>
+              <option value="M">Monthly</option>
+              <option value="C">Cycle</option>
+            </select>
+            <div ng-messages="datoForm.datoFREQUENCY.$error"> 
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            </div>              
+          </div>
+
+          <div class="col-sm-2">
+            <label for="datoRELEVANT">Relevant</label>
+            <select name="datoRELEVANT" class="form-control" ng-model="dato.RELEVANT" ng-disabled="!changeRequest && !newDato">
+              <option>Y</option>
+              <option>N</option>
+            </select>
+          </div>
+
+          <div class="col-sm-3">
+            <label for="datoSTART_DATEgroup">Valid from</label>
+            <p name="datoSTART_DATEgroup" class="input-group">
+              <input name="datoSTART_DATE" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" datepicker-options="dp.dateOptions" ng-model="dato.START_DATE" is-open="dp.status.opened" ng-required="true" close-text="Close" ng-disabled="!changeRequest && !newDato"/>
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="dp.open($event)" ng-disabled="!changeRequest && !newDato"><i class="glyphicon glyphicon-calendar"></i></button>
+              <div ng-messages="datoForm.datoSTART_DATE.$error"> 
+                <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+                <div ng-message="date"><small class="label label-danger">Invalid date</small></div>
+              </div> 
+              </span>
+            </p>
+          </div>
+
+          <div class="col-sm-3">
+            <label for="datoAREA">Area</label>
+            <select name="datoAREA" class="form-control" ng-model="dato.AREA_ID" ng-disabled="!changeRequest && !newDato" required>
+              <option ng-repeat="area in localEntry.lookup.areas" value="{{area.AREA_ID}}">{{area.NAME}}</option>
+            </select>
+            <div ng-messages="datoForm.datoAREA.$error"> 
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            </div>            
+          </div>
+
+
+      </div>
+
+      <div class="form-group">
+        <div class="col-sm-6">
+            <label for="datoNAME">Name</label>
+            <textarea name="datoNAME" type="text" class="form-control" placeholder="Name" ng-model="dato.NAME" rows="3" ng-disabled="!changeRequest && !newDato" required></textarea>
+            <div ng-messages="datoForm.datoNAME.$error">
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            </div>   
+
+        </div>
+
+        <div class="col-sm-6">
+            <label for="datoDESCRIPTION">Description</label>
+            <textarea name="datoDESCRIPTION" type="text" class="form-control" placeholder="Description" ng-model="dato.DESCRIPTION" rows="3" ng-disabled="!changeRequest && !newDato" required></textarea>
+            <div ng-messages="datoForm.datoDESCRIPTION.$error">
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            </div>            
+        </div>
+      </div>
+
+      <div ng-if="!changeRequest && !newDato" class="info-title"></div>
+      <div ng-if="!changeRequest && !newDato" class="form-group ">
+          <div class="col-sm-2">
+            <label for="datoIMPLEMENTED">Implemented</label>
+            <select name="datoIMPLEMENTED" class="form-control" ng-model="dato.IMPLEMENTED" ng-disabled="dato.OPCO_ID != entry.currentUser.userOpcoId && entry.currentUser.userOpcoId != 0">
+              <option>Y</option>
+              <option>N</option>
+            </select>
+          </div>
+
+          <div class="col-sm-2">
+            <label for="datoNULLABLE">Optional <i class="fa fa-info-circle" uib-tooltip="Dato is optional. This in effect means that if dato value is not available at the moment of metric calculation it will be simply replaced by zero in the formula." tooltip-trigger="mouseenter" tooltip-placement="top"></i></label>
+            <select name="datoNULLABLE" class="form-control" ng-model="dato.NULLABLE" disabled>
+              <option>Y</option>
+              <option>N</option>
+            </select>
+          </div>
+
+          <div class="col-sm-2">
+            <label for="datoUNIT">Unit</label>
+            <input name="datoUNIT" class="form-control" ng-model="dato.UNIT" ng-disabled="dato.OPCO_ID != entry.currentUser.userOpcoId && entry.currentUser.userOpcoId != 0" />
+          </div>
+
+          <div class="col-sm-6">
+            <label for="datoNOTES">Implementation notes</label>
+            <textarea name="datoNOTES" type="text" class="form-control" placeholder="Implementation notes" ng-model="dato.NOTES" rows="3" ng-disabled="dato.OPCO_ID != entry.currentUser.userOpcoId && entry.currentUser.userOpcoId != 0"></textarea>
+          </div>
+     
+      </div>
+
+      <div ng-if="changeRequest || newDato" class="form-group">
+          <div class="col-sm-12">
+            <label for="datoCHANGE_REQUEST_COMMENT">Change request comment</label>
+            <textarea name="datoCHANGE_REQUEST_COMMENT" type="text" class="form-control" placeholder="Comment" ng-model="datoAdd.CHANGE_REQUEST_COMMENT" rows="3"></textarea>
+          </div>
+      </div>      
+
+
+      <!-- Related Metrics  -->
+      <div ng-if="!changeRequest && !newDato && datoLayout.length > 0" class="info-title"></div>
+      <div ng-if="!changeRequest && !newDato && datoLayout.length > 0">
+        <div class="row">
+          <div class="col-sm-12">
+            Related metrics:
+            <span ng-repeat="metricId in dato.METRICS | split:', '">
+              <a class="btn btn-default btn-sm" ng-href="/metric-info/{{dato.OPCO_ID}}/{{metricId}}">
+                Edit 
+                <i class="fa fa-line-chart fa-fw"></i> 
+                <strong>{{metricId}}</strong>
+              </a>
+          </span>
+          </div>
+        </div>
+      </div>
+      <!-- Related Metrics  -->
+      
+      <!-- Layout -->
+
+      <div ng-if="!changeRequest && !newDato && datoLayout.length == 0" class="info-title">
+          <h4>No dato layout definitions found. Dato layout will be automatically generated as soon as the first Datos are delivered.</h4>
+      </div>
+
+      <div ng-if="!changeRequest && !newDato && datoLayout.length > 0" class="info-title"></div>
+      <div ng-if="!changeRequest && !newDato && datoLayout.length > 0" class="form-group ">
+        <div class="col-sm-12">
+
+          <div class="table-responsive small">
+              <table class="table table-condensed table-hover no-margins">
+                  <thead>
+                    <tr>
+                      <th width="10px">#</th>
+                      <th>LOB</th>
+                      <th>Technology</th>
+                      <th>Service</th>
+                      <th>Freq.</th>
+                      <th ng-if="dato.FREQUENCY=='C'">Cycle</th>
+                      <th>System</th>
+                      <th>Contact</th>
+                      <th width="80px">Days delay</th>
+                      <th width="50px"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="layout in datoLayout">
+                      <td style="vertical-align:middle; text-align:right">{{$index+1}}. </td>
+                      <td style="vertical-align:middle">{{localEntry.lookup.getLobById(layout.LOB_ID).NAME}}</td>
+                      <td style="vertical-align:middle">{{localEntry.lookup.getTechnologyById(layout.TECHNOLOGY_ID).NAME}}</td>
+                      <td style="vertical-align:middle">{{localEntry.lookup.getServiceById(layout.SERVICE_ID).NAME}}</td>
+                      <td style="vertical-align:middle"><span class="label" ng-class="{'btn-day':layout.PERIODICITY_ID=='1', 'btn-month':layout.PERIODICITY_ID=='3', 'btn-cycle':layout.PERIODICITY_ID=='5'}">{{entry.lookup.getPeriodicityById(layout.PERIODICITY_ID).PERIODICITY_CODE}}</span></td>
+                      <td style="vertical-align:middle" ng-if="layout.BILL_CYCLE"><strong>{{layout.BILL_CYCLE}}</strong></td>
+                      <td style="vertical-align:middle">
+                        <select class="form-control input-sm" ng-options="system.SYSTEM_ID as system.NAME for system in localEntry.lookup.systems | opcoFilter:dato.OPCO_ID" ng-model="layout.SYSTEM_ID" ng-disabled="dato.OPCO_ID != entry.currentUser.userOpcoId && entry.currentUser.userOpcoId != 0">
+                          <option value=""></option>
+                        </select>
+                      </td>
+                      <td style="vertical-align:middle">
+                        <select class="form-control input-sm" ng-options="contact.CONTACT_ID as contact.NAME + ((contact.EMAIL)?(' <' + contact.EMAIL + '>'):'') for contact in localEntry.lookup.contacts | opcoFilter:dato.OPCO_ID | filter:{'CONTACT_TYPE':'G'}" ng-model="layout.CONTACT_ID" ng-disabled="dato.OPCO_ID != entry.currentUser.userOpcoId && entry.currentUser.userOpcoId != 0">
+                          <option value=""></option>
+                        </select>
+                      </td>
+                      <td style="vertical-align:middle">
+                        <input type="number" step="1" class="form-control input-sm text-right" ng-model="layout.DELAY" ng-disabled="dato.OPCO_ID != entry.currentUser.userOpcoId && entry.currentUser.userOpcoId != 0">
+                      </td>
+                      <td style="vertical-align:middle">
+                        <a class="btn btn-primary btn-sm" ng-click="deleteLayout(layout.LAYOUT_ID)" uib-tooltip="Delete" tooltip-trigger="mouseenter" tooltip-placement="top" tooltip-popup-delay="800" ng-if="dato.OPCO_ID == entry.currentUser.userOpcoId"><i class="fa fa-trash"></i></a>
+                      </td>
+                    </tr>
+                  </tbody>
+              </table>
+          </div>
+        </div>
+      </div>
+      <!-- Layout -->
+
+    </div> 
+
+      <div class="panel-footer no-margins">
+        <!-- Buttons -->
+        <div class="form-group">
+          <div class="col-sm-12">
+            <button ng-if="!changeRequest && !newDato && (dato.OPCO_ID == entry.currentUser.userOpcoId || entry.currentUser.userOpcoId == 0)" type="button" class="btn btn-primary" ng-click="addDatoChangeRequest()"><i class="fa fa-edit"></i> Create change request</button>  
+
+            <a ng-if="!changeRequest && !newDato && dato.RELEVANT == 'Y'" class="btn btn-default" ng-href="/dato-result/{{dato.OPCO_ID}}/{{dato.DATO_ID}}?month={{entry.searchMDmonth}}"><i class="fa fa-cube"></i> <strong>{{dato.DATO_ID}}</strong> results</a>
+            <a ng-if="!changeRequest && !newDato && dato.PROCEDURE_ID" class="btn btn-default" ng-href="/dataflow-graph?procedureId={{dato.PROCEDURE_ID}}"><i class="fa fa-sitemap"></i> Dataflow graph</a>
+            
+            <button ng-if="changeRequest && !newDato && (dato.OPCO_ID == entry.currentUser.userOpcoId || !entry.currentUser.userOpcoId)" type="button" class="btn btn-default" ng-click="cancelDatoChangeRequest()">Cancel</button>
+            <button ng-if="changeRequest && !newDato && (dato.OPCO_ID == entry.currentUser.userOpcoId || !entry.currentUser.userOpcoId)" type="submit" class="btn btn-primary" ng-click="submitDatoChangeRequest(datoForm.$valid)"><i class="fa fa-envelope"></i> Submit the change request</button>
+
+            <button ng-if="!changeRequest && newDato && (dato.OPCO_ID == entry.currentUser.userOpcoId || !entry.currentUser.userOpcoId)" type="button" class="btn btn-default" ng-click="cancelNewDato()">Cancel</button>
+            <button ng-if="!changeRequest && newDato && (dato.OPCO_ID == entry.currentUser.userOpcoId || !entry.currentUser.userOpcoId) " type="submit" class="btn btn-primary" ng-click="submitNewDato(datoForm.$valid)"><i class="fa fa-envelope"></i> Submit the request for a new dato</button>
+          </div>
+        </div>
+        <!-- Buttons -->
+      </div>
+</div>
+</div>
+</form>
+
+
+<div ng-if="!changeRequest && !newDato && changeRequests.length>0" class="panel panel-default md-whiteframe-4dp">  
+  <div class="panel-heading no-margins">
+    <h5>Change history</h5>
+  </div>
+  <div class="panel-body no-margins">
+    <div class="table-responsive">
+        <table class="table table-hover table-condensed" ng-if="changeRequests.length > 0">
+            <tbody>
+                <tr ng-repeat="(rowId, change) in changeRequests | opcoFilter:entry.OPCO_ID | filter:entry.searchChange" ng-click="">
+                    <td style="vertical-align:middle; text-align:left; width:100px">
+                      <strong>C_{{change.OPCO_ID}}_{{Lpad(change.CHANGE_ID, 3, '0')}}</strong><br>
+                    </td>
+                    <td style="vertical-align:middle; text-align:left; width:80px">
+                      <span ng-if="change.CHANGE_TYPE.indexOf('dato') > 0" ng-class="{'change-approved':change.STATUS=='Approved', 'change-rejected':change.STATUS=='Rejected', 'change-requested':change.STATUS=='Requested'}" >&nbsp;<i class="fa fa-fw fa-lg" ng-class="{'fa-cube':change.CHANGE_TYPE.indexOf('dato')>0, 'fa-line-chart':change.CHANGE_TYPE.indexOf('metric')>0}"></i> <strong>{{change.OBJECT_ID}}</strong></span>
+                      <span ng-if="change.CHANGE_TYPE.indexOf('metric') > 0" ng-class="{'change-approved':change.STATUS=='Approved', 'change-rejected':change.STATUS=='Rejected', 'change-requested':change.STATUS=='Requested'}" >&nbsp;<i class="fa fa-fw fa-lg" ng-class="{'fa-cube':change.CHANGE_TYPE.indexOf('dato')>0, 'fa-line-chart':change.CHANGE_TYPE.indexOf('metric')>0}"></i> <strong>{{change.OBJECT_ID}}</strong></span>
+                    </td>                    
+                    <td style="vertical-align:middle; text-align:left; width:250px">
+                      <strong class="change-requested">Requested</strong><br>
+                      <i class="fa fa-fw fa-clock-o"></i> {{change.CREATED | date:'dd.MM.yyyy'}} <small class="btn-grey">{{change.CREATED | date:'HH:mm'}}</small><br>
+                      <i class="fa fa-fw fa-user"></i> <small>{{change.REQUESTOR}}</small><br>
+                      <span class="change-requested" ng-if="change.REQUESTOR_COMMENT != null"><strong>Comment:</strong> <small>{{change.REQUESTOR_COMMENT}}</small></span>
+                    </td>
+                    <td style="vertical-align:middle; text-align:center">
+                      <div ng-repeat="chg in change.CHANGES"><strong>{{chg.field | sentencecase}}</strong>: {{chg.oldValue}} <i class="fa fa-fw fa-long-arrow-right"></i> <strong>{{chg.newValue}}</strong> </div>
+                    </td>
+                    <td style="vertical-align:middle; text-align:left; width:250px">
+                      <strong ng-class="{'change-approved':change.STATUS=='Approved', 'change-rejected':change.STATUS=='Rejected', 'change-requested':change.STATUS=='Requested'}">{{change.STATUS}}</strong><br>
+                      <i class="fa fa-fw fa-clock-o"></i> {{change.STATUS_DATE | date:'dd.MM.yyyy'}} <small class="btn-grey">{{change.STATUS_DATE | date:'HH:mm'}}</small><br>
+                      <div ng-if="change.APPROVER"><i class="fa fa-fw fa-user"></i> <small>{{change.APPROVER}}</small></div>
+                      <span ng-class="{'change-approved':change.STATUS=='Approved', 'change-rejected':change.STATUS=='Rejected', 'change-requested':change.STATUS=='Requested'}" ng-if="change.APPROVER_COMMENT != null"><strong>Comment:</strong> <small>{{change.APPROVER_COMMENT}}</small></span>
+                    </td>
+                    <td style="vertical-align:middle;">
+                      <span class="input-group">        
+                        <button ng-if="change.STATUS == 'Requested' && entry.currentUser.userOpcoId == 0" type="button" class="btn btn-sm btn-success " ng-click="approveChange(change.CHANGE_ID)" uib-tooltip="Approve" tooltip-trigger="mouseenter" tooltip-placement="top" tooltip-popup-delay="800"><i class="fa fa-check fa-fw"></i> </button>
+                        <button ng-if="change.STATUS == 'Requested' && entry.currentUser.userOpcoId == 0" type="button" class="btn btn-sm btn-danger" ng-click="rejectChange(change.CHANGE_ID)" uib-tooltip="Reject" tooltip-trigger="mouseenter" tooltip-placement="top" tooltip-popup-delay="800"><i class="fa fa-times fa-fw"></i> </button>
+                      </span>
+                    </td>                     
+                </tr>
+            </tbody>
+        </table>
+    </div>
+  </div>
+</div>  
+
+
+<!-- Tasks -->
+<div ng-if="!changeRequest && !newMetric && tasks.length>0" class="panel panel-default md-whiteframe-4dp">  
+  <div class="panel-heading no-margins">
+    <h5>
+    <span class="input-group btn-group pull-left">
+      <a class="btn btn-primary dropdown-toggle no-margins no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="isDisabled && entry.currentUser.userOpcoId">
+        <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a ng-href="#" ng-click="newTask()"><i class="fa fa-check-square-o fa-fw"></i> New task</a></li>        
+      </ul>
+    </span> 
+    &nbsp;
+    <strong>Tasks</strong></h5>
+  </div>
+  <div class="panel-body no-margins">
+    <div class="table-responsive" >
+        <table class="table table-hover table-condensed">
+            <thead>
+                <tr>
+                    <th width="90px">ID</th>
+                    <th width="120px">Timestamp</th>
+                    <th width="80px">Object</th>
+                    <th width="5px"></th>
+                    <th>Description / Notes</th>
+                    <th width="80px">Status</th>
+                    <th width="250px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-if="!tasks.length"><td colspan="7"><h4>No tasks exist yet. </h4></td></tr>
+                <tr class="animation pointer-row" ng-class="{'btn-not-relevant':task.RELEVANT=='N'}" ng-repeat="task in tasks" ng-click="$event.originalEvent.dropdown || $event.originalEvent.menuclick || taskEditModal(task.TASK_ID)" >
+                    <td style="vertical-align:middle; text-align:left">
+                        <span ng-class="{'btn-red':task.STATUS == 'Open - OPCO', 'btn-black':task.STATUS == 'Open - TAG', 'btn-green':task.STATUS == 'Closed'}"> <i class="fa fa-lg fa-fw fa-check-square"></i></span>
+                        <strong>T_{{task.OPCO_ID}}_{{Lpad(task.TASK_ID, 3, '0')}}</strong></td>                              
+                    <td style="vertical-align:middle"><i class="fa fa-fw fa-clock-o"></i> {{task.CREATED | date:"dd.MM.yyyy"}} <small class="btn-grey">{{task.CREATED | date:"HH:mm"}}</small></td> 
+                    <td style="vertical-align:middle"><span ng-class="{'btn-red':task.STATUS == 'Open - OPCO', 'btn-black':task.STATUS == 'Open - TAG', 'btn-green':task.STATUS == 'Closed'}"> <i class="fa fa-lg fa-fw" ng-class="{'fa-cube':task.SOURCE=='DATO', 'fa-line-chart':task.SOURCE=='METRIC', 'fa-edit':task.SOURCE=='CHANGE', 'fa-file-text':task.SOURCE=='FILE'}"></i></span> | <strong >{{task.OBJECT_ID}}</strong></td>
+                    <td ng-class="{'panel-red':task.STATUS == 'Open - OPCO', 'panel-black':task.STATUS == 'Open - TAG', 'panel-green':task.STATUS == 'Closed'}"></td>                    
+                    <td style="vertical-align:middle; padding-left:10px;"><span ng-if="task.DESCRIPTION">{{task.DESCRIPTION}}</br><small ng-if="task.NOTE"><strong>Notes:</strong> {{task.NOTE}}</small></span></td>
+                    <td style="vertical-align:middle;">
+                      <span class="input-group btn-group btn-block dropdown">
+                        <button class="btn btn-sm dropdown-toggle btn-block" ng-click="$event.originalEvent.dropdown = true" data-toggle="dropdown"
+                            ng-class="{
+                                'btn-default': task.STATUS == 'Pending', 
+                                'btn-primary': (task.STATUS == 'Open - OPCO' && task.ASSIGNED_TO), 
+                                'btn-default': (task.STATUS == 'Open - TAG' || task.STATUS == 'Open - OPCO'), 
+                                'btn-success': task.STATUS == 'Closed'}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" 
+                            ng-disabled="(task.ASSIGNED_TO && task.ASSIGNED_TO != entry.currentUser.userName && entry.currentUser.userOpcoId) 
+                                        || (entry.currentUser.userOpcoId != entry.OPCO_ID && entry.currentUser.userOpcoId)
+                                        || (task.STATUS !== 'Open - OPCO' && task.ASSIGNED_TO != entry.currentUser.userName && entry.currentUser.userOpcoId)
+                                        ">
+                            <span>
+                                <i class="fa fa-fw" 
+                                    ng-class="{
+                                        'fa-hourglass-half': task.STATUS == 'Open - OPCO' && !task.ASSIGNED_TO, 
+                                        'fa-flag-checkered': task.STATUS == 'Open - TAG', 
+                                        'fa-lg fa-cog fa-spin': task.STATUS == 'Open - OPCO' && task.ASSIGNED_TO && task.STATUS !== 'Closed', 
+                                        'fa-check':task.STATUS == 'Closed'
+                                        }">
+                                </i> 
+                            </span>
+                          <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                          <!-- Open - OPCO -->
+                          <li ng-if="task.STATUS === 'Open - OPCO' && !task.ASSIGNED_TO && entry.currentUser.userOpcoId"><a href="" ng-click="$event.originalEvent.menuclick = true; assignTaskToMe(task.TASK_ID);"><i class="fa fa-user-plus fa-fw"></i> Assign task to me</a></li>
+                          <li ng-if="task.STATUS === 'Open - OPCO' && task.ASSIGNED_TO === entry.currentUser.userName && entry.currentUser.userOpcoId"><a href="" ng-click="$event.originalEvent.menuclick = true; unAssignTask(task.TASK_ID);"><i class="fa fa-user-times fa-fw"></i> Un-assign</a></li>
+                          <li ng-if="task.STATUS === 'Open - OPCO' && (!task.ASSIGNED_TO || task.ASSIGNED_TO === entry.currentUser.userName) && entry.currentUser.userOpcoId"><a href="" ng-click="$event.originalEvent.menuclick = true; closeTaskOpco(task.TASK_ID);"><i class="fa fa-check fa-fw"></i> Close</a></li>
+
+                          <!-- In progress -->
+                          <li ng-if="task.STATUS == 'Open - TAG' && !entry.currentUser.userOpcoId"><a href="" ng-click="$event.originalEvent.menuclick = true; returnTaskToOpco(task.TASK_ID);"><i class="fa fa-unlock fa-fw"></i> Return task to OPCO</a></li>
+                          <li ng-if="task.STATUS == 'Open - TAG' && entry.currentUser.userOpcoId && task.ASSIGNED_TO === entry.currentUser.userName"><a href="" ng-click="$event.originalEvent.menuclick = true; returnTaskToOpco(task.TASK_ID);"><i class="fa fa-user-plus fa-fw"></i> Re-assign task to me</a></li>
+                          <li ng-if="(task.STATUS == 'Open - OPCO' || task.STATUS == 'Open - TAG') && !entry.currentUser.userOpcoId "><a href="" ng-click="$event.originalEvent.menuclick = true; closeTaskTag(task.TASK_ID);"><i class="fa fa-check fa-fw"></i> Close</a></li>
+                                                    
+                          <!-- Closed -->
+                          <li ng-if="(task.STATUS == 'Closed' && task.ASSIGNED_TO === entry.currentUser.userName) || (task.STATUS == 'Closed' && !entry.currentUser.opcoId)"><a href="" ng-click="$event.originalEvent.menuclick = true; returnTaskToOpco(task.TASK_ID);"><i class="fa fa-unlock fa-fw"></i> Re-open & return task to OPCO</a></li>
+                        </ul>
+                      </span>
+                    </td>
+                    <td style="vertical-align:middle">
+                        <span ng-class="{'btn-red':task.STATUS == 'Open - OPCO', 'btn-black':task.STATUS == 'Open - TAG', 'btn-green':task.STATUS == 'Closed'}"> <strong>{{task.STATUS}}</strong></span></br>
+                        <i class="fa fa-fw fa-clock-o"></i> {{task.MODIFIED | date:"dd.MM.yyyy"}} <small class="btn-grey">{{task.MODIFIED | date:"HH:mm"}}</small></br>
+                        <div ng-if="task.ASSIGNED_TO"><i class="fa fa-fw fa-user"></i> <small>{{task.ASSIGNED_TO}}</small></div>
+                        <div ng-if="!task.ASSIGNED_TO"><i class="fa fa-fw fa-user-times"></i> <small>Not assigned</small></div>
+                    </td>
+              
+                </tr>
+            </tbody>
+        </table>
+    </div>
+  </div>
+</div>  
+<!-- /Tasks -->

@@ -1,0 +1,311 @@
+<div id="main-div">
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li class="active"><i class="fa fa-area-chart fa-fw"></i> Control results</a></li>
+  <li><a href="/control-monitor?opcoId={{entry.OPCO_ID}}"><i class="fa fa-th-list fa-fw"></i> Monitor</a></li>
+</ol>
+<!-- Breadcrumbs -->
+
+<div class="row" layout="row" layout-align="space-between center">
+  <div class="col-md-11 text-left" layout="row" layout-align="start center">
+    <h3 class="sub-header">
+        <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+        {{entry.state.data.title}} 
+    </h3>
+    <h4>
+      &nbsp;
+      <i class="fa fa-calendar fa-fw"></i>
+      {{fromDateText}} - {{toDateText}}
+    </h4>    
+  </div>
+  <div class="col-md-1 text-right" layout="row" layout-align="end center">
+    <div class="input-group" layout="row"> 
+      <input style="width: 55px" class="form-control input-sm" type="number" step="1" maxlength="2" ng-model="entry.searchControlResultTable.limitDays" flex="none" ng-change="limitDaysChanged()" uib-tooltip="Show {{entry.searchControlResultTable.limitDays}} days on screen" tooltip-trigger="mouseenter" tooltip-placement="left" tooltip-popup-delay="300"> 
+      <span class = "input-group-btn">
+        <button class="btn btn-default btn-sm disabled">
+         <i class="fa fa-calendar"></i>
+        </button>
+      </span>
+    </div>    
+  </div>
+</div>
+
+<!-- Navigate -->
+<div class="row hidden-print" layout="row">
+  <div class="col-md-2 text-left">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/control-results?opcoId={{entry.OPCO_ID}}&toDate={{goBack}}" uib-tooltip="Slide {{entry.searchControlResultTable.limitDays}} days left" tooltip-trigger="mouseenter" tooltip-placement="bottom" tooltip-popup-delay="300">
+      <i class="fa fa-chevron-left fa-fw"></i>
+      {{goBackText}}
+    </a>
+  </div>
+
+  <div class="col-md-7 text-center">
+      <div layout="row" layout-align="space-between center">
+
+          <div class="input-group" layout="row"> 
+            <input class="form-control input-sm" type="text" ng-model="entry.searchControlResultTable.text" placeholder="Search control name" ng-change="filterChanged()">
+            <span class = "input-group-btn">
+              <button class="btn btn-default btn-sm" ng-click="searchTextClear()">
+               <i class="fa fa-times"></i>
+              </button>
+            </span>      
+          </div>
+
+          <div flex="50" layout="row" layout-align="space-around center">
+            <md-switch class="md-primary md-hue-1 no-margins" ng-true-value="true" ng-false-value="false" ng-model="entry.searchControlResultTable.alarmsOnly" ng-change="filterChanged()" aria-label="Alarms only"> 
+              Alarms only
+            </md-switch>
+            <span ng-if="!entry.searchControlResultTable.alarmsOnly" style="min-width: 150px; max-width: 150px;"></span>
+            <md-checkbox ng-if="entry.searchControlResultTable.alarmsOnly" class="md-primary md-hue-1 xs-margins" style="min-width: 150px; max-width: 150px;" md-no-ink ng-true-value="true" ng-false-value="false" ng-model="entry.searchControlResultTable.noKPIisAlarm" ng-change="filterChanged()" aria-label="No KPI is Alarm">
+              Include missing KPIs
+            </md-checkbox>            
+          </div>
+
+          <!-- Spinner -->
+          <div class="text-right" style="min-width: 50px; max-width: 50px;">
+            <div ng-if="!loadFinished">
+              <i class="fa fa-spinner fa-pulse fa-2x"></i>
+            </div>
+          </div>
+          <!-- Spinner -->
+
+      </div>
+  </div>
+
+  <div class="col-md-3 text-right" layout="row" layout-align="end center">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/control-results?opcoId={{entry.OPCO_ID}}&toDate={{goForward}}" ng-if="goForward <= currDate" uib-tooltip="Slide {{entry.searchControlResultTable.limitDays}} days right" tooltip-trigger="mouseenter" tooltip-placement="bottom" tooltip-popup-delay="300"> 
+      {{goForwardText}}
+      <i class="fa fa-chevron-right fa-fw"></i>
+    </a>
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/control-results?opcoId={{entry.OPCO_ID}}&toDate={{currDate}}" ng-if="goForward <= currDate" uib-tooltip="Slide to present" tooltip-trigger="mouseenter" tooltip-placement="bottom" tooltip-popup-delay="300"> 
+      <i class="fa fa-step-forward fa-fw"></i>
+    </a>    
+  </div>
+</div>
+<!-- Navigate -->
+
+<br>
+
+<div class="panel panel-default md-whiteframe-4dp md-padding">
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="table-full-page">
+          <table name="controlTable" class="table table-condensed table-striped">
+
+              <thead>
+                <tr fixed-header style="position: static; z-index: 3; display: none;">
+                  <th style="min-width: 150px; max-width: 150px;">Processname <span class="btn-blue" ng-if="loadFinished">({{_und.size(controlsDataFiltered)}})</span></th>
+                  <th class="text-center">#</th>
+                  <th style="width:150px; min-width: 40px;" class="text-right" ng-repeat="header in controlsDataHeader">
+                    <span><i ng-if="header.HOLIDAY" class="fa fa-fw fa-info-circle pointer-row btn-blue" uib-tooltip="{{header.HOLIDAY}}" tooltip-trigger="mouseenter" tooltip-placement="left" tooltip-popup-delay="300"></i> {{header.RUN_FOR_DATE | date:'dd.MM'}}</span>
+                  </th>
+                </tr>
+              </thead>
+ 
+              <thead>
+                <tr id="reference-row" style="position: static; z-index: 3;">
+                  <th style="min-width: 150px; max-width: 150px;">Processname <span class="btn-blue" ng-if="loadFinished">({{_und.size(controlsDataFiltered)}})</span></th>
+                  <th class="text-center">#</th>
+                  <th style="width:150px; min-width: 40px;" class="text-right" ng-repeat="header in controlsDataHeader">
+                    <span><i ng-if="header.HOLIDAY" class="fa fa-fw fa-info-circle pointer-row btn-blue" uib-tooltip="{{header.HOLIDAY}}" tooltip-trigger="mouseenter" tooltip-placement="left" tooltip-popup-delay="300"></i> {{header.RUN_FOR_DATE | date:'dd.MM'}}</span>
+                  </th>
+                </tr>                
+              </thead>
+                
+              <tbody infinite-scroll="infiniteScrollGetData()" infinite-scroll-distance-from-bottom="1500">
+                
+                <!-- No results -->      
+                <tr ng-if="!_und.size(controlsDataFiltered) && loadFinished">
+                    <td colspan="{{entry.searchControlResultTable.limitDays + 3}}">
+                        <h4>No control results found</h4>
+                    </td>
+                </tr>                  
+                <!-- No results -->
+
+                <!-- Controls -->      
+                <tr ng-repeat="controlList in controlsDataFilteredInf" ng-class="{'table-segment-bottom': controlList.RULE_TYPE != controlsDataFilteredInf[$index+1].RULE_TYPE}">
+                  <td>
+                    <a ng-href="/control-runhistory?opcoId={{entry.OPCO_ID}}&processname={{controlList[0].PROCESSNAME}}&toDate={{toDate}}">
+                        <strong ng-class="{'btn-dark-purple': controlList.RULE_TYPE === 'C', 'btn-dark-blue': controlList.RULE_TYPE === 'U', 'btn-dark-green': controlList.RULE_TYPE === 'R'}">{{controlList[0].PROCESSNAME}}</strong>
+                    </a>
+                  </td>
+
+                  <td class="control-results-table-fields">
+                    <span class="label label-default pointer-row" ng-class="{'label-danger':!controlList.KPI_COUNT}" uib-tooltip="{{controlList.KPI_TYPE_DESC}}" tooltip-trigger="mouseenter" tooltip-placement="top" tooltip-popup-delay="300">{{controlList.KPI_COUNT}}</span>
+                  </td>
+
+                  <td class="control-results-table-value" ng-class="{'control-results-table-holiday': control.HOLIDAY, 'control-results-table-saturday': control.DAY_OF_WEEK == 6, 'control-results-table-sunday': control.DAY_OF_WEEK == 7}" ng-repeat="control in controlList">
+                    <div ng-class="{'info btn-grey': control.KPI_COUNT == 0, 'success btn-green':(control.KPI_ALARM_LEVEL == 0 || control.ALARM_STATUS == 'Closed'), 'btn-blue': (control.KPI_ALARM_LEVEL == 1 && control.ALARM_STATUS != 'Closed'),  'btn-orange': (control.KPI_ALARM_LEVEL == 2 && control.ALARM_STATUS != 'Closed'), 'btn-red': (control.KPI_ALARM_LEVEL == 3 && control.ALARM_STATUS != 'Closed'), 'btn-red-strong': (control.KPI_ALARM_LEVEL > 3 && control.ALARM_STATUS != 'Closed')}" layout="row" layout-align="end center">
+                      <span ng-if="control.HIGHLIGHT" class="btn-blue pointer-row" uib-tooltip="Just updated" tooltip-trigger="mouseenter" tooltip-placement="top" tooltip-popup-delay="300"><i class="fa fa-fw fa-arrow-right"></i></span>
+                      <span ng-if="control.KPI_COUNT == null && control.RECALCULATE=='N' && !(controlList.RULE_TYPE=='C' && moment(control.RUN_FOR_DATE).format('YYYY-MM-DD') != moment().format('YYYY-MM-DD'))" uib-tooltip="Run for {{control.RUN_FOR_DATE | date: 'd MMMM (EEE)'}}" tooltip-trigger="mouseenter" tooltip-placement="top" tooltip-popup-delay="800"><i class="fa fa-fw fa-ellipsis-h pointer-row btn-grey" ng-click="!entry.isDisabled() && rerun(control, true)"></i></span>
+                      <a class="pointer-row" ng-if="control.RECALCULATE=='Y'" ng-click="stop(control)" ng-disabled="entry.isDisabled()" uib-tooltip="Cancel re-run" tooltip-trigger="mouseenter" tooltip-placement="top" tooltip-popup-delay="300"><i class="btn-orange fa fa-fw fa-refresh fa-spin"></i>&nbsp;</a>
+                      <a ng-if="control.KPI_COUNT != null" ng-href="#" data-html="true" uib-popover-template="'controlPopOver.html'" popover-trigger="outsideClick" popover-placement="left-center" popover-append-to-body="false" ng-click="getEmails(control)">
+                        <span flex ng-class="{'mark-control-assigned': control.ALARM_STATUS != 'Closed' && control.ASSIGNED_TO, 'mark-control-assigned-to-me': control.ALARM_STATUS != 'Closed' && control.ASSIGNED_TO == entry.currentUser.userName}">{{control.KPI_JSON[0].KPI_VALUE | number:(control.KPI_JSON[0].KPI_DECIMAL_PLACES?control.KPI_JSON[0].KPI_DECIMAL_PLACES:1)}}&nbsp;{{control.KPI_JSON[0].KPI_VALUE_UNIT}}</span>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                <!-- Controls -->
+
+                <!-- Infinite load spinner -->
+                <tr ng-if="_und.size(controlsDataFiltered) > _und.size(controlsDataFilteredInf) && _und.size(controlsDataFiltered) && loadFinished">
+                    <td class="text-center panel-grey pointer-row" colspan="{{entry.searchControlResultTable.limitDays + 3}}" ng-click="infiniteScrollGetData()">
+                      <i class="fa fa-spinner fa-pulse"></i>
+                      Rendering {{_und.size(controlsDataFilteredInf)}} from {{_und.size(controlsDataFiltered)}} rows ... click to fetch more data 
+                    </td>
+                </tr>
+                <!-- Spinner -->
+
+              </tbody>
+          </table>    
+        </div>
+      </div>
+    </div>
+
+</div>
+
+<br>
+<br>
+<br>
+<br>
+
+<script type="text/ng-template" id="controlPopOver.html">
+    <div style="font-family: 'Roboto Regular'; color:#333333; font-size: 11px; vertical-align: middle;">
+      <table class="sm-margins table table-condensed" style="width:250px" flex>
+        <thead>
+          <tr>
+            <th colspan="2" class="text-left"><strong>{{control.PROCESSNAME}}</strong></th>
+            <th class="text-right"><strong>{{control.RUN_FOR_DATE | date:'dd.MM.yyyy'}}</strong></th>
+          </tr>
+        </thead>        
+        <tbody> 
+          <tr>
+            <td>PID: <strong>{{control.PROCESSID}}</strong></td>
+            <td colspan="2" class="text-right"><strong>{{control.STARTRUNDATE | date:'dd.MM.yyyy'}}</strong>&nbsp;{{control.STARTRUNDATE | date:'HH:mm'}}</td>
+          </tr> 
+          <tr ng-repeat="kpi in control.KPI_JSON">
+            <td colspan="2" ><strong>{{kpi.KPI_TYPE}}</strong> - {{kpi.KPI_TYPE_DESC}} <span ng-if="kpi.KPI_VALUE_UNIT">[{{kpi.KPI_VALUE_UNIT}}]</span></td>
+            <td class="text-right" ng-class="{'btn-green':(kpi.ALARM_LEVEL == 0), 'btn-blue': (kpi.ALARM_LEVEL == 1), 'btn-orange': (kpi.ALARM_LEVEL == 2), 'btn-red': (kpi.ALARM_LEVEL == 3), 'btn-red-strong': (kpi.ALARM_LEVEL > 3)}" flex>{{kpi.KPI_VALUE | number:(kpi.KPI_DECIMAL_PLACES?kpi.KPI_DECIMAL_PLACES:1)}}&nbsp;{{kpi.KPI_VALUE_UNIT}}</td>
+          </tr>
+          <tr>
+            <td>Datasource A</td>
+            <td colspan="2" class="text-right btn-blue">{{control.DS_A}}</td>
+          </tr> 
+          <tr>
+            <td>Datasource B</td>
+            <td colspan="2" class="text-right btn-blue">{{control.DS_B}}</td>
+          </tr>
+          <thead> 
+            <tr>
+              <th class="active">&nbsp;</th>
+              <th class="active text-right">Datasource&nbsp;A</th>
+              <th class="active text-right">Datasource&nbsp;B</th>
+            </tr>
+          </thead>
+          <tr>
+            <td>Fetched&nbsp;[#]</td>
+            <td class="text-right btn-blue">
+              <a ng-if="control.RULE_TYPE != 'C'" data-toggle="dropdown" ng-href="#" data-html="true" uib-popover-template="'fetchedPopOverA.html'" popover-trigger="focus" popover-placement="right-center" popover-append-to-body="false">
+                {{control.RECORDSFETCHED_A | number:0}}
+              </a>
+              <span ng-if="control.RULE_TYPE == 'C'">{{control.RECORDSFETCHED_A | number:0}}</span>
+            </td>
+            <td class="text-right btn-blue">
+              <a ng-if="control.RULE_TYPE != 'C'" data-toggle="dropdown" ng-href="#" data-html="true" uib-popover-template="'fetchedPopOverB.html'" popover-trigger="focus" popover-placement="right-center" popover-append-to-body="false">
+                {{control.RECORDSFETCHED_B | number:0}}
+              </a>
+              <span ng-if="control.RULE_TYPE == 'C'">{{control.RECORDSFETCHED_B | number:0}}</span>
+            </td>
+          </tr> 
+          <tr>
+            <td>Discrepancy&nbsp;[#]</td>
+            <td class="text-right btn-blue">
+              <a ng-if="control.DISC_COUNT_A > 0" data-toggle="dropdown" ng-href="#" data-html="true" uib-popover-template="'discrepanciesPopOverA.html'" popover-trigger="focus" popover-placement="right-center" popover-append-to-body="false">
+                  {{control.DISC_COUNT_A | number:0}}
+              </a>
+            </td>
+            <td class="text-right btn-blue">
+              <a ng-if="control.DISC_COUNT_B > 0" data-toggle="dropdown" ng-href="#" data-html="true" uib-popover-template="'discrepanciesPopOverB.html'" popover-trigger="focus" popover-placement="right-center" popover-append-to-body="false">
+                {{control.DISC_COUNT_B | number:0}}
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>Discrepancy&nbsp;[%]</td>
+            <td class="text-right btn-blue">{{control.ERRORLEVEL_A | number:2}}%</td>
+            <td class="text-right btn-blue">{{control.ERRORLEVEL_B | number:2}}%</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div layout="row" layout-align="space-between center">
+        <a class="btn btn-default btn-xs" ng-href="/control-results-day?opcoId={{control.OPCO_ID}}&processname={{control.PROCESSNAME}}&runForDate={{control.RUN_FOR_DATE | date: 'yyyy-MM-dd'}}" uib-tooltip="{{control.VERSION}} past {{control.VERSION>1?'results':'result'}}" tooltip-trigger="mouseenter" tooltip-placement="left" tooltip-popup-delay="300">
+          <i class="fa fa-fw fa-history"></i> {{control.VERSION}} {{control.VERSION>1?'results':'result'}}
+        </a>
+        <a ng-if="control.ALARM_ID" class="btn btn-default btn-xs" ng-href="/alarms?opcoId={{control.OPCO_ID}}&month={{control.RUN_FOR_DATE | date:'yyyy-MM'}}&filterText={{control.ALARM_ID}}" uib-tooltip="Alarm {{control.ALARM_ID}} ({{control.ALARM_STATUS}}) {{control.ASSIGNED_TO?control.ASSIGNED_TO:''}}" tooltip-trigger="mouseenter" tooltip-placement="left" tooltip-popup-delay="300">
+          <i class="fa fa-fw pointer-row" ng-class="{'fa-bell btn-red':control.ALARM_STATUS == 'Pending', 'fa-bell btn-blue': control.ALARM_STATUS == 'In progress', 'fa-bell-slash btn-green': control.ALARM_STATUS == 'Closed'}"></i>
+        </a>
+        <a ng-if="control.INCIDENT_ID" class="btn btn-default btn-xs" ng-href="/incident-info/{{control.INCIDENT_ID}}" uib-tooltip="Incident I_{{control.OPCO_ID}}_{{control.INCIDENT_ID}} ({{control.INCIDENT_STATUS}})" tooltip-trigger="mouseenter" tooltip-placement="left" tooltip-popup-delay="300">
+          <i class="fa fa-exclamation-circle fa-fw" ng-class="{'btn-green':control.INCIDENT_STATUS == 'Closed', 'btn-red':(control.INCIDENT_STATUS == 'Expired' || control.INCIDENT_STATUS == 'Pending'), 'btn-blue':control.INCIDENT_STATUS == 'In progress'}"></i>
+        </a>
+        <a ng-if="email" class="btn btn-default btn-xs" ng-href="mailto:{{normalizeText(email)}}?subject=[RA {{normalizeText(entry.lookup.getOpcoById(control.OPCO_ID).OPCO_NAME)}}]: {{normalizeText(control.PROCESSNAME)}} - {{control.RUN_FOR_DATE | date:'dd.MM.yyyy'}}" uib-tooltip="Send Email to responsible" tooltip-trigger="mouseenter" tooltip-placement="left" tooltip-popup-delay="300">
+          <i class="fa fa-fw fa-envelope"></i> 
+        </a>   
+        <a ng-if="control.ALARM_ID && control.ALARM_STATUS !== 'Closed' && control.ASSIGNED_TO !== entry.currentUser.userName" class="btn btn-default btn-xs" ng-click="assignAlarmToMe(control)" uib-tooltip="Assign alarm to me" tooltip-trigger="mouseenter" tooltip-placement="left" tooltip-popup-delay="300" ng-disabled="entry.isDisabled()">
+          <i class="fa fa-fw pointer-row fa-user-plus fa-fw"></i>
+        </a>             
+        <a ng-if="control.RECALCULATE=='N'" class="btn btn-default btn-xs" ng-click="rerun(control)" ng-disabled="entry.isDisabled() || control.RECALCULATE=='Y' || (control.RULE_TYPE=='C' && moment(control.RUN_FOR_DATE).format('YYYY-MM-DD') != moment().format('YYYY-MM-DD'))" uib-tooltip="Run for {{control.RUN_FOR_DATE | date: 'd MMMM (EEE)'}}" tooltip-trigger="mouseenter" tooltip-placement="left" tooltip-popup-delay="800">
+          <i class="fa fa-fw fa-refresh" ng-class="{'btn-green':control.INCIDENT_STATUS == 'Closed', 'btn-red':(control.INCIDENT_STATUS == 'Expired' || control.INCIDENT_STATUS == 'Pending'), 'btn-blue':control.INCIDENT_STATUS == 'In progress'}" ng-class="{'btn-orange fa-spin': control.RECALCULATE=='Y'}"></i> <span ng-if="control.RECALCULATE=='N'">Re-run</span> <span ng-if="control.RECALCULATE=='Y'">Running</span>
+        </a>
+        <a ng-if="control.RECALCULATE=='Y'" class="btn btn-default btn-xs" ng-click="stop(control)" ng-disabled="entry.isDisabled()" uib-tooltip="Cancel re-run" tooltip-trigger="mouseenter" tooltip-placement="left" tooltip-popup-delay="800">
+            <i class="fa fa-fw fa-refresh" ng-class="{'btn-orange fa-spin': control.RECALCULATE=='Y'}"></i> <span ng-if="control.RECALCULATE=='Y'">Cancel re-run</span>
+        </a>
+      </div>
+    </div>
+</script>
+
+<script type="text/ng-template" id="discrepanciesPopOverA.html">
+  <div class="panel-header-grey text-center"><strong>Datasource A (Discrepancies)</strong></div>
+  <div style="font-family: 'Roboto Regular'; color:#333333;">
+      <ul class="dd-menu">
+        <li ng-if="(control.RULE_TYPE=='U' || control.RULE_TYPE=='R') && control.DISC_COUNT_A>0"><a href class="pointer-row" ng-click="copyToClipboard(control, 'A')"><i class="fa fa-fw fa-database"></i> Copy <strong>SQL select</strong> to clipboard</a></li>
+        <li ng-if="control.RULE_TYPE=='C' && control.DISC_COUNT_A>0"><a href class="pointer-row" ng-click="copyToClipboard(control, 'A')"><i class="fa fa-fw fa-database"></i> Copy <strong>SQL select</strong> to clipboard</a></li>
+        <li ng-if="control.DISC_COUNT_A>0"><a ng-href="{{entry.getBaseURL()}}:8000/hub/login?jwt={{entry.currentUser.userToken}}&next=/user/{{entry.currentUser.userName}}/notebooks/shared/_dash/run_data_profiler.ipynb?opco_id={{entry.currentUser.userOpcoId}}%26rule_name=%22{{control.PROCESSNAME}}%22%26rule_type=%22{{control.RULE_TYPE}}%22%26side=%22A%22%26pid={{control.PROCESSID}}%26for_date=%22{{control.RUN_FOR_DATE|date:'yyyy-MM-dd'}}%22%26autorun=true" target="_blank"><i class="fa fa-flask fa-fw"></i> Open in <strong>Data profiler</strong> Jupyter notebook</a></li>
+        <li ng-if="control.DISC_COUNT_A>0"><a ng-href="{{entry.getBaseURL()}}:8000/hub/login?jwt={{entry.currentUser.userToken}}&next=/user/{{entry.currentUser.userName}}/notebooks/shared/_dash/run_mpr_phik.ipynb?opco_id={{entry.currentUser.userOpcoId}}%26rule_name=%22{{control.PROCESSNAME}}%22%26rule_type=%22{{control.RULE_TYPE}}%22%26side=%22A%22%26pid={{control.PROCESSID}}%26for_date=%22{{control.RUN_FOR_DATE|date:'yyyy-MM-dd'}}%22%26autorun=true" target="_blank"><i class="fa fa-flask fa-fw"></i> Open in  <strong>Phi-K MPR</strong> Jupyter notebook</a></li>
+      </ul>
+  </div>
+</script>
+
+<script type="text/ng-template" id="discrepanciesPopOverB.html">
+  <div class="panel-header-grey text-center"><strong>Datasource B (Discrepancies)</strong></div>
+  <div style="font-family: 'Roboto Regular'; color:#333333;">
+      <ul class="dd-menu">
+        <li ng-if="(control.RULE_TYPE=='U' || control.RULE_TYPE=='R') && control.DISC_COUNT_B>0"><a href class="pointer-row" ng-click="copyToClipboard(control, 'B')"><i class="fa fa-fw fa-database"></i> Copy <strong>SQL select</strong> to clipboard</a></li>
+        <li ng-if="control.RULE_TYPE=='C' && control.DISC_COUNT_B>0"><a href class="pointer-row" ng-click="copyToClipboard(control, 'B')"><i class="fa fa-fw fa-database"></i> Copy <strong>SQL select</strong> to clipboard</a></li>
+        <li ng-if="control.DISC_COUNT_B>0"><a ng-href="{{entry.getBaseURL()}}:8000/hub/login?jwt={{entry.currentUser.userToken}}&next=/user/{{entry.currentUser.userName}}/notebooks/shared/_dash/run_data_profiler.ipynb?opco_id={{entry.currentUser.userOpcoId}}%26rule_name=%22{{control.PROCESSNAME}}%22%26rule_type=%22{{control.RULE_TYPE}}%22%26side=%22B%22%26pid={{control.PROCESSID}}%26for_date=%22{{control.RUN_FOR_DATE|date:'yyyy-MM-dd'}}%22%26autorun=true" target="_blank"><i class="fa fa-flask fa-fw"></i> Open in <strong>Data profiler</strong> Jupyter notebook</a></li>
+        <li ng-if="control.DISC_COUNT_B>0"><a ng-href="{{entry.getBaseURL()}}:8000/hub/login?jwt={{entry.currentUser.userToken}}&next=/user/{{entry.currentUser.userName}}/notebooks/shared/_dash/run_mpr_phik.ipynb?opco_id={{entry.currentUser.userOpcoId}}%26rule_name=%22{{control.PROCESSNAME}}%22%26rule_type=%22{{control.RULE_TYPE}}%22%26side=%22B%22%26pid={{control.PROCESSID}}%26for_date=%22{{control.RUN_FOR_DATE|date:'yyyy-MM-dd'}}%22%26autorun=true" target="_blank"><i class="fa fa-flask fa-fw"></i> Open in  <strong>Phi-K MPR</strong> Jupyter notebook</a></li>
+      </ul>
+  </div>
+</script>
+
+<script type="text/ng-template" id="fetchedPopOverA.html">
+  <div class="panel-header-grey text-center"><strong>Datasource A</strong></div>
+  <div style="font-family: 'Roboto Regular'; color:#333333;">
+      <ul class="dd-menu">
+        <li ng-if="control.RULE_TYPE == 'R' && control.DISC_COUNT_A == 0 && control.RECORDSFETCHED_A > 0"><a href class="pointer-row" ng-click="copyToClipboard(control, 'A')"><i class="fa fa-fw fa-database"></i> Copy <strong>SQL select</strong> to clipboard</a></li>
+        <li ng-if="control.RULE_TYPE != 'C'"><a ng-href="{{entry.getBaseURL()}}:8000/hub/login?jwt={{entry.currentUser.userToken}}&next=/user/{{entry.currentUser.userName}}/notebooks/shared/_dash/datasource_trend.ipynb?opco_id={{entry.currentUser.userOpcoId}}%26rule_name=%22{{control.PROCESSNAME}}%22%26rule_type=%22{{control.RULE_TYPE}}%22%26side=%22A%22%26pid={{control.PROCESSID}}%26for_date=%22{{control.RUN_FOR_DATE|date:'yyyy-MM-dd'}}%22%26autorun=true" target="_blank"><i class="fa fa-flask fa-fw"></i> Open <strong>Trend analysis</strong> in Jupyter notebook</a></li>
+      </ul>
+  </div>
+</script>
+
+<script type="text/ng-template" id="fetchedPopOverB.html">
+  <div class="panel-header-grey text-center"><strong>Datasource B</strong></div>
+  <div style="font-family: 'Roboto Regular'; color:#333333;">
+      <ul class="dd-menu">
+        <li ng-if="control.RULE_TYPE == 'R' && control.DISC_COUNT_B == 0 && control.RECORDSFETCHED_B > 0"><a href class="pointer-row" ng-click="copyToClipboard(control, 'A')"><i class="fa fa-fw fa-database"></i> Copy <strong>SQL select</strong> to clipboard</a></li>
+        <li ng-if="control.RULE_TYPE != 'C'"><a ng-href="{{entry.getBaseURL()}}:8000/hub/login?jwt={{entry.currentUser.userToken}}&next=/user/{{entry.currentUser.userName}}/notebooks/shared/_dash/datasource_trend.ipynb?opco_id={{entry.currentUser.userOpcoId}}%26rule_name=%22{{control.PROCESSNAME}}%22%26rule_type=%22{{control.RULE_TYPE}}%22%26side=%22B%22%26pid={{control.PROCESSID}}%26for_date=%22{{control.RUN_FOR_DATE|date:'yyyy-MM-dd'}}%22%26autorun=true" target="_blank"><i class="fa fa-flask fa-fw"></i> Open <strong>Trend analysis</strong> in Jupyter notebook</a></li>
+      </ul>
+  </div>
+</script>
+
+</div>

@@ -1,0 +1,92 @@
+<form class="form-horizontal" name="psForm">
+
+  <div class="panel-heading">
+
+    <div layout="row">
+      <div class="sm-margins h4" flex>
+        Found <strong>{{filteredProductSegments.length}}</strong> product segments 
+        having risk node <strong>{{parentRiskNode.RISK}}</strong> 
+        in system <strong>{{parentRiskNode.SYSTEM_NAME}}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-body" ng-cloak>
+
+    <!-- Main table -->
+    <table class="table table-hover table-condensed">
+      <thead>
+        <tr>
+          <th width="10px"></th>
+          <th width="220px" style="vertical-align: middle; text-align: left;">LOB / Product group</th>
+          <th style="vertical-align: middle; text-align: left;">Product segment</th>
+          <th width="120px" style="vertical-align: middle; text-align: right;">Value</th>
+          <th width="200px" style="vertical-align: middle; text-align: center;">
+            <span ng-if="!entry.showMeasureCoverage">Risk coverage</span>
+            <span ng-if="entry.showMeasureCoverage">Measure coverage</span>
+          </th>
+      </thead>
+
+      <tbody ng-repeat="productSegmentGroup in groupFilteredProductSegments" class="table-segment-bottom">
+        <tr class="animation pointer-row" ng-class="{'info':productSegment.SELECTED=='Y'}"
+          ng-repeat="productSegment in productSegmentGroup" ng-click="selectProductSegment(productSegment)">
+          <td style="vertical-align: middle; text-align: center;">
+            <md-checkbox class="md-primary md-hue-1 no-margins" ng-model="productSegment.SELECTED" ng-true-value="'Y'"
+              ng-false-value="'N'" md-no-ink aria-label="Product segment selected"
+              ng-click="$event.originalEvent.checkBoxClick = true" ng-change="updateSelected()"
+              ng-disabled="isDisabled">
+            </md-checkbox>
+          </td>
+          <td style="vertical-align: middle; text-align: left;">
+            <div style="font-size: 14px">
+              <strong class="btn-blue">{{productSegment.LOB}}</strong>
+            </div>
+            <strong class="btn-green" flex>{{productSegment.PRODUCT_GROUP}}</strong>
+          </td>
+          <td style="vertical-align: middle; text-align: left;">
+            <span ng-if="productSegment.PRODUCT_SEGMENT_ID"><strong>{{productSegment.PRODUCT_SEGMENT}}</strong></span>
+            <span ng-if="!productSegment.PRODUCT_SEGMENT_ID"><strong class="btn-red">No segments exist in this product
+                group. </strong>
+              <a ng-href="#" ng-click="newProductSegment(entry.OPCO_ID, productSegment.PRODUCT_GROUP_ID)"
+                class="btn btn-danger btn-xs" ng-if="!isDisabled"><i class="fa fa-briefcase fa-fw"></i> Create product
+                segment</a> </span>
+          </td>
+          <td style="vertical-align: middle; text-align: right;">
+            <div
+              ng-class="{'btn-grey': productSegment.PS_TOTAL_VALUE_RATIO < 0.1, 'btn-red': productSegment.PS_TOTAL_VALUE_RATIO >= 3}">
+              <i class="fa fa-euro"></i> <strong>{{productSegment.PS_VALUE | number:0}} </strong>
+            </div>
+            <div
+              ng-class="{'btn-grey': productSegment.PS_TOTAL_VALUE_RATIO < 0.1, 'btn-red': productSegment.PS_TOTAL_VALUE_RATIO >= 3}">
+              ( {{productSegment.PS_TOTAL_VALUE_RATIO | number:4}}% )
+            </div>
+          </td>
+          <td style="vertical-align: middle;">
+            <span layout-align="center center">
+              <uib-progressbar ng-if="!entry.showMeasureCoverage" class="danger no-margins" type="primary" max="100"
+                value="productSegment.COVERAGE">
+                <span style="color:#333; white-space:nowrap;">{{productSegment.COVERAGE}}%</span>
+              </uib-progressbar>
+
+              <uib-progressbar ng-if="entry.showMeasureCoverage" class="danger no-margins" type="warning" max="100"
+                value="productSegment.MEASURE_COVERAGE">
+                <span style="color:#333; white-space:nowrap;">{{productSegment.MEASURE_COVERAGE}}%</span>
+              </uib-progressbar>
+            </span>
+          </td>         
+        </tr>
+      </tbody>
+    </table>
+    <!-- Main table -->
+
+  </div>
+
+  <div class="panel-footer no-margins">
+    <div class="input-group">
+      <button type="button" class="btn btn-default" ng-click="modalCancel()">Cancel</button>
+      <button ng-if="selectedProductSegments.length" ng-click="submitProductSegments(selectedProductSegments)"
+        class="btn btn-primary">Clone to ({{selectedProductSegments.length}}) product segments</button>
+    </div>
+  </div>
+
+</form>

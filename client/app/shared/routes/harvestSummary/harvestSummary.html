@@ -1,0 +1,143 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li><a href="/incidents?opcoId={{entry.OPCO_ID}}&archive=N"><i class="fa fa-exclamation-circle fa-fw"></i> Incidents</a></li>
+  <li><a href="/stakeholder-reports?opcoId={{entry.OPCO_ID}}"><i class="fa fa-wpforms fa-fw"></i> Stakeholder reports</a></li>  
+  <li><a href="/balanced-scorecard?year={{workYear}}&opcoId={{entry.OPCO_ID}}"><i class="fa fa-vcard fa-fw"></i> Balanced scorecard</a></li>  
+  <li class="active"><i class="fa fa-dashboard fa-fw"></i> Incidents summary</a></li>
+</ol>
+<!-- Breadcrumbs -->
+
+<div class="row">
+  <div class="col-md-12 text-left">
+    <h3 class="sub-header">
+	    <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+	    {{entry.state.data.title}}	
+    </h3> 
+  </div>
+</div>
+
+<!-- Navigate months -->
+<div class="row hidden-print">
+  <div class="col-md-3 text-left">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/harvest-summary?year={{prevYear}}&opcoId={{entry.OPCO_ID}}">
+      <i class="fa fa-chevron-left fa-fw"></i>
+      {{prevYear}}
+    </a>
+  </div>
+
+  <div class="col-md-6 text-center">
+    <h4 class="sub-header">
+      <i class="fa fa-calendar fa-fw"></i>
+      {{workYear}}
+    </h4>
+  </div>
+  
+  <div class="col-md-3 text-right">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/harvest-summary?year={{nextYear}}&opcoId={{entry.OPCO_ID}}" ng-if="currYear >= nextYear"> 
+      {{nextYear}}
+      <i class="fa fa-chevron-right fa-fw"></i>
+    </a>
+  </div>
+</div>
+<!-- Navigate months -->
+
+<!-- Spinner -->
+<div ng-if="!loadFinished">
+  <div class="col-sm-12 text-center">
+    <br><br>
+    <i class="fa fa-spinner fa-pulse fa-3x"></i>
+  </div>
+</div>
+<!-- Spinner -->
+
+<div class="panel panel-default md-whiteframe-4dp md-padding" ng-if="loadFinished">
+
+<!-- Table overview -->
+<div class="table-responsive">
+    <h4 class="h3">Total <strong>{{getMetric(entry.OPCO_ID, 'INCIDENT_COUNT_TOTAL') | number:0}}</strong> Revenue Assurance incidents with a Financial impact of <strong>{{getMetric(entry.OPCO_ID, 'REVENUE_IMPACT') / 1000000 | number:2}} M€</strong></h4>
+</div>
+
+<div class="row h4">
+    <div class="col-sm-6">
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th ng-class="{'panel-bs-highlight':opco.OPCO_ID == entry.OPCO_ID}" class="text-right" width="10%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Revenue lost (M€)</strong></td>
+                        <td class="text-right btn-red" ng-class="{'panel-bs-highlight':opco.OPCO_ID == entry.OPCO_ID}" class="text-right" width="10%">{{getMetric(entry.OPCO_ID, 'I_REVENUE_LOSS') / 1000000 | number:2}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Revenue loss recovered (M€)</strong></td>
+                        <td class="text-right btn-green" ng-class="{'panel-bs-highlight':opco.OPCO_ID == entry.OPCO_ID}" class="text-right" width="10%">{{getMetric(entry.OPCO_ID, 'R_REVENUE_LOSS') / 1000000 | number:2}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Revenue loss prevented (M€)</strong></td>
+                        <td class="text-right btn-blue" ng-class="{'panel-bs-highlight':opco.OPCO_ID == entry.OPCO_ID}" class="text-right" width="10%">{{getMetric(entry.OPCO_ID, 'P_REVENUE_LOSS') / 1000000 | number:2}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-sm-6">
+
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th ng-class="{'panel-bs-highlight':opco.OPCO_ID == entry.OPCO_ID}" class="text-right" width="10%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Excessive costs (M€)</strong></td>
+                        <td class="text-right btn-red" ng-class="{'panel-bs-highlight':opco.OPCO_ID == entry.OPCO_ID}" class="text-right" width="10%">{{getMetric(entry.OPCO_ID, 'I_EXCESSIVE_COSTS') / 1000000 | number:2}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Excessive cost recovered (M€)</strong></td>
+                        <td class="text-right btn-green" ng-class="{'panel-bs-highlight':opco.OPCO_ID == entry.OPCO_ID}" class="text-right" width="10%">{{getMetric(entry.OPCO_ID, 'R_EXCESSIVE_COSTS') / 1000000 | number:2}}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Excessive cost prevented (M€)</strong></td>
+                        <td class="text-right btn-blue" ng-class="{'panel-bs-highlight':opco.OPCO_ID == entry.OPCO_ID}" class="text-right" width="10%">{{getMetric(entry.OPCO_ID, 'P_EXCESSIVE_COSTS') / 1000000 | number:2}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="table-responsive">
+    <h3 class="sub-header">
+        Risk coverage<br>
+        <small>Percentage of all identified financial risks which are covered by existing RA controls</small>
+    </h3>
+
+    <c3-chart id="cvgOverviewTotal" config="cvgOverviewChartOptions" data="cvgOverviewChartData"></c3-chart>
+<!-- 
+    <table class="table">     
+        <thead>
+            <tr>
+                <th></th>
+                <th ng-class="{'panel-bs-highlight':opco.OPCO_ID == entry.OPCO_ID}" ng-repeat="opco in opcos | notOpcoFilter:0" class="text-right" width="10%">{{opco.OPCO_NAME}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Risk coverage (%)</strong></td>
+                <td class="text-right" ng-class="{'panel-bs-highlight':opco.OPCO_ID == entry.OPCO_ID}" ng-repeat="opco in opcos | notOpcoFilter:0" class="text-right" width="10%">{{getMetric(opco.OPCO_ID, 'TOTAL_COVERAGE') | number:2}} %</td>
+            </tr>
+        </tbody>
+    </table>
+-->
+</div>
+
+<!-- Table overview -->
+
+</div>

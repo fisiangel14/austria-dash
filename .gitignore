@@ -1,0 +1,15 @@
+node_modules
+client/bower_components
+public
+/dist
+/distsmall
+.tmp
+.idea
+/server/config/local.env.js
+npm-debug.log
+this.sublime-workspace
+/shared/archive
+/shared/input
+server/utils/db.js
+start.cmd
+a1g-dash.pm2.json

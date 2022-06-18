@@ -1,0 +1,85 @@
+<div class="md-whiteframe-4dp">
+
+	<div class="modal-body">
+
+  <!-- start -->
+
+    <!-- Filters -->
+    <div ng-if="loadFinished">
+      <span ng-if="_und.size(incidents)"><strong>{{_und.size(filteredIncidents)}}</strong> of
+        <strong>{{_und.size(incidents)}}</strong> incidents</span>
+      <small ng-if="_und.size(filteredIncidents) < _und.size(incidents)"><a class="pointer-row" ng-click="removeAllFilters()">Clear all filters</a></small>
+    </div>    
+    <div class="small no-margins" ng-if="!entry.searchIncident">
+      <ul class="list-inline no-margins">
+          <li><strong>Filters: </strong></li>
+          <li class="filter-alert"> None </li>
+      </ul>
+  </div>
+
+  <div class="small no-margins" ng-if="entry.searchIncident">
+      <ul class="list-inline no-margins">
+          <li><strong>Filters: </strong></li>
+          <li ng-repeat="(element, filter) in entry.searchIncident" class="filter-alert" ng-if="filter">
+              <a ng-click="removeFilter(element)" class="btn-xs  close" style="font-size: 10px; vertical-align: text-top;" data-dismiss="alert"><i class="fa fa-times"></i></a>
+              {{element}} <em>is like</em> <strong>"{{filter}}"</strong>
+          </li>
+      </ul>
+  </div>
+  <!-- Filters -->  
+
+  <div class="table-responsive">
+      <table class="table table-hover table-condensed" >
+          <thead>
+              <tr>
+                  <th width="70px">ID</th>
+                  <th width="150px">Name / Opening date</th>
+                  <th width="60px" align="center"></th>
+                  <th>Problem / Cause / Responsible</th>
+              </tr>
+              <tr>                
+                <th><input class="no-borders-title" type="text" ng-model="entry.searchIncident.INCIDENT_ID" placeholder="ID"/></th>
+                <th><span layout="row"><input class="no-borders-title" flex="40" type="text" ng-model="entry.searchIncident.NAME" placeholder="Name"/> <span class="xs-padding">&nbsp;</span> <input class="no-borders-title" flex type="text" ng-model="entry.searchIncident.OPENING_DATE_SEARCH" placeholder="Date"/> <span class="xs-padding"></span></th>
+                <th></th>
+                <th><span layout="row"><input class="no-borders-title" flex="30" type="text" ng-model="entry.searchIncident.PROBLEM_DESCRIPTION" placeholder="Problem"/> <span class="xs-padding">&nbsp;</span> <input class="no-borders-title" flex type="text" ng-model="entry.searchIncident.ROOT_CAUSE" placeholder="Cause"/> <span class="xs-padding">&nbsp;</span> <input class="no-borders-title" flex type="text" ng-model="entry.searchIncident.RESPONSIBLE_PERSON" placeholder="Responsible"/> </span></th>
+            </tr>            
+          </thead>
+          <tbody>
+              <tr ng-if="!filteredIncidents.length && !loadFinished">
+                  <td colspan="3">
+                      <!-- Spinner -->
+                        <div class="col-sm-12 text-center">
+                          <br><br>
+                          <i class="fa fa-spinner fa-pulse fa-3x"></i>
+                        </div>
+                      <!-- Spinner -->                
+                  </td>
+              </tr>   
+              <tr ng-if="!filteredIncidents.length && loadFinished">
+                  <td colspan="3">
+                      <h4>No open incidents found.</h4>
+                  </td>
+              </tr>      				
+              <tr ng-repeat="incident in filteredIncidents | startFrom: (currentPage-1) * pageSize  | limitTo:pageSize" ng-click="selectIncident(incident)" style="cursor:pointer;">
+                  <td>
+                    <strong>I_{{incident.OPCO_ID}}_{{Lpad(incident.INCIDENT_ID, 3, '0')}}</strong><br>
+                  </td>								
+                  <td><a class="btn btn-default btn-sm btn-block" ng-class="{'btn-green':incident.STATUS == 'Closed', 'btn-red':incident.STATUS == 'Expired'}"><strong>{{incident.METRIC_ID.length>30?incident.METRIC_ID.substr(0,30)+' ...':incident.METRIC_ID}}</strong><br>{{incident.OPENING_DATE | date:'dd.MM.yyyy'}}</a></td>
+                  <td style="text-align:center"><strong>{{entry.lookup.getOpcoById(incident.OPCO_ID).COUNTRY_CODE}}</strong></td>
+                  <td>
+                    <strong>{{incident.PROBLEM_DESCRIPTION}}</strong>
+                    <small ng-if="incident.ROOT_CAUSE"><br><strong>Cause:</strong> {{incident.ROOT_CAUSE}}</small>
+                    <small class="btn-blue" ng-if="incident.RESPONSIBLE_PERSON"><br><strong>Responsible:</strong> {{incident.RESPONSIBLE_PERSON}} <span ng-if="incident.RESPONSIBLE_TEAM"> ({{incident.RESPONSIBLE_TEAM}})</span></small>
+                  </td>
+              </tr>
+          </tbody>
+      </table>
+      
+      <div ng-if="filteredIncidents.length > pageSize" class="no-margins" layout="row" layout-align="center">
+        <ul uib-pagination total-items="filteredIncidents.length" items-per-page="pageSize" max-size="10" ng-model="currentPage" ng-change="setCurrentPage(currentPage)" boundary-link-numbers="true" previous-text="<" next-text=">"></ul>
+      </div>
+
+  </div>  
+
+</div>
+</div>

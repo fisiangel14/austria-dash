@@ -1,0 +1,364 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li><a href="/metric-catalogue?opcoId={{entry.OPCO_ID}}"><i class="fa fa-line-chart fa-fw"></i> Metric catalogue</a></li>
+  <li><a href="/metric-results-overview?opcoId={{entry.OPCO_ID}}&month={{entry.searchMDmonth}}"><i class="fa fa-th-list fa-fw"></i> Metrics overview</a></li>
+  <li ng-if="metric.FREQUENCY=='D'"><a href="/metric-result-table?opcoId={{entry.OPCO_ID}}&month={{entry.searchMDmonth}}&frequency=D&finetuned={{entry.overviewShowFineTunedOnly}}"><i class="fa fa-table fa-fw"></i> Daily Metric results table</a></li>
+  <li ng-if="metric.FREQUENCY=='M' || metric.FREQUENCY=='C'"><a href="/metric-result-table?opcoId={{entry.OPCO_ID}}&month={{entry.searchMDmonth}}&frequency=M&finetuned={{entry.overviewShowFineTunedOnly}}"><i class="fa fa-list-alt fa-fw"></i> Monthly Metric results table</a></li>
+  <li><a href="/metric-info/{{metric.OPCO_ID}}/{{metric.METRIC_ID}}"><i class="fa fa-edit fa-fw"></i> Edit <strong>{{metric.METRIC_ID}}</strong></a></li>  
+  <li class="active"><i class="fa fa-area-chart fa-fw"></i> <strong>{{metric.METRIC_ID}}</strong> results</li>
+  <li><a href="/dataflow-graph?datasourceId=M-{{metric.METRIC_ID}}-{{metric.OPCO_ID}}""><i class="fa fa-sitemap fa-fw"></i> <strong>{{metric.METRIC_ID}}</strong> dataflow</a></li>
+</ol>
+<!-- Breadcrumbs -->
+
+<h3 class="sub-header">
+    <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+    {{entry.state.data.title}} 
+    <small> - {{entry.currDay}}</small>
+</h3>
+
+<!-- Navigate months -->
+<div class="row">
+  <div class="col-md-4 text-left">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/metric-result/{{metric.OPCO_ID}}/{{metric.METRIC_ID}}?month={{prevMonth}}" ng-if="prevMonth >= (metric.START_DATE | date:'yyyy-MM')">
+      <i class="fa fa-chevron-left fa-fw"></i>
+      {{prevMonthText}}
+    </a>
+  </div>
+  <div class="col-md-4 text-center">
+    <h4 class="sub-header">
+      <i class="fa fa-calendar fa-fw"></i>
+      {{workMonthText}}
+    </h4>
+  </div>
+  <div class="col-md-4 text-right">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/metric-result/{{metric.OPCO_ID}}/{{metric.METRIC_ID}}?month={{nextMonth}}" ng-if="currMonth >= nextMonth"> 
+      {{nextMonthText}}
+      <i class="fa fa-chevron-right fa-fw"></i>
+    </a>
+  </div>
+</div>
+<!-- Navigate months -->
+
+<!-- Metric info START -->
+<div ng-if="metric.METRIC_ID || newMetric || changeRequest">
+<div class="panel panel-default md-whiteframe-4dp" ng-class="{'panel-danger':metric.IMPLEMENTED=='N' && metric.RELEVANT=='Y', 'panel-success':metric.IMPLEMENTED=='Y'}">  
+
+  <div class="panel-heading no-margins" ng-click="toggleShowMetricInfo()" style="cursor:pointer">
+
+    <h3 class="no-margins">
+      <strong><i class="fa fa-line-chart"></i> {{metric.METRIC_ID}}</strong> 
+
+      <small ng-if="!showMetricInfo" class="animate" ng-class="{'alert-danger':metric.IMPLEMENTED=='N' && metric.RELEVANT=='Y', 'alert-success':metric.IMPLEMENTED=='Y'}" >{{metric.NAME}}</small>
+
+
+      <span class="label pull-right" ng-class="{'btn-day':metric.FREQUENCY=='D', 'btn-month':metric.FREQUENCY=='M', 'btn-cycle':metric.FREQUENCY=='C'}">{{metric.FREQUENCY}}</span>
+      <span class="small label pull-right" ng-if="!changeRequest && !newMetric"><small>{{flashMessage}}</small> </span>
+
+      <span class="pull-right">
+        <span ng-if="!showMetricInfo"><small><small><i class="fa fa-chevron-down"></i> metric details <i class="fa fa-chevron-down"></i></small></small></span>
+        <span ng-if="showMetricInfo"><small><small><i class="fa fa-chevron-up"></i> metric details <i class="fa fa-chevron-up"></i></small></small></span>
+      </span>
+    </h3> 
+
+
+  </div>
+
+  <div class="panel-body animation-roll-down" ng-cloak ng-if="showMetricInfo">
+
+    <div class="row">
+
+      <div class="col-sm-2">
+          <label for="metricMETRIC_ID">Metric ID</label>
+          <input name="metricMETRIC_ID" type="text" class="form-control" ng-required="true" placeholder="Metric ID" ng-model="metric.METRIC_ID" ng-disabled="!changeRequest && !newMetric">
+          <div ng-messages="metricForm.metricMETRIC_ID.$error"> 
+            <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            <div ng-message="minlength" ng-message="maxlength"><small class="label label-danger">Must be exactly 3 characters long</small></div>
+          </div>            
+      </div>
+
+      <div class="col-sm-2">
+        <label for="metricFREQUENCY">Frequency</label>
+        <select name="metricFREQUENCY" class="form-control" ng-required="true" ng-model="metric.FREQUENCY" ng-disabled="!changeRequest && !newMetric" required>
+          <option value="D">Daily</option>
+          <option value="M">Monthly</option>
+          <option value="C">Bill Cycle</option>
+        </select>
+        <div ng-messages="metricForm.metricFREQUENCY.$error">
+          <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+        </div>         
+      </div>
+
+      <div class="col-sm-2">
+        <label for="metricRELEVANT">Relevant</label>
+        <select name="metricRELEVANT" class="form-control" ng-model="metric.RELEVANT" ng-disabled="!changeRequest && !newMetric" required>
+          <option>Y</option>
+          <option>N</option>
+        </select>
+        <div ng-messages="metricForm.metricRELEVANT.$error">
+          <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+        </div>         
+      </div>
+
+      <div class="col-sm-3">
+        <label for="metricSTART_DATEgroup">Valid from</label>
+        <p name="metricSTART_DATEgroup" class="input-group">
+          <input name="metricSTART_DATE" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" datepicker-options="dp.dateOptions" ng-model="metric.START_DATE" is-open="dp.status.opened" ng-required="true" close-text="Close" ng-disabled="!changeRequest && !newMetric"/>
+          <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="dp.open($event)" ng-disabled="!changeRequest && !newMetric"><i class="glyphicon glyphicon-calendar"></i></button>
+          <div ng-messages="metricForm.metricSTART_DATE.$error"> 
+            <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            <div ng-message="date"><small class="label label-danger">Invalid date</small></div>
+          </div> 
+          </span>
+        </p>
+      </div>
+
+      <div class="col-sm-3">
+        <label for="metricAREA">Area</label>
+        <select name="metricAREA" class="form-control" ng-model="metric.AREA_ID" ng-disabled="!changeRequest && !newMetric" required>
+          <option ng-repeat="area in localEntry.lookup.areas" value="{{area.AREA_ID}}">{{area.NAME}}</option>
+        </select>
+        <div ng-messages="metricForm.metricAREA.$error">
+          <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+        </div>        
+      </div>
+
+    </div>
+
+    <div class="row">
+      <div class="col-sm-6">
+          <label for="metricNAME">Name</label>
+          <textarea name="metricNAME" type="text" class="form-control" placeholder="Name" ng-model="metric.NAME" ng-required="true" rows="3" ng-disabled="!changeRequest && !newMetric"></textarea>
+          <div ng-messages="metricForm.metricNAME.$error">
+            <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+          </div>   
+
+      </div>
+
+      <div class="col-sm-6">
+          <label for="metricDESCRIPTION">Description</label>
+          <textarea name="metricDESCRIPTION" type="text" class="form-control" placeholder="Description" ng-model="metric.DESCRIPTION" rows="3" ng-disabled="!changeRequest && !newMetric" required></textarea>
+          <div ng-messages="metricForm.metricDESCRIPTION.$error">
+            <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+          </div>             
+      </div>
+    </div>
+<br>
+    <div class="row">
+      <div class="col-sm-12">
+        <span class="pull-right">
+          <a class="btn btn-primary" ng-href="/metric-info/{{metric.OPCO_ID}}/{{metric.METRIC_ID}}">
+            <small>Edit </small> 
+            <i class="fa fa-fw" ng-class="{'fa-line-chart': metric.RELEVANT=='Y', 'fa-ban btn-red': metric.RELEVANT=='N'}"></i>
+            <strong>{{metric.METRIC_ID}}</strong>
+          </a>
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</div>
+<!-- Metric info END -->
+
+
+<div class="panel panel-default md-whiteframe-4dp">
+<div class="panel-body" ng-cloak>
+
+  <!-- Related Metrics  -->
+  <div class="panel">
+    <div class="row">
+      <div class="col-sm-12">
+        <strong>{{localEntry.lookup.getAreaById(metric.AREA_ID).NAME}} area </strong> metrics results: <br><br>
+        <span ng-repeat="relatedMetric in relatedMetrics">
+          <a class="btn btn-default btn-sm" ng-class="{'btn-primary':relatedMetric.METRIC_ID == metric.METRIC_ID}" ng-href="/metric-result/{{relatedMetric.OPCO_ID}}/{{relatedMetric.METRIC_ID}}?month={{workMonth}}">
+            <i class="fa fa-fw" ng-class="{'fa-line-chart': relatedMetric.RELEVANT=='Y', 'fa-ban btn-red': relatedMetric.RELEVANT=='N'}"></i> 
+            <strong>{{relatedMetric.METRIC_ID}}</strong> results
+          </a>
+      </span>
+      </div>
+    </div>
+  </div>
+  <!-- Related Metrics  -->
+
+    <!-- Chart -->
+    <div class="row">
+      <div class="col-sm-12">
+        <div ng-if="metricResultsChart.length>0 && metricResultsChartOptions && (metric.FREQUENCY=='D'  || metric.FREQUENCY=='M')">
+          <c3-chart id="chartMetrics" config="metricResultsChartOptions" data="metricResultsChart"></c3-chart>
+        </div>      
+      </div>      
+    </div>
+    <!-- Chart -->
+
+    <!-- Formula -->
+    <div class="row">
+      <div class="col-sm-12 panel">
+        <div class="panel formula-panel panel-default no-margins" ng-disabled="!changeRequest && !newMetric">
+          <table class="table table-condensed table-striped no-margins">
+              <tbody>
+                  <tr>
+                    <td ng-repeat="dato in relatedDatos" style="vertical-align:middle">
+                      <a class="btn btn-default btn-xs btn-block" ng-class="{'btn-not-implemented': dato.RELEVANT=='Y' && dato.IMPLEMENTED=='N'}" href="/dato-info/{{dato.OPCO_ID}}/{{dato.DATO_ID}}" data-html="true" popover-title="{{dato.NAME}}" uib-popover-html="popoverHtml(dato.DESCRIPTION, dato.UNIT)" popover-trigger="mouseenter" popover-placement="top-left" popover-append-to-body="false">
+                        <i class="fa" ng-class="{'fa-cube': dato.RELEVANT=='Y', 'fa-ban btn-red': dato.RELEVANT=='N'}"></i>
+                        <strong>{{dato.DATO_ID}}</strong> 
+                      </a>
+                    </td>                           
+                  </tr>
+              </tbody>
+          </table>
+
+          <div class="panel-body text-center">
+            <span math="`sf({{metric.FORMULA}})`"></span>
+          </div>
+
+          <div class="panel-body no-padding text-left">
+            <small>Objective =</small> <strong class="btn-blue">{{metric.OBJECTIVE}}</strong>, 
+            <small>Tolerance =</small> <strong class="btn-blue">{{metric.TOLERANCE}}</strong>
+          </div>            
+        </div>
+      </div>
+    </div>
+    <!-- Formula -->
+
+    <!-- Metric results Table - NOT RELEVANT -->
+    <div ng-if="metric.RELEVANT == 'N'" >
+      <div class="row">
+        <div class="col-sm-12">
+        <h4>Skipping results...</h4> <br>Metric <strong>{{metric.METRIC_ID}}</strong> is marked as non-relevant for {{entry.OPCO_NAME}}.
+        </div>
+      </div>
+    </div>
+    <!-- Metric results Table - NOT RELEVANT -->
+
+    <!-- Metric results Table -->
+    <div class="row" ng-if="metric.RELEVANT == 'Y'" >
+      <div class="col-sm-12">
+        <table name="metricTABLE" class="table table-condensed table-hover no-margins">
+            <thead>
+              <tr>
+                <th ng-click="order('DATE')" style="cursor:pointer">Date <i class="fa fa-sm" ng-class="{'fa-caret-down':!entry.reverse, 'fa-caret-up':entry.reverse}"></i></th>
+                <th>
+                  <span ng-if="metric.FREQUENCY=='C'" class="text-center">Bill cycle</span>
+                </th>
+                <th class="text-right" ng-repeat="dato in metricDatoLabelUnion">
+                  <a ng-href="/dato-result/{{metric.OPCO_ID}}/{{dato.substr(0,3)}}?month={{workMonth}}">
+                    <!-- <small> R:</small> -->
+                    <!-- <i class="fa fa-cube fa-fw"></i> -->
+                    <strong>#{{dato}}</strong>
+                  </a>
+                </th>
+                <th class="text-right">
+                  {{metric.METRIC_ID}} Value
+                </th>
+                <th></th>
+                <th class="text-right">Calculation time</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr ng-hide="(metric.START_DATE > metricResult.DATE && !metricResult.RESULT_ID) || (!metricResult.RESULT_ID && metricResult.DAYS_LATE < 0)" ng-class="{'active':metricResult.DAY_OF_WEEK == 6 || metricResult.DAY_OF_WEEK == 7, 'danger':(!metricResult.RESULT_ID && metricResult.DAYS_LATE > 1) || !metricResult.JSON_DATO_SUMS}" ng-click="" ng-repeat="metricResult in (metricResultsFiltered = (metricResults | toArray | orderBy:predicate:entry.reverse))">
+                <!-- Date -->
+                <td>
+                  <span ng-if="metric.FREQUENCY == 'D'"> 
+                    <strong ng-class="{'btn-grey':metricResult.DAY_OF_WEEK == 6 || metricResult.DAY_OF_WEEK == 7}">
+                      {{metricResult.DATE | date:"dd.MM.yyyy"}}
+                    </strong> 
+                    <small ng-class="{'btn-red':metricResult.DAY_OF_WEEK == 7, 'btn-orange':metricResult.DAY_OF_WEEK == 6, 'btn-grey':metricResult.DAY_OF_WEEK < 6}">{{metricResult.DATE | date:"EEE"}}</small>
+                  </span>
+                  <span ng-if="metric.FREQUENCY !== 'D'"> 
+                    <strong>{{metricResult.DATE | date:"MMM yyyy"}}</strong>
+                  </span>
+                </td>
+
+                <!-- Cycle -->
+                <td>
+                  <span ng-if="metric.FREQUENCY=='C'" class="text-center">
+                    <i class="fa fa-calendar-check-o fa-fw"></i>
+                    <strong>{{metricResult.BILL_CYCLE}}</strong>
+                  </span>
+                </td>
+
+                <!-- Dato values -->
+                <td ng-if="metricResult.RESULT_ID && metricResult.JSON_DATO_SUMS" ng-repeat="dato in metricResult.JSON_DATO_SUMS_FINAL" class="text-right">
+                  <span ng-if="(dato.VAL - Math.round(dato.VAL)) != 0 && Math.abs(dato.VAL) < 100">{{dato.VAL | number:2}}</span>
+                  <span ng-if="(dato.VAL - Math.round(dato.VAL)) == 0 || Math.abs(dato.VAL) >= 100">{{dato.VAL | number:0}}</span>
+                </td>
+
+                <!-- No Metric result found - DATOS MISSING) -->
+                <td ng-if="!metricResult.RESULT_ID && metricResult.DATO_ID_MISSING" class="text-center" colspan="{{metricDatoLabelUnion.length}}">
+                  <!-- {{metricResult}} -->
+                    <!-- Expected today -->
+                    <span ng-if="(metricResult.DAYS_LATE) < 1 && (metricResult.DAYS_LATE > -1)" class="btn-orange"><small><i class="fa fa-clock-o"></i> Required datos expected <strong>today</strong>.</small></span>
+                    <!-- Delayed more than one day -->
+                    <span ng-if="metricResult.DAYS_LATE >= 1" class="btn-red"><small><i class="fa fa-exclamation-triangle"></i> Calculation delayed <strong>{{metricResult.DAYS_LATE | number:0}}</strong> days.</small>
+                      <!-- List Datos which are missing -->
+                      <span ng-if="metricResult.DATO_ID_MISSING" class="btn-red"><small>Dato(s) missing: </small> <strong>{{metricResult.DATO_ID_MISSING}}</strong></span>
+                    </span>
+                </td>
+
+                <!-- No datos seem to be missing but Metric is not calculated - wierd?! -->
+                <td ng-if="(!metricResult.RESULT_ID && !metricResult.DATO_ID_MISSING) || (!metricResult.JSON_DATO_SUMS && metricResult.RECALCULATE=='Y')" class="text-center" colspan="{{metricDatoLabelUnion.length}}">
+                    <span ng-if="!metricResult.DATO_ID_MISSING"><i class="fa fa-question-circle fa-fw btn-red"></i> 
+                      <small ng-if="metricResult.RECALCULATE=='N' || !metricResult.RECALCULATE">No datos are missing, but metric still not calculated. Please start calculation manually by clicking the button on the right.</small> 
+                      <small ng-if="metricResult.RECALCULATE=='Y'">No datos are missing. Metric recalculation pending.</small> 
+                    </span>
+                </td>
+
+                <!-- Metric result exists -->
+                <td class="text-right">
+                  <!-- No ERROR CODE -->
+                  <span ng-if="!metricResult.ERROR_CODE" ng-class="{'btn-green':(metricResult.VALUE<=metric.OBJECTIVE) || ((metricResult.VALUE>metric.OBJECTIVE && + metricResult.VALUE <=  metric.OBJECTIVE + metric.TOLERANCE) && metric.TREND == 'Y'), 'btn-yellow':(metricResult.VALUE>metric.OBJECTIVE && + metricResult.VALUE <=  metric.OBJECTIVE + metric.TOLERANCE) && metric.TREND == 'N', 'btn-red':(metricResult.VALUE>metric.OBJECTIVE + metric.TOLERANCE) && metric.TREND == 'N', 'btn-orange':(metricResult.VALUE>metric.OBJECTIVE + metric.TOLERANCE) && metric.TREND == 'Y'}">
+                    <strong>{{metricResult.VALUE | number:5}}</strong>
+                  </span>
+
+                  <!-- Metric has ERROR CODE (NaN, Inf) -->
+                  <span ng-if="metricResult.ERROR_CODE" class="btn-blue">
+                    <strong>{{metricResult.ERROR_CODE}}</strong>
+                  </span>
+
+                  <!-- Info button - detailed result link -->
+                  <span>
+                    <a ng-if="metricResult.RESULT_ID" class="btn btn-xs btn-default" ng-href="/metric-composite-result?opcoId={{metricResult.OPCO_ID}}&metricId={{metricResult.METRIC_ID}}&billCycle={{metricResult.BILL_CYCLE}}&date={{metricResult.DATE | date:'yyyy-MM-dd'}}" uib-tooltip="{{metricResult.ASSIGNED_TO}}{{metricResult.NOTE?': ':''}}{{metricResult.NOTE}}" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top" uib-tooltip-popup-delay="800" ng-class="{'panel-grey':metricResult.ASSIGNED_TO}"> 
+                      <i class="fa fa-info fa-fw"><strong ng-if="metricResult.CNT"><sub>{{metricResult.CNT + 1}}</sub></strong></i>
+                    </a>
+                  </span>
+
+                  <!-- Recalculate button -->
+                  <span ng-if="!metricResult.RESULT_ID && !metricResult.DATO_ID_MISSING && metricResult.RECALCULATE != 'Y'"><button class="btn btn-xs btn-default" ng-click="recalculateMetric(metricResult)" ng-disabled="entry.isDisabled()" uib-tooltip="Recalculate {{metric.METRIC_ID}} for {{metricResult.DATE | date:'dd.MM.yyyy'}}" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top" uib-tooltip-popup-delay="1800"><i class="fa fa-refresh fa-fw"></i></button></span>
+                  <span ng-if="metricResult.RESULT_ID && metricResult.RECALCULATE == 'N'"><button class="btn btn-xs btn-default" ng-click="recalculateMetric(metricResult)" ng-disabled="entry.isDisabled()" uib-tooltip="Recalculate {{metric.METRIC_ID}} for {{metricResult.DATE | date:'dd.MM.yyyy'}}" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top" uib-tooltip-popup-delay="1800"><i class="fa fa-refresh fa-fw"></i></button></span>
+                  <span ng-if="metricResult.RECALCULATE == 'Y'"><button class="btn btn-xs btn-primary"> <i class="fa fa-refresh fa-spin fa-fw"></i></button></span>
+
+                </td>
+                
+                <!-- Incident link -->
+                <td>
+                  <span ng-if="metricResult.INCIDENT_ID">
+                    <a ng-href="/incident-info/{{metricResult.INCIDENT_ID}}">
+                      <i class="fa fa-fw fa-exclamation-circle"></i> 
+                      I_{{metricResult.OPCO_ID}}_{{Lpad(metricResult.INCIDENT_ID, 3, '0')}}
+                    </a>
+                  </span>
+                </td>
+                
+                <!-- Date calculated -->
+                <td class="text-right">
+                  <!-- Recalculation pending -->
+                  <span ng-if="metricResult.RECALCULATE == 'Y'" class="text-center btn-blue">
+                    <small><i class="fa fa-clock-o"></i> Metric recalculation pending </small>
+                  </span> 
+                  <!-- Recalcualtion not pending -->
+                  <span ng-if="metricResult.RESULT_ID && metricResult.RECALCULATE == 'N'" >
+                    {{metricResult.MODIFIED | date:"dd.MM.yyyy"}} <small class="btn-grey">{{metricResult.MODIFIED | date:"HH:mm"}}</small> <small>({{metricResult.DAYS_LATE | number:0}} days ago)</small>
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+        </table>    
+      </div>
+    </div>
+    </div>
+
+</div>
+</div>

@@ -1,0 +1,422 @@
+<!doctype html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <base href="/">
+    <title>RAPO</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(client) app/vendor.css -->
+      <!-- bower:css -->
+      <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+      <link rel="stylesheet" href="bower_components/angular-material/angular-material.css" />
+      <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css({.tmp,client}) app/app.css -->
+      <link rel="stylesheet" href="app/app.css">
+      <!-- injector:css -->
+      <link rel="stylesheet" href="app/amx/routes/alarmExportReport/alarmExportReport.css">
+      <link rel="stylesheet" href="app/amx/routes/alarmTable/alarmTable.css">
+      <link rel="stylesheet" href="app/amx/routes/changeRequests/changeRequests.css">
+      <link rel="stylesheet" href="app/amx/routes/datoFileTable/datoFileTable.css">
+      <link rel="stylesheet" href="app/amx/routes/datoInfo/datoInfo.css">
+      <link rel="stylesheet" href="app/amx/routes/datoNew/datoNew.css">
+      <link rel="stylesheet" href="app/amx/routes/datoResult/datoResult.css">
+      <link rel="stylesheet" href="app/amx/routes/datoResultsOverview/datoResultsOverview.css">
+      <link rel="stylesheet" href="app/amx/routes/datoTable/datoTable.css">
+      <link rel="stylesheet" href="app/amx/routes/incidentExportReport/incidentExportReport.css">
+      <link rel="stylesheet" href="app/amx/routes/incidentInfo/incidentInfo.css">
+      <link rel="stylesheet" href="app/amx/routes/incidentNew/incidentNew.css">
+      <link rel="stylesheet" href="app/amx/routes/incidentTable/incidentTable.css">
+      <link rel="stylesheet" href="app/amx/routes/lookupTables/lookupTables.css">
+      <link rel="stylesheet" href="app/amx/routes/metricCompositeResult/metricCompositeResult.css">
+      <link rel="stylesheet" href="app/amx/routes/metricInfo/metricInfo.css">
+      <link rel="stylesheet" href="app/amx/routes/metricNew/metricNew.css">
+      <link rel="stylesheet" href="app/amx/routes/metricResult/metricResult.css">
+      <link rel="stylesheet" href="app/amx/routes/metricResultTable/metricResultTable.css">
+      <link rel="stylesheet" href="app/amx/routes/metricResultsOverview/metricResultsOverview.css">
+      <link rel="stylesheet" href="app/amx/routes/metricTable/metricTable.css">
+      <link rel="stylesheet" href="app/amx/routes/taskTable/taskTable.css">
+      <link rel="stylesheet" href="app/app.css">
+      <link rel="stylesheet" href="app/coverage/directives/heatMap/heatMap.css">
+      <link rel="stylesheet" href="app/coverage/directives/sankeyDiagram/sankeyDiagram.css">
+      <link rel="stylesheet" href="app/coverage/routes/cvgHeatMap/cvgHeatMap.css">
+      <link rel="stylesheet" href="app/coverage/routes/cvgOverview/cvgOverview.css">
+      <link rel="stylesheet" href="app/coverage/routes/keyRiskAreaInfo/keyRiskAreaInfo.css">
+      <link rel="stylesheet" href="app/coverage/routes/keyRiskAreaLandscape/keyRiskAreaLandscape.css">
+      <link rel="stylesheet" href="app/coverage/routes/keyRiskAreaTable/keyRiskAreaTable.css">
+      <link rel="stylesheet" href="app/coverage/routes/productSegmentCompare/productSegmentCompare.css">
+      <link rel="stylesheet" href="app/coverage/routes/productSegmentInfo/productSegmentInfo.css">
+      <link rel="stylesheet" href="app/coverage/routes/productSegmentTable/productSegmentTable.css">
+      <link rel="stylesheet" href="app/coverage/routes/riskInfo/riskInfo.css">
+      <link rel="stylesheet" href="app/coverage/routes/riskNodeInfo/riskNodeInfo.css">
+      <link rel="stylesheet" href="app/coverage/routes/riskNodeTable/riskNodeTable.css">
+      <link rel="stylesheet" href="app/coverage/routes/riskTable/riskTable.css">
+      <link rel="stylesheet" href="app/dataflow/directives/directedGraph/directedGraph.css">
+      <link rel="stylesheet" href="app/dataflow/routes/dataflowGraph/dataflowGraph.css">
+      <link rel="stylesheet" href="app/dataflow/routes/datasourceInfo/datasourceInfo.css">
+      <link rel="stylesheet" href="app/dataflow/routes/datasourceTable/datasourceTable.css">
+      <link rel="stylesheet" href="app/dataflow/routes/interfaceInfo/interfaceInfo.css">
+      <link rel="stylesheet" href="app/dataflow/routes/interfaceTable/interfaceTable.css">
+      <link rel="stylesheet" href="app/dataflow/routes/procedureInfo/procedureInfo.css">
+      <link rel="stylesheet" href="app/dataflow/routes/procedureTable/procedureTable.css">
+      <link rel="stylesheet" href="app/dataflow/routes/schedulerInfo/schedulerInfo.css">
+      <link rel="stylesheet" href="app/dataflow/routes/schedulerTable/schedulerTable.css">
+      <link rel="stylesheet" href="app/dataflow/routes/systemInfo/systemInfo.css">
+      <link rel="stylesheet" href="app/dataflow/routes/systemTable/systemTable.css">
+      <link rel="stylesheet" href="app/mm/routes/controlMonitor/controlMonitor.css">
+      <link rel="stylesheet" href="app/mm/routes/controlResult/controlResult.css">
+      <link rel="stylesheet" href="app/mm/routes/controlResultsOverview/controlResultsOverview.css">
+      <link rel="stylesheet" href="app/mm/routes/controlRunhistory/controlRunhistory.css">
+      <link rel="stylesheet" href="app/shared/routes/balancedScorecard/balancedScorecard.css">
+      <link rel="stylesheet" href="app/shared/routes/harvestSummary/harvestSummary.css">
+      <link rel="stylesheet" href="app/shared/routes/overview/overview.css">
+      <link rel="stylesheet" href="app/shared/routes/userMessages/userMessages.css">
+      <link rel="stylesheet" href="app/stakeholderReport/routes/stakeholderReportInfo/stakeholderReportInfo.css">
+      <link rel="stylesheet" href="app/stakeholderReport/routes/stakeholderReportPublic/stakeholderReportPublic.css">
+      <link rel="stylesheet" href="app/stakeholderReport/routes/stakeholderReportTable/stakeholderReportTable.css">
+      <link rel="stylesheet" href="components/footer/footer.css">
+      <link rel="stylesheet" href="components/modal/modal.css">
+      <!-- endinjector -->
+    <!-- endbuild -->
+
+    <!-- manual -->
+    <link href="bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="js/c3/c3.min.css" rel="stylesheet">
+    <!-- end: manual -->
+</head>
+  <div flash-message="5000" ></div> 
+  
+  <p id="iedetect" class="btn-red browserupgrade" style="display: none; color: red; text-align: center;">You are using <strong>unsupported browser</strong>. You may experience bad performance or some of the features may not work at all. Please open this page with any other browser available to you.</p>
+
+  <script>
+    if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > -1) {
+      document.getElementById("iedetect").style.display = "block";
+    }
+  </script>
+
+  <body layout="column" ng-app="amxApp" ng-cloak>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top md-whiteframe-1dp" ng-controller="topMenuCtrl" ng-cloak style="background-color: #D92E1C;">
+      <div class="container-fluid">
+
+        <div class="navbar-header">
+          <md-button ng-click="toggleLeft()" class="md-icon-button navbar-toggle" hide-gt-sm aria-label="Sidebar">
+            <md-icon md-font-icon="fa-bars" style="color: #FFF" class="fa fa-2x fa-inverse fa-fw **fa-md**" aria-label="Menu"></md-icon>
+          </md-button>
+
+          <a class="navbar-brand" ng-href="{{entry.navBarLink}}" style="color: #FFF;">
+            <i class="fa fa-line-chart fa-fw"></i> RAPO
+            <!-- <span ng-if="entry.env !== 'production'" class="btn-orange">
+              <i class="fa fs-2x fa-rocket"></i>
+              <strong> {{entry.env}} instance</strong>
+            </span> -->
+          </a>
+        </div>
+
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li ng-if="!entry.currentUser.userAuth"><a href="#" ng-click="login()"  style="color: #FFF"><i class="fa fa-sign-in"></i> Sign In</a></li>
+            <li ng-if="entry.currentUser.userAuth">
+              <div class="dropdown">
+                <button class="navbar-buton btn btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="background-color: #D92E1C; color:#FFF !important" >
+                  <i class="fa fa-user"></i> {{entry.currentUser.userName}}
+                  <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" >
+                  <li><a href="#" ui-sref="userMessages"><i class="fa fa-envelope fa-fw"></i> Alerts & Messages</a></li>
+                  <li><a href="#" ng-click="changePassword()"><i class="fa fa-key fa-fw"></i> Change password</a></li>
+                  <li class="divider"></li>
+                  <li ng-if="entry.currentUser.userOpcoId != 39"><a ng-href="{{entry.getBaseURL()}}:8000/hub/login?jwt={{entry.currentUser.userToken}}&next=/hub/spawn" target="_blank"><i class="fa fa-flask fa-fw"></i> My Jupyter notebooks</a></li>
+                  <li ng-if="entry.currentUser.userOpcoId == 39"><a ng-href="http://lvpjupyter01.vipnet.hr:8000/hub/login?jwt={{entry.currentUser.userToken}}&next=/hub/spawn" target="_blank"><i class="fa fa-flask fa-fw"></i> My Jupyter notebooks</a></li>
+                  <li class="divider"></li>
+                  <li><a href="#" ng-click="logout()"><i class="fa fa-sign-out fa-fw"></i> Sign Out</a></li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </nav>
+
+  <div layout="column" flex>
+    <div layout="row" flex>
+
+      <!-- Sidenav -->
+      <!-- <md-sidenav style="width: 250px;" class="md-whiteframe-4dp md-sidenav-left" md-component-id="left" md-is-locked-open="$mdMedia('gt-sm')"> -->
+      <md-sidenav class="sidemenu md-sidenav-left md-padding md-whiteframe-4dp hidden-print" md-component-id="left" md-is-locked-open="$mdMedia('gt-sm') && entry.currentUser.userAuth">
+
+          <!-- <div class="col-md-2 col-xl-1 sidebar md-whiteframe-4dp" ng-controller="leftMenuCtrl" ng-cloak> -->
+
+            <div>
+              <ul class="nav nav-sidebar">
+                <li ng-class="{'active': entry.state.name == 'overview'}"><a href="#" ui-sref="overview"><i class="fa fa-circle fa-fw"></i> Overview</a></li>
+              </ul>
+            </div>
+
+            <div ng-if="entry.currentUser.userAuth">
+              
+              <!-- Datos & Metrics -->
+              <ul class="nav nav-sidebar">
+                <li ng-class="{'active': entry.state.data.leftMenu == 'Controls'}"><a ng-href="/control-results?opcoId={{entry.OPCO_ID}}" ><i class="fa fa-area-chart fa-fw"></i> Controls</a></li>
+                <li ng-class="{'active': entry.state.data.leftMenu == 'Metric catalogue'}"><a ng-href="/metric-catalogue?opcoId={{entry.OPCO_ID}}"><i class="fa fa-line-chart fa-fw"></i> Metrics</a></li>
+                <li ng-class="{'active': entry.state.data.leftMenu == 'Dato catalogue'}"><a ng-href="/dato-catalogue?opcoId={{entry.OPCO_ID}}" ><i class="fa fa-cube fa-fw"></i> Datos</a></li>
+              </ul>
+
+              <!-- Dataflow -->
+              <ul class="nav nav-sidebar">
+                <li ng-class="{'active': entry.state.data.leftMenu == 'Dataflow'}"><a ui-sref="procedureTable({'opcoId': entry.OPCO_ID})" ><i class="fa fa-sitemap fa-fw"></i> Dataflows</a></li>
+              </ul> 
+
+              <!-- Coverage -->
+              <ul class="nav nav-sidebar">
+                <li ng-class="{'active': entry.state.data.leftMenu == 'Coverage'}"><a ui-sref="productSegmentTable({'opcoId': entry.OPCO_ID})" ><i class="fa fa-umbrella fa-fw"></i> Risk coverage</a></li>
+                <li ng-class="{'active': entry.state.data.leftMenu == 'Risk catalogue'}"><a ui-sref="riskTable()" ><i class="fa fa-exclamation-triangle fa-fw"></i> Risk catalogue</a></li>
+              </ul> 
+
+              <!-- Alarms and incidents -->
+              <ul class="nav nav-sidebar">
+                <li ng-class="{'active': entry.state.data.leftMenu == 'Alarms'}"><a href="/alarms?month={{entry.currMonth}}&opcoId={{entry.OPCO_ID}}"><i class="fa fa-bell fa-fw"></i> Alarms <span ng-if="entry.counters.openAlarms" class="badge pull-right">{{entry.counters.openAlarms}}</span></a></li>
+                <li ng-class="{'active': entry.state.data.leftMenu == 'Incidents'}"><a ng-href="/incidents?opcoId={{entry.OPCO_ID}}&archive=N"><i class="fa fa-exclamation-circle fa-fw"></i> Incidents <span ng-if="entry.counters.openIncidents" class="badge pull-right">{{entry.counters.openIncidents}}</span></a></li>
+                <li ng-class="{'active': entry.state.data.leftMenu == 'Balanced scorecard'}"><a href="/balanced-scorecard?year={{entry.currYear}}&opcoId={{entry.OPCO_ID}}"><i class="fa fa-vcard fa-fw"></i> Balanced scorecard </span></a></li>
+              </ul>
+              <!-- Settings -->
+              <ul class="nav nav-sidebar">
+                <li ng-class="{'active': entry.state.data.leftMenu == 'Change requests'}"><a ng-href="/change-requests?opcoId={{entry.OPCO_ID}}&archive=N"><i class="fa fa-edit fa-fw"></i> Change requests <span ng-if="entry.counters.openChangeRequests" class="badge pull-right">{{entry.counters.openChangeRequests}}</span></a></li>
+                <li ng-class="{'active': entry.state.name == 'lookupTables'}"><a ui-sref="lookupTables"><i class="fa fa-cog fa-fw"></i> Settings</a></li>
+              </ul>        
+            </div>
+
+            <div class="nav-sidebar container-fluid" ng-if="entry.state.data.showOpcoFilter">
+              <div class="btn-group input-group btn-group-justified">
+                <select class="form-control" name="entryOPCO" ng-options="opco.OPCO_ID as (opco.OPCO_NAME + (opco.OPCO_ID==entry.currentUser.userOpcoId?' ⚑':'')) for opco in entry.lookup.opcos | filter:{OPCO_ID: '!99'}" ng-model="entry.OPCO_ID" required>
+                </select>
+              </div>
+            </div>            
+            
+          <!-- </div> -->
+      </md-sidenav>
+
+      <md-content class="md-content md-padding" flex>
+        <div class="md-padding" ui-view></div>
+      </md-content>
+    </div>
+  </div>
+    
+    <!-- manual -->
+      <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+          jax: ["input/AsciiMath","output/CommonHTML"],
+          extensions: ["tex2jax.js","asciimath2jax.js","MathMenu.js"],
+          TeX: {
+            extensions: ["AMSmath.js","AMSsymbols.js","noErrors.js","noUndefined.js"]
+          }
+        });
+      </script>
+      <script src="/socket.io/socket.io.js"></script>     
+
+    <!-- end manual -->
+
+    <!--[if lt IE 9]>
+    <script src="bower_components/es5-shim/es5-shim.js"></script>
+    <script src="bower_components/json3/lib/json3.min.js"></script>
+    <![endif]-->
+    <!-- build:js({client,node_modules}) app/vendor.js -->
+      <!-- bower:js -->
+      <script src="bower_components/jquery/dist/jquery.js"></script>
+      <script src="bower_components/angular/angular.js"></script>
+      <script src="bower_components/angular-resource/angular-resource.js"></script>
+      <script src="bower_components/angular-cookies/angular-cookies.js"></script>
+      <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+      <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+      <script src="bower_components/lodash/lodash.js"></script>
+      <script src="bower_components/angular-ui-router/release/angular-ui-router.js"></script>
+      <script src="bower_components/moment/moment.js"></script>
+      <script src="bower_components/underscore/underscore-umd.js"></script>
+      <script src="bower_components/angular-animate/angular-animate.js"></script>
+      <script src="bower_components/angular-aria/angular-aria.js"></script>
+      <script src="bower_components/angular-messages/angular-messages.js"></script>
+      <script src="bower_components/angular-material/angular-material.js"></script>
+      <script src="bower_components/ng-csv/build/ng-csv.min.js"></script>
+      <script src="bower_components/angular-jwt/dist/angular-jwt.js"></script>
+      <script src="bower_components/mathjs/dist/math.min.js"></script>
+      <script src="bower_components/async/dist/async.js"></script>
+      <script src="bower_components/MathJax/MathJax.js"></script>
+      <!-- endbower -->
+    <!-- endbuild -->
+    
+
+    <!-- build:js(.tmp) app/app.js -->
+      <script src="app/app.js"></script>
+      <!-- injector:js -->
+      <script src="components/c3chart/c3chart.module.js"></script>
+      <script src="components/util/util.module.js"></script>
+      <script src="app/amx/directives/directives.js"></script>
+      <script src="app/amx/filters/filters.js"></script>
+      <script src="app/amx/providers/Alarm/Alarm.service.js"></script>
+      <script src="app/amx/providers/Change/Change.service.js"></script>
+      <script src="app/amx/providers/CommentModal/CommentModal.service.js"></script>
+      <script src="app/amx/providers/Dato/Dato.service.js"></script>
+      <script src="app/amx/providers/ExportIncidentReportModal/ExportIncidentReportModal.service.js"></script>
+      <script src="app/amx/providers/Incident/Incident.service.js"></script>
+      <script src="app/amx/providers/LinkIncidentModal/LinkIncidentModal.service.js"></script>
+      <script src="app/amx/providers/Lookup/Lookup.service.js"></script>
+      <script src="app/amx/providers/Metric/Metric.service.js"></script>
+      <script src="app/amx/providers/Task/Task.service.js"></script>
+      <script src="app/amx/providers/View/View.service.js"></script>
+      <script src="app/amx/routes/alarmExportReport/alarmExportReport.controller.js"></script>
+      <script src="app/amx/routes/alarmExportReport/alarmExportReport.js"></script>
+      <script src="app/amx/routes/alarmTable/alarmTable.controller.js"></script>
+      <script src="app/amx/routes/alarmTable/alarmTable.js"></script>
+      <script src="app/amx/routes/changeRequests/changeRequests.controller.js"></script>
+      <script src="app/amx/routes/changeRequests/changeRequests.js"></script>
+      <script src="app/amx/routes/datoFileTable/datoFileTable.controller.js"></script>
+      <script src="app/amx/routes/datoFileTable/datoFileTable.js"></script>
+      <script src="app/amx/routes/datoInfo/datoInfo.controller.js"></script>
+      <script src="app/amx/routes/datoInfo/datoInfo.js"></script>
+      <script src="app/amx/routes/datoNew/datoNew.controller.js"></script>
+      <script src="app/amx/routes/datoNew/datoNew.js"></script>
+      <script src="app/amx/routes/datoResult/datoResult.controller.js"></script>
+      <script src="app/amx/routes/datoResult/datoResult.js"></script>
+      <script src="app/amx/routes/datoResultsOverview/datoResultsOverview.controller.js"></script>
+      <script src="app/amx/routes/datoResultsOverview/datoResultsOverview.js"></script>
+      <script src="app/amx/routes/datoTable/datoTable.controller.js"></script>
+      <script src="app/amx/routes/datoTable/datoTable.js"></script>
+      <script src="app/amx/routes/incidentExportReport/incidentExportReport.controller.js"></script>
+      <script src="app/amx/routes/incidentExportReport/incidentExportReport.js"></script>
+      <script src="app/amx/routes/incidentInfo/incidentInfo.controller.js"></script>
+      <script src="app/amx/routes/incidentInfo/incidentInfo.js"></script>
+      <script src="app/amx/routes/incidentNew/incidentNew.controller.js"></script>
+      <script src="app/amx/routes/incidentNew/incidentNew.js"></script>
+      <script src="app/amx/routes/incidentTable/incidentTable.controller.js"></script>
+      <script src="app/amx/routes/incidentTable/incidentTable.js"></script>
+      <script src="app/amx/routes/lookupTables/lookupTables.controller.js"></script>
+      <script src="app/amx/routes/lookupTables/lookupTables.js"></script>
+      <script src="app/amx/routes/metricCompositeResult/metricCompositeResult.controller.js"></script>
+      <script src="app/amx/routes/metricCompositeResult/metricCompositeResult.js"></script>
+      <script src="app/amx/routes/metricInfo/metricInfo.controller.js"></script>
+      <script src="app/amx/routes/metricInfo/metricInfo.js"></script>
+      <script src="app/amx/routes/metricNew/metricNew.controller.js"></script>
+      <script src="app/amx/routes/metricNew/metricNew.js"></script>
+      <script src="app/amx/routes/metricResult/metricResult.controller.js"></script>
+      <script src="app/amx/routes/metricResult/metricResult.js"></script>
+      <script src="app/amx/routes/metricResultTable/metricResultTable.controller.js"></script>
+      <script src="app/amx/routes/metricResultTable/metricResultTable.js"></script>
+      <script src="app/amx/routes/metricResultsOverview/metricResultsOverview.controller.js"></script>
+      <script src="app/amx/routes/metricResultsOverview/metricResultsOverview.js"></script>
+      <script src="app/amx/routes/metricTable/metricTable.controller.js"></script>
+      <script src="app/amx/routes/metricTable/metricTable.js"></script>
+      <script src="app/amx/routes/taskTable/taskTable.controller.js"></script>
+      <script src="app/amx/routes/taskTable/taskTable.js"></script>
+      <script src="app/app.constant.js"></script>
+      <script src="app/coverage/directives/heatMap/heatMap.directive.js"></script>
+      <script src="app/coverage/directives/sankeyDiagram/sankeyDiagram.directive.js"></script>
+      <script src="app/coverage/providers/Coverage/Coverage.service.js"></script>
+      <script src="app/coverage/routes/cvgHeatMap/cvgHeatMap.controller.js"></script>
+      <script src="app/coverage/routes/cvgHeatMap/cvgHeatMap.js"></script>
+      <script src="app/coverage/routes/cvgOverview/cvgOverview.controller.js"></script>
+      <script src="app/coverage/routes/cvgOverview/cvgOverview.js"></script>
+      <script src="app/coverage/routes/keyRiskAreaInfo/keyRiskAreaInfo.controller.js"></script>
+      <script src="app/coverage/routes/keyRiskAreaInfo/keyRiskAreaInfo.js"></script>
+      <script src="app/coverage/routes/keyRiskAreaLandscape/keyRiskAreaLandscape.controller.js"></script>
+      <script src="app/coverage/routes/keyRiskAreaLandscape/keyRiskAreaLandscape.js"></script>
+      <script src="app/coverage/routes/keyRiskAreaTable/keyRiskAreaTable.controller.js"></script>
+      <script src="app/coverage/routes/keyRiskAreaTable/keyRiskAreaTable.js"></script>
+      <script src="app/coverage/routes/productSegmentCompare/productSegmentCompare.controller.js"></script>
+      <script src="app/coverage/routes/productSegmentCompare/productSegmentCompare.js"></script>
+      <script src="app/coverage/routes/productSegmentInfo/productSegmentInfo.controller.js"></script>
+      <script src="app/coverage/routes/productSegmentInfo/productSegmentInfo.js"></script>
+      <script src="app/coverage/routes/productSegmentTable/productSegmentTable.controller.js"></script>
+      <script src="app/coverage/routes/productSegmentTable/productSegmentTable.js"></script>
+      <script src="app/coverage/routes/riskInfo/riskInfo.controller.js"></script>
+      <script src="app/coverage/routes/riskInfo/riskInfo.js"></script>
+      <script src="app/coverage/routes/riskNodeInfo/riskNodeInfo.controller.js"></script>
+      <script src="app/coverage/routes/riskNodeInfo/riskNodeInfo.js"></script>
+      <script src="app/coverage/routes/riskNodeTable/riskNodeTable.controller.js"></script>
+      <script src="app/coverage/routes/riskNodeTable/riskNodeTable.js"></script>
+      <script src="app/coverage/routes/riskTable/riskTable.controller.js"></script>
+      <script src="app/coverage/routes/riskTable/riskTable.js"></script>
+      <script src="app/dataflow/directives/directedGraph/directedGraph.directive.js"></script>
+      <script src="app/dataflow/providers/dflLinkDatasourceModal/dflLinkDatasourceModal.service.js"></script>
+      <script src="app/dataflow/routes/dataflowGraph/dataflowGraph.controller.js"></script>
+      <script src="app/dataflow/routes/dataflowGraph/dataflowGraph.js"></script>
+      <script src="app/dataflow/routes/datasourceInfo/datasourceInfo.controller.js"></script>
+      <script src="app/dataflow/routes/datasourceInfo/datasourceInfo.js"></script>
+      <script src="app/dataflow/routes/datasourceTable/datasourceTable.controller.js"></script>
+      <script src="app/dataflow/routes/datasourceTable/datasourceTable.js"></script>
+      <script src="app/dataflow/routes/interfaceInfo/interfaceInfo.controller.js"></script>
+      <script src="app/dataflow/routes/interfaceInfo/interfaceInfo.js"></script>
+      <script src="app/dataflow/routes/interfaceTable/interfaceTable.controller.js"></script>
+      <script src="app/dataflow/routes/interfaceTable/interfaceTable.js"></script>
+      <script src="app/dataflow/routes/procedureInfo/procedureInfo.controller.js"></script>
+      <script src="app/dataflow/routes/procedureInfo/procedureInfo.js"></script>
+      <script src="app/dataflow/routes/procedureTable/procedureTable.controller.js"></script>
+      <script src="app/dataflow/routes/procedureTable/procedureTable.js"></script>
+      <script src="app/dataflow/routes/schedulerInfo/schedulerInfo.controller.js"></script>
+      <script src="app/dataflow/routes/schedulerInfo/schedulerInfo.js"></script>
+      <script src="app/dataflow/routes/schedulerTable/schedulerTable.controller.js"></script>
+      <script src="app/dataflow/routes/schedulerTable/schedulerTable.js"></script>
+      <script src="app/dataflow/routes/systemInfo/systemInfo.controller.js"></script>
+      <script src="app/dataflow/routes/systemInfo/systemInfo.js"></script>
+      <script src="app/dataflow/routes/systemTable/systemTable.controller.js"></script>
+      <script src="app/dataflow/routes/systemTable/systemTable.js"></script>
+      <script src="app/mm/directives/fixedHeader/fixedHeader.directive.js"></script>
+      <script src="app/mm/filters/filters.js"></script>
+      <script src="app/mm/providers/Control/Control.service.js"></script>
+      <script src="app/mm/routes/controlMonitor/controlMonitor.controller.js"></script>
+      <script src="app/mm/routes/controlMonitor/controlMonitor.js"></script>
+      <script src="app/mm/routes/controlResult/controlResult.controller.js"></script>
+      <script src="app/mm/routes/controlResult/controlResult.js"></script>
+      <script src="app/mm/routes/controlResultsOverview/controlResultsOverview.controller.js"></script>
+      <script src="app/mm/routes/controlResultsOverview/controlResultsOverview.js"></script>
+      <script src="app/mm/routes/controlRunhistory/controlRunhistory.controller.js"></script>
+      <script src="app/mm/routes/controlRunhistory/controlRunhistory.js"></script>
+      <script src="app/shared/angular-locale.js"></script>
+      <script src="app/shared/controllers/topMenu/topMenuCtrl.controller.js"></script>
+      <script src="app/shared/directives/directives.js"></script>
+      <script src="app/shared/directives/infiniteScroll.directive.js"></script>
+      <script src="app/shared/providers/Auth/Auth.service.js"></script>
+      <script src="app/shared/providers/ConfirmModal/ConfirmModal.service.js"></script>
+      <script src="app/shared/providers/Entry/Entry.service.js"></script>
+      <script src="app/shared/providers/Socket/Socket.service.js"></script>
+      <script src="app/shared/routes/balancedScorecard/balancedScorecard.controller.js"></script>
+      <script src="app/shared/routes/balancedScorecard/balancedScorecard.js"></script>
+      <script src="app/shared/routes/harvestSummary/harvestSummary.controller.js"></script>
+      <script src="app/shared/routes/harvestSummary/harvestSummary.js"></script>
+      <script src="app/shared/routes/overview/overview.controller.js"></script>
+      <script src="app/shared/routes/overview/overview.js"></script>
+      <script src="app/shared/routes/userMessages/userMessages.controller.js"></script>
+      <script src="app/shared/routes/userMessages/userMessages.js"></script>
+      <script src="app/stakeholderReport/providers/StakeholderReport/StakeholderReport.service.js"></script>
+      <script src="app/stakeholderReport/routes/stakeholderReportInfo/stakeholderReportInfo.controller.js"></script>
+      <script src="app/stakeholderReport/routes/stakeholderReportInfo/stakeholderReportInfo.js"></script>
+      <script src="app/stakeholderReport/routes/stakeholderReportPublic/stakeholderReportPublic.controller.js"></script>
+      <script src="app/stakeholderReport/routes/stakeholderReportPublic/stakeholderReportPublic.js"></script>
+      <script src="app/stakeholderReport/routes/stakeholderReportTable/stakeholderReportTable.controller.js"></script>
+      <script src="app/stakeholderReport/routes/stakeholderReportTable/stakeholderReportTable.js"></script>
+      <script src="components/footer/footer.directive.js"></script>
+      <script src="components/modal/modal.service.js"></script>
+      <script src="components/navbar/navbar.controller.js"></script>
+      <script src="components/navbar/navbar.directive.js"></script>
+      <script src="components/util/util.service.js"></script>
+      <!-- endinjector -->
+    <!-- endbuild -->
+ 
+     <!-- manual -->
+      <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+      <!-- <script src="js/mathjs/dist/math.min.js"></script> -->
+      <!-- <script src="js/MathJax/MathJax.js?config=AM_HTMLorMML"></script> -->
+      <script src="js/d3/d3.min.js"></script>
+      <script src="js/c3/c3.min.js"></script>
+      <script src="js/d3/d3-sankey.js"></script>
+      <script src="js/d3/d3-context-menu.js"></script>
+      <!-- <script src="bower_components/angular-c3/dist/c3-chart.js"></script> -->
+      <!-- <script src="bower_components/cal-heatmap/cal-heatmap.min.js"></script> -->
+      <script src="js/crypto/sha256.js"></script>
+      <script src="js/color-hash/dist/color-hash.js"></script>
+    <!-- end manual -->
+  </body>
+</html>

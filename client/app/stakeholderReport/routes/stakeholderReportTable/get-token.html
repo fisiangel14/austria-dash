@@ -1,0 +1,73 @@
+<div class="modal-header">
+    <h4 class="modal-title" id="modal-title">
+        Generate access key for report <strong>{{params.stakoholderReport}}</strong>
+    </h4>
+</div>
+<div class="modal-body" id="modal-body">
+    <form name="tokenForm">
+
+        <div class="input-group">
+        
+            <div class="col-sm-4">
+                <label for="fromDateGroup">Data limit - from date</label>
+                <p name="fromDateGroup" class="input-group">
+                    <input name="qFROM" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" ng-model="params.filterFromDate" is-open="dp1.status.opened" ng-required="true" close-text="Close" ng-change="fromDateChanged()" />
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="dp1.open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                        <div ng-messages="tokenForm.qFROM.$error">
+                            <div ng-message="parse"><small class="label label-danger">Invalid date</small></div>
+                        </div>
+                    </span>
+                </p>
+            </div>
+            
+            <div class="col-sm-4">
+                <label for="toDateGroup">Data limit - to date</label>
+                <p name="toDateGroup" class="input-group">
+                    <input name="qTO" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" ng-model="params.filterToDate" is-open="dp2.status.opened" close-text="Close" ng-change="toDateChanged()" />
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="dp2.open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                        <div ng-messages="tokenForm.qTO.$error">
+                            <div ng-message="parse"><small class="label label-danger">Invalid date</small></div>
+                        </div>
+                    </span>
+                </p>
+            </div>
+            
+            <div class="col-sm-4">
+                <label for="toDateGroup">Access key valid until</label>
+                <p name="validDateGroup" class="input-group">
+                    <input name="qVALID" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" ng-model="params.validToDate" is-open="dp3.status.opened" close-text="Close" ng-change="toDateChanged()" />
+                    <span class="input-group-btn">
+                        <button type="button" class="btn btn-default" ng-click="dp3.open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                        <div ng-messages="tokenForm.qVALID.$error">
+                            <div ng-message="parse"><small class="label label-danger">Invalid date</small></div>
+                        </div>
+                    </span>
+                </p>
+            </div>
+
+            <div class="col-sm-12 text-center" ng-if="generatingToken">
+                <i class="fa fa-spinner fa-pulse fa-2x"></i>
+            </div>
+            
+            <div class="col-sm-12" ng-if="!generatingToken && token">
+                <label for="tokenGroup">Access key generated</label>
+                <p name="tokenGroup">
+                    <span class="input-group">
+                        <input type="text" ng-model="token.url" class="form-control" placeholder="URL" aria-describedby="URL">
+                        <a class="btn btn-sm btn-default input-group-addon" id="basic-addon2" ng-click="entry.copyToClipboard(token.url)"><i class="fa fa-clipboard fa-fw"></i> Copy</a>
+                    </span>
+                    <div ng-if="entry.copiedToClipboard" class="btn-green text-center">URL copied to clipboard. You can close this window.</div>
+                </p>
+            </div>
+
+        </div>
+
+    </form>        
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" ng-click="generateToken()"><i class="fa fa-unlock-alt fa-fw"></i> Generate access key</button>
+    <button class="btn btn-default" type="button" ng-click="modalCancel()">Close</button>
+</div>

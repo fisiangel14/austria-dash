@@ -1,0 +1,22 @@
+<div class="panel-metric-results panel-default" ng-class="{'panel-default':dato.STATUS=='0', 'panel-success':dato.STATUS=='1', 'panel-danger':dato.STATUS=='2', 'panel-warning':dato.STATUS=='10'}">  
+  <div class="panel-heading">
+    <h4 class="no-margins">
+      <i class="fa fa-cube fa-fw"></i>
+      <strong>{{dato.DATO_ID}}</strong>
+      <small><small>{{entry.lookup.getOpcoById(dato.OPCO_ID).COUNTRY_CODE}}</small></small>
+      <span class="label pull-right" ng-class="{'btn-day':dato.FREQUENCY=='D', 'btn-month':dato.FREQUENCY=='M', 'btn-cycle':dato.FREQUENCY=='C'}">{{dato.FREQUENCY}}</span>
+    </h4> 
+  </div>
+
+  <div class="panel-body" ng-cloak>
+    <div class="row">
+      <div class="col-sm-12">
+        <span ng-if="dato.GREEN>0" class="label label-success label-badge pull-left">{{dato.GREEN}}</span>
+        <span ng-if="dato.ORANGE>0" class="label label-warning label-badge pull-left">{{dato.ORANGE}}</span>
+        <span ng-if="dato.RED>0" class="label label-danger label-badge pull-left">{{dato.RED}}</span>
+        <span ng-if="dato.NO_RESULT>0" class="label label-primary label-badge pull-right">{{dato.NO_RESULT}}</span>
+      </div>
+      <div class="footer-text">{{dato.NAME.substr(0,100)}}</div>
+    </div>
+  </div>
+</div>

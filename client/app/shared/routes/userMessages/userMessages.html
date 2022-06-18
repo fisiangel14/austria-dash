@@ -1,0 +1,180 @@
+<h3 class="sub-header">
+  Alerts and messages 
+    <strong class="btn-blue"><i class="fa fa-envelope fa-fw"></i> {{entry.currentUser.userAlias}} </strong>
+</h3>
+<div class="table-responsive">
+  <table class="table table-striped">
+    <!-- Metrics -->
+    <thead>
+      <tr>
+        <th>"Metric" alarm notifications</th>
+        <th width="50px">Y/N</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="vertical-align:middle;">
+          <md-switch ng-change="saveMessageConfig()" class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'"
+            ng-model="entry.currentUser.userMessageConfig.metricSendError">
+            Email <span class="btn-red"><strong>Error</strong></span> alarms (e.g. Metric above tolerance threshold)
+          </md-switch>
+        </td>
+        <td style="vertical-align:middle; text-align: center">{{entry.currentUser.userMessageConfig.metricSendError}}</td>
+      </tr>
+      <tr>
+        <td style="vertical-align:middle;">
+          <md-switch ng-change="saveMessageConfig()" class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'"
+            ng-model="entry.currentUser.userMessageConfig.metricSendWarning">
+            Email <span class="btn-orange"><strong>Warning</strong></span> alarms (e.g. Metric above objective threshold)
+          </md-switch>
+        </td>
+        <td style="vertical-align:middle; text-align: center">{{entry.currentUser.userMessageConfig.metricSendWarning}}</td>
+      </tr>
+      <tr>
+        <td style="vertical-align:middle;">
+          <md-switch ng-change="saveMessageConfig()" class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'"
+            ng-model="entry.currentUser.userMessageConfig.metricSendInfo">
+            Email <span class="btn-blue"><strong>Info</strong></span> notifications (e.g. Metric can not be calculated or not a number)
+          </md-switch>
+        </td>
+        <td style="vertical-align:middle; text-align: center">{{entry.currentUser.userMessageConfig.metricSendInfo}}</td>
+      </tr>
+    </tbody>
+    <!-- Metrics -->
+    <!-- Datos -->
+    <thead>
+      <tr>
+        <th>"Dato" alarm notifications</th>
+        <th width="50px">&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="vertical-align:middle;">
+          <md-switch ng-change="saveMessageConfig()" class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'"
+            ng-model="entry.currentUser.userMessageConfig.datoSendError">
+            Email <span class="btn-red"><strong>Error</strong></span> alarms (e.g. error in "Indicadores" file or Dato format)
+          </md-switch>
+        </td>
+        <td style="vertical-align:middle; text-align: center">{{entry.currentUser.userMessageConfig.datoSendError}}</td>
+      </tr>
+      <tr>
+        <td style="vertical-align:middle;">
+          <md-switch ng-change="saveMessageConfig()" class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'"
+            ng-model="entry.currentUser.userMessageConfig.datoSendWarning">
+            Email <span class="btn-orange"><strong>Warning</strong></span> alarms (e.g. new Dato layout)
+          </md-switch>
+        </td>
+        <td style="vertical-align:middle; text-align: center">{{entry.currentUser.userMessageConfig.datoSendWarning}}</td>
+      </tr>
+      <tr>
+        <td style="vertical-align:middle;">
+          <md-switch ng-change="saveMessageConfig()" class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'"
+            ng-model="entry.currentUser.userMessageConfig.datoSendInfo">
+            Email <span class="btn-blue"><strong>Info</strong></span> notifications (e.g. Dato null value)
+          </md-switch>
+        </td>
+        <td style="vertical-align:middle; text-align: center">{{entry.currentUser.userMessageConfig.datoSendInfo}}</td>
+      </tr>
+    </tbody>
+    <!-- Datos -->
+    <!-- Change requests -->
+    <thead>
+      <tr>
+        <th>"Change request" status</th>
+        <th width="50px">&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="vertical-align:middle;">
+          <md-switch ng-change="saveMessageConfig()" class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'"
+            ng-model="entry.currentUser.userMessageConfig.changeSendInfo">
+            Email <span class="btn-blue"><strong>Info</strong></span> notifications (e.g. new / approved / rejected change requests)
+          </md-switch>
+        </td>
+        <td style="vertical-align:middle; text-align: center">{{entry.currentUser.userMessageConfig.changeSendInfo}}
+        </td>
+      </tr>
+    </tbody>
+    <!-- Change requests -->
+    <!-- Control Messages -->
+    <thead>
+      <tr>
+        <th>"Control" alarm notifications</th>
+        <th width="50px">&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="vertical-align:middle;">
+          <md-switch ng-change="saveMessageConfig()" class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'"
+            ng-model="entry.currentUser.userMessageConfig.controlSendError">
+            Email <span class="btn-red"><strong>Error</strong></span> control alarms 
+          </md-switch>
+        </td>
+        <td style="vertical-align:middle; text-align: center">{{entry.currentUser.userMessageConfig.controlSendError}}
+        </td>
+      </tr>
+      <tr>
+        <td style="vertical-align:middle;">
+          <md-switch ng-change="saveMessageConfig()" class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'"
+            ng-model="entry.currentUser.userMessageConfig.controlSendWarning">
+            Email <span class="btn-orange"><strong>Warning</strong></span> control alarms 
+          </md-switch>
+        </td>
+        <td style="vertical-align:middle; text-align: center">{{entry.currentUser.userMessageConfig.controlSendWarning}}
+        </td>
+      </tr>
+      <tr>
+        <td style="vertical-align:middle;">
+          <md-switch ng-change="saveMessageConfig()" class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'"
+            ng-model="entry.currentUser.userMessageConfig.controlSendInfo">
+            Email <span class="btn-blue"><strong>Info</strong></span> control alarms 
+          </md-switch>
+        </td>
+        <td style="vertical-align:middle; text-align: center">{{entry.currentUser.userMessageConfig.controlSendInfo}}
+        </td>
+      </tr>
+    </tbody>
+    <!-- Control messages -->
+    <!-- Job Messages -->
+    <thead>
+      <tr>
+        <th>"Job" alarm notifications</th>
+        <th width="50px">&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="vertical-align:middle;">
+          <md-switch ng-change="saveMessageConfig()" class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'"
+            ng-model="entry.currentUser.userMessageConfig.jobSendError">
+            Email <span class="btn-red"><strong>Error</strong></span> job alarms 
+          </md-switch>
+        </td>
+        <td style="vertical-align:middle; text-align: center">{{entry.currentUser.userMessageConfig.jobSendError}}</td>
+      </tr>
+      <tr>
+        <td style="vertical-align:middle;">
+          <md-switch ng-change="saveMessageConfig()" class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'"
+            ng-model="entry.currentUser.userMessageConfig.jobSendWarning">
+            Email <span class="btn-orange"><strong>Warning</strong></span> job alarms 
+          </md-switch>
+        </td>
+        <td style="vertical-align:middle; text-align: center">{{entry.currentUser.userMessageConfig.jobSendWarning}}
+        </td>
+      </tr>
+      <tr>
+        <td style="vertical-align:middle;">
+          <md-switch ng-change="saveMessageConfig()" class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'"
+            ng-model="entry.currentUser.userMessageConfig.jobSendInfo">
+            Email <span class="btn-blue"><strong>Info</strong></span> job alarms
+          </md-switch>
+        </td>
+        <td style="vertical-align:middle; text-align: center">{{entry.currentUser.userMessageConfig.jobSendInfo}}</td>
+      </tr>
+    <tbody>
+      <!-- Job messages -->
+  </table>
+</div>

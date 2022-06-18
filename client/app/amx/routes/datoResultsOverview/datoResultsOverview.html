@@ -1,0 +1,139 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li><a href="/dato-catalogue?opcoId={{entry.OPCO_ID}}"><i class="fa fa-cubes fa-fw"></i> Dato catalogue</a></li>
+  <li class="active"><i class="fa fa-th-list fa-fw"></i> Datos overview</a></li>
+  <li><a href="/dato-file?month={{entry.searchMDmonth}}"><i class="fa fa-files-o fa-fw"> </i> Dato files</a></li></ol>
+<!-- Breadcrumbs -->
+
+<h3 class="sub-header">
+    <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+    {{entry.state.data.title}} 
+    <small> - {{entry.currDay}}</small>
+</h3>
+
+<!-- Navigate months -->
+<div class="row">
+  <div class="col-md-4 text-left">
+
+  </div>
+  <div class="col-md-4 text-center">
+    <h4 class="sub-header">
+      <i class="fa fa-calendar fa-fw"></i>
+      {{workMonthText}}
+    </h4>
+  </div>
+  <div class="col-md-4 text-right">
+
+  </div>
+</div>
+<!-- Navigate months -->
+
+<!-- Filter buttons -->
+
+<div class="row panel-metric-results-group-container" style="padding-bottom:16px">
+ 
+  <div class="col-sm-3 text-right">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" href="/dato-results-overview?month={{prevMonth}}&opcoId={{entry.OPCO_ID}}"> 
+      <i class="fa fa-chevron-left fa-fw"></i>
+      {{prevMonthText}}
+    </a>
+  </div>
+
+  <div class="col-sm-6 text-center">
+    <div class="input-group" style="padding-left:7px">
+      <span class = "input-group-btn" data-toggle="buttons">
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchDatoOverview.GREEN}"  ng-click="searchDatoOverviewToggle('GREEN')"> 
+          <i class="fa fa-lg btn-green" ng-class="{'fa-check-circle':entry.searchDatoOverview.GREEN, 'fa-circle-o':!entry.searchDatoOverview.GREEN}"></i>
+        </button>
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchDatoOverview.ORANGE}" ng-click="searchDatoOverviewToggle('ORANGE')"> 
+          <i class="fa fa-lg btn-orange" ng-class="{'fa-minus-circle':entry.searchDatoOverview.ORANGE, 'fa-circle-o':!entry.searchDatoOverview.ORANGE}"></i>
+        </button>
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchDatoOverview.RED}"  ng-click="searchDatoOverviewToggle('RED')"> 
+          <i class="fa fa-lg btn-red" ng-class="{'fa-times-circle':entry.searchDatoOverview.RED, 'fa-circle-o':!entry.searchDatoOverview.RED}"></i>
+        </button>
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchDatoOverview.NO_RESULT}"  ng-click="searchDatoOverviewToggle('NO_RESULT')"> 
+          <i class="fa fa-lg btn-blue" ng-class="{'fa-check-circle':entry.searchDatoOverview.NO_RESULT, 'fa-circle-o':!entry.searchDatoOverview.NO_RESULT}"></i>
+        </button>     
+
+        <button class="btn btn-default btn-sm disabled" > 
+          <i class="fa"></i>
+        </button> 
+
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchDatoOverview.D}"  ng-click="searchDatoOverviewToggle('D')"> 
+          <span class="label label-default" ng-class="{'btn-day':entry.searchDatoOverview.D}">D</span>
+        </button>
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchDatoOverview.M}"  ng-click="searchDatoOverviewToggle('M')"> 
+          <span class="label label-default" ng-class="{'btn-month':entry.searchDatoOverview.M}">M</span>
+        </button>
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchDatoOverview.C}"  ng-click="searchDatoOverviewToggle('C')"> 
+          <span class="label label-default" ng-class="{'btn-cycle':entry.searchDatoOverview.C}">C</span>
+        </button>
+
+        <button class="btn btn-default btn-sm disabled" > 
+          <i class="fa"></i>
+        </button>  
+
+      </span>  
+
+      <input class="form-control input-sm" type="text" ng-model="entry.searchDatoOverview.text" placeholder="Search" focus-me="true">
+      <span class = "input-group-btn">
+        <button class="btn btn-default btn-sm disabled" > 
+          <i class="fa"></i>
+        </button>        
+        <button class="btn btn-default btn-sm" ng-click="searchDatoOverviewClear()">
+         <i class="fa fa-times"></i>
+        </button>
+      </span>      
+    </div>
+  </div>
+
+  <div class="col-sm-3 text-left">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" href="/dato-results-overview?month={{nextMonth}}&opcoId={{entry.OPCO_ID}}" ng-if="currMonth >= nextMonth"> 
+      {{nextMonthText}}
+      <i class="fa fa-chevron-right fa-fw"></i>
+    </a>
+  </div> 
+
+</div>
+<!-- Filter buttons -->
+
+<!-- Spinner -->
+<div ng-if="datoResultsSummary.length == 0">
+  <div class="col-sm-12 text-center">
+    <br><br>
+    <i class="fa fa-spinner fa-pulse fa-3x"></i>
+  </div>
+</div>
+<!-- Spinner -->
+
+<div ng-repeat="(datoArea, datoGroup) in datoResultsSummary">
+  <div ng-if="(datoGroup | opcoFilter:entry.OPCO_ID | datoResultsOverviewFilter:entry.searchDatoOverview).length > 0" class="row panel-metric-results-group-container">
+    <div class="col-sm-2">
+      <h4 class="sub-header no-margins" style="padding-top:10px;text-align:right;">
+        <strong>{{datoArea}}</strong><br>
+        <small>{{localEntry.lookup.getAreaById(datoArea).NAME}}</small>
+      </h4>
+    </div>
+    <div class="col-sm-10">
+      <div class="panel-metric-results-container animation" ng-repeat="dato in datoGroup | opcoFilter:entry.OPCO_ID | datoResultsOverviewFilter:entry.searchDatoOverview">
+        <dato-results-box  dato="dato"></dato-results-box>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- No datos to show -->
+<div ng-if="datoResultsSummary.length != 0 && (datoResults|opcoFilter:entry.OPCO_ID | datoResultsOverviewFilter:entry.searchDatoOverview).length == 0">
+  <div class="col-sm-2">
+
+  </div>
+  <div class="col-sm-10">
+    <h4 class="sub-header no-margins" style="padding-top:10px;text-align:left;">
+      <strong>&nbsp;</strong><br>
+      <small>No datos to show...</small>
+    </h4>
+    <i class="fa fa-meh-o fa-4x btn-grey"></i>
+  </div>
+</div>
+<!-- No datos to show -->

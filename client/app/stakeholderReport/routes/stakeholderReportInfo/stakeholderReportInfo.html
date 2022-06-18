@@ -1,0 +1,157 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li><a href="/incidents?opcoId={{entry.OPCO_ID}}&archive=N"><i class="fa fa-exclamation-circle fa-fw"></i> Incidents</a></li>
+  <li><a href="/stakeholder-reports?opcoId={{entry.OPCO_ID}}"><i class="fa fa-wpforms fa-fw"></i> Stakeholder reports</a></li>  
+  <li class="active"><i class="fa fa-file-text fa-fw"></i> {{stakeholderReport.STAKEHOLDER_REPORT?stakeholderReport.STAKEHOLDER_REPORT:'New stakeholder report'}}</a></li>
+  <li><a href="/balanced-scorecard?year={{entry.currYear}}&opcoId={{entry.OPCO_ID}}"><i class="fa fa-vcard fa-fw"></i> Balanced scorecard</a></li>
+</ol>
+<!-- Breadcrumbs -->
+
+<h3>
+	<span class="input-group btn-group pull-left">
+		<a class="btn btn-primary dropdown-toggle no-margins no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="isDisabled">
+			<span class="caret"></span>
+		</a>
+		<ul class="dropdown-menu">
+			<li><a ui-sref="stakeholderReportInfo({reportId:'newStakeholderReport'})"><i class="fa fa-fw fa-file-text"></i> New stakeholder report</a></li>
+			<li ng-if="stakeholderReport.STAKEHOLDER_REPORT_ID"><a href="#" ng-click="deleteStakeholderReport(stakeholderReport.STAKEHOLDER_REPORT_ID)"><i class="fa fa-trash fa-fw"></i> Delete this stakeholder report</a></li>
+		</ul>
+	</span> 
+    &nbsp;
+		<strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+    {{entry.state.data.title}} 
+</h3>
+
+<form class="form-horizontal" name="stakeholderReportForm">
+
+	<div class="panel panel-default md-whiteframe-4dp panel-process-{{stakeholderReport.BUSINESS_PROCESS_ID}}">
+
+	  <div class="panel-heading no-margins">
+			<h3 class="no-margins">
+				<i class="fa fa-wpforms"></i> 
+				<strong>{{stakeholderReport.STAKEHOLDER_REPORT}}</strong> 
+			</h3>
+	  </div>
+
+	  <div class="panel-body" ng-cloak>
+
+      <!-- Description -->
+      <div class="form-group">
+
+          <div class="col-sm-6">
+            <label for="stakeholderReportName">Stakeholder report</label>
+            <input type="text" name="stakeholderReportName" minlength="5" maxlength="50" ng-model="stakeholderReport.STAKEHOLDER_REPORT" placeholder="Stakeholder report" class="form-control" ng-disabled="isDisabled" required autocomplete="off">
+            <div ng-messages="stakeholderReportForm.stakeholderReportName.$error"> 
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+              <div ng-message="minlength" ng-message="maxlength"><small class="label label-danger">Should at least 5 characters long</small></div>
+            </div> 
+          </div>
+
+          <div class="col-sm-12">
+						<label for="stakeholderReportDescription">Report description</label>
+						<textarea name="stakeholderReportDescription" type="text" class="form-control" placeholder="Risk description" ng-model="stakeholderReport.STAKEHOLDER_REPORT_DESCRIPTION" rows="1" ng-disabled="isDisabled" msd-elastic required autocomplete="off"></textarea>          
+						<div ng-messages="stakeholderReportForm.stakeholderReportDescription.$error"> 
+							<div ng-message="required"><small class="label label-danger">This field is required</small></div>
+						</div>               
+					</div>
+					
+					<div class="col-sm-12" style="margin-top: 10px;">
+						<span layout="row">
+							<md-checkbox class="md-primary md-hue-1" ng-model="stakeholderReport.REPORT_INCIDENTS" ng-true-value="'Y'" ng-false-value="'N'" ng-click="$event.originalEvent.checkBoxClick = true" ng-disabled="isDisabled">
+								Show relevant incidents 
+							</md-checkbox>
+							<md-checkbox class="md-primary md-hue-1" ng-model="stakeholderReport.REPORT_CONTROL_DESC" ng-true-value="'Y'" ng-false-value="'N'" ng-click="$event.originalEvent.checkBoxClick = true" ng-disabled="isDisabled">
+								Show control descriptions
+							</md-checkbox>
+							<!-- <md-checkbox class="md-primary md-hue-1" ng-model="stakeholderReport.REPORT_CONTROL_RUNS" ng-true-value="'Y'" ng-false-value="'N'" ng-click="$event.originalEvent.checkBoxClick = true" ng-disabled="isDisabled">
+								Show control execution details
+							</md-checkbox> -->
+						</span>
+					</div>
+						
+      </div>
+      <!-- Description -->
+
+      <!-- Controls -->
+      <md-content layout="row" layout-align="top space-around">
+        <md-card flex class="md-whiteframe-2dp">
+          <md-card-header layout-align="start center" class="xs-padding panel-header-grey">
+            <i class="fa fa-fw fa-download fa-rotate-270 fa-2x"></i>
+            <strong>Controls</strong>
+            <div flex="5"></div>            
+            <button class="btn btn-xs btn-default" ng-if="stakeholderReport.STAKEHOLDER_REPORT_ID" ng-click="linkControl()" ng-disabled="isDisabled">Link control <i class="fa fa-plus fa-fw"></i></button>
+            <button class="btn btn-xs btn-default" ng-if="countSelectedControls" ng-click="unlinkControls()" ng-disabled="isDisabled">Unlink <strong>{{countSelectedControls}}</strong> control<span ng-if="countSelectedControls > 1">s</span> <i class="fa fa-minus fa-fw"></i></button>
+            <div flex></div>            
+          </md-card-header>
+          <md-card-content class="sm-padding" layout="column" flex>
+						<!-- Main table -->
+						<table class="table table-hover table-condensed">		
+							
+						  <tbody>
+						    <tr ng-if="!stakeholderReportControls.length && !loadFinished && stakeholderReport.STAKEHOLDER_REPORT_ID">
+						        <td colspan="9">
+						            <!-- Spinner -->
+						              <div class="col-sm-12 text-center">
+						                <br><br>
+						                <i class="fa fa-spinner fa-pulse fa-3x"></i>
+						              </div>
+						            <!-- Spinner -->                
+						        </td>
+								</tr>
+								
+						    <tr ng-if="(!stakeholderReportControls.length && loadFinished) || !stakeholderReport.STAKEHOLDER_REPORT_ID">
+						        <td colspan="9">
+						            <h4>No controls linked to this report</h4>
+						        </td>
+						    </tr>   
+
+								<tr class="animation pointer-row" ng-class="{'info':control.SELECTED=='Y'}" ng-repeat="control in stakeholderReportControls" ng-click="!entry.isDisabled() && ($event.originalEvent.checkBoxClick || ((control.SELECTED=='Y'?control.SELECTED='N':control.SELECTED='Y')) && clickControlCheckbox())">
+									<td style="vertical-align: middle; text-align: center;">
+										<md-checkbox class="md-primary md-hue-1 no-margins" ng-model="control.SELECTED" ng-true-value="'Y'" ng-false-value="'N'" md-no-ink aria-label="Sub-risk selected" ng-click="$event.originalEvent.checkBoxClick = true" ng-change="clickControlCheckbox()" ng-disabled="isDisabled"> 
+										</md-checkbox>							
+									</td>
+									<td class="node-{{control.CONTROL_TYPE}}"></td>
+									<td style="vertical-align:middle; padding-left:10px;">
+										<div>
+											<strong><i class="fa fa-fw fa-lg"
+													ng-class="{'fa-line-chart':control.CONTROL_TYPE == 'M', 'fa-area-chart':control.CONTROL_TYPE == 'C'}"></i>
+												{{control.CONTROL_NAME}}</strong>
+											<small>{{control.STATUS_CODE_TEXT}}</small>
+										</div>
+										<span ng-if="control.DESCRIPTION">{{control.DESCRIPTION}}</br></span>
+										<span ng-if="control.SAME_SYSTEM" class="label label-default">Systems match</span>
+									</td>
+									<td style="vertical-align:middle; text-align: center">
+										<h4><span class="label btn-day">{{control.FREQUENCY}}</span></h4>
+									</td>
+									<td style="vertical-align:middle; text-align: center"><i class="fa fa-2x fa-fw"
+											ng-class="{'fa-check-square btn-green':control.STATUS_CODE == 'A', 'fa-square-o btn-red':control.STATUS_CODE == 'I', 'fa-pencil-square btn-blue':control.STATUS_CODE == 'D', 'fa-minus-square btn-grey':control.STATUS_CODE == 'P'}"></i>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<!-- Main table -->
+
+          </md-card-content>
+        </md-card>        
+
+      </md-content>
+      <!-- Controls groups -->
+
+    </div> 
+
+	  <!-- Buttons -->
+	  <div class="panel-footer no-margins">
+
+	    <div class="form-group">
+	      <div class="col-sm-12">
+	        <button ng-if="!isDisabled" type="button" class="btn btn-primary" ng-click="save()"><i class="fa fa-save"></i> Save</button>  
+	        <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+	      </div>
+	    </div>
+	  </div>
+	  <!-- Buttons -->
+
+	</div>
+
+</form>

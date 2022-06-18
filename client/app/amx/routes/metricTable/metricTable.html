@@ -1,0 +1,132 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb hidden-print">
+  <li class="active"><i class="fa fa-line-chart fa-fw"></i> Metric catalogue</a></li>
+  <li><a href="/metric-results-overview?opcoId={{entry.OPCO_ID}}&month={{entry.searchMDmonth}}"><i class="fa fa-th-list fa-fw"></i> Metrics overview</a></li>
+  <li><a href="/metric-result-table?opcoId={{entry.OPCO_ID}}&month={{entry.searchMDmonth}}&frequency=D&finetuned={{entry.overviewShowFineTunedOnly}}"><i class="fa fa-table fa-fw"></i> Daily metrics results table</a></li>
+  <li><a href="/metric-result-table?opcoId={{entry.OPCO_ID}}&month={{entry.searchMDmonth}}&frequency=M&finetuned={{entry.overviewShowFineTunedOnly}}"><i class="fa fa-list-alt fa-fw"></i> Monthly metrics results table</a></li>
+</ol>
+<!-- Breadcrumbs -->
+
+<h3 class="sub-header">
+    <span class="input-group btn-group pull-left">
+      <a class="btn btn-primary dropdown-toggle no-margins no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="isDisabled && entry.currentUser.userOpcoId">
+        <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a ui-sref="metricNew"><i class="fa fa-plus fa-fw"></i> New metric</a></li>
+      </ul>
+    </span> 
+    &nbsp;
+    <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+    {{entry.state.data.title}} 
+</h3>
+
+<div class="panel panel-default md-whiteframe-4dp md-padding">
+
+    <div class="small no-margins" ng-if="!entry.searchMetric">
+        <ul class="list-inline no-margins">
+            <li><strong>Filters: </strong></li>
+            <li class="filter-alert"> None </li>
+        </ul>
+    </div>
+
+    <div class="small no-margins" ng-if="entry.searchMetric">
+        <ul class="list-inline no-margins">
+            <li><strong>Filters: </strong></li>
+            <li ng-repeat="(element, filter) in entry.searchMetric" class="filter-alert" ng-if="filter">
+                <a ng-click="removeFilter(element)" class="btn-xs  close" style="font-size: 10px; vertical-align: text-top;" data-dismiss="alert"><i class="fa fa-times"></i></a>
+                {{element}} <em>is like</em> <strong>"{{filter}}"</strong>
+            </li>
+        </ul>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-condensed">
+            <thead>
+                <tr>
+                    <th width="10px" style="text-align:right">#</th>
+                    <th width="80px">Metric ID</th>
+                    <th width="60px" style="text-align:center"></th>
+                    <th width="60px" style="text-align:center">Area</th>
+                    <th>Description</th>
+                    <th width="150px">Related Datos</th>
+                    <th width="50px" style="text-align:center">Relevant</th>
+                    <th width="50px" style="text-align:center">Implemented & Fine-tuned</th>
+                    <th width="50px" style="text-align:center">Risk coverage</th>
+                    <th width="50px" style="text-align:center">Freq.</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th><input class="no-borders-title" type="text" ng-model="entry.searchMetric.METRIC_ID" ng-change="filterChanged()" placeholder="Search" focus-me="true"/></th>
+                    <th></th>
+                    <th><input class="no-borders-title" type="text" ng-model="entry.searchMetric.AREA_ID" ng-change="filterChanged()" placeholder="Search" /></th>
+                    <th>
+                        <div layout="row">
+                            <input class="no-borders-title" type="text" ng-model="entry.searchMetric.DESCRIPTION" ng-change="filterChanged()" placeholder="Search" /> 
+                            <md-switch class="md-primary md-hue-1 no-margins" ng-true-value="'Y'" ng-false-value="'N'" ng-model="search.TASKLIST_DONE" aria-label="IMPLEMENTED"> Open tasks only</md-switch>
+                        </div>
+                    </th>
+                    <th><input class="no-borders-title" type="text" ng-model="entry.searchMetric.DATOS" ng-change="filterChanged()" placeholder="Search" /></th>
+                    <th>
+                        <md-switch class="md-primary md-hue-1 no-margins" ng-true-value="'Y'" ng-false-value="'N'" ng-model="entry.searchMetric.RELEVANT" ng-change="filterChanged()" aria-label="RELEVANT"></md-switch>                    
+                    </th>
+                    <th>
+                        <md-switch class="md-primary md-hue-1 no-margins" ng-true-value="'Y'" ng-false-value="'N'" ng-model="entry.searchMetric.IMPLEMENTED" ng-change="filterChanged()" aria-label="IMPLEMENTED"></md-switch>                    
+                    </th>
+                    <th><div layout="row" layout-align="center center"><md-switch class="md-primary md-hue-1 no-margins" ng-model="entry.searchMetric.IN_COVERAGE_MODEL" ng-true-value="'Y'" ng-false-value="'N'" aria-label="Used in coverage"></md-switch></div></th>
+                    <th><input class="no-borders-title" type="text" ng-model="entry.searchMetric.FREQUENCY" ng-change="filterChanged()" placeholder="D/M/C" /></th>
+                </tr>            
+            </thead>
+            <tbody>
+                <tr ng-if="!metrics.length && !loadFinished">
+                    <td colspan="9">
+                        <!-- Spinner -->
+                          <div class="col-sm-12 text-center">
+                            <br><br>
+                            <i class="fa fa-spinner fa-pulse fa-3x"></i>
+                          </div>
+                        <!-- Spinner -->                
+                    </td>
+                </tr>   
+                <tr ng-if="!metrics.length && loadFinished">
+                    <td colspan="9">
+                        <h4>No metrics found.</h4>
+                    </td>
+                </tr>             
+                <tr ng-class="{'btn-not-relevant':metric.RELEVANT=='N'}" ng-repeat="metric in metrics | filter:entry.searchMetric | tasklistDone:search.TASKLIST_DONE" ng-click="">
+                    <td style="vertical-align:middle; text-align:right">{{$index + 1}}. </td>
+                    <td style="vertical-align:middle"><a class="btn btn-default btn-block" ng-class="{'btn-not-relevant': metric.RELEVANT=='N', 'btn-implemented': metric.IMPLEMENTED=='Y'}" href="/metric-info/{{metric.OPCO_ID}}/{{metric.METRIC_ID}}"><i class="fa" ng-class="{'fa-line-chart': metric.RELEVANT=='Y', 'fa-ban': metric.RELEVANT=='N'}"></i>&nbsp;<strong>{{metric.METRIC_ID}}</strong></a></td>
+                    <td style="text-align:center; vertical-align:middle"><strong>{{entry.lookup.getOpcoById(metric.OPCO_ID).COUNTRY_CODE}}</strong></td>
+                    <td style="text-align:center; vertical-align:middle"><h4><span class="label label-default">{{metric.AREA_ID}}</span></h4></td>
+                    <td style="vertical-align:middle">
+                        <strong>{{metric.NAME}}</strong> 
+                        <span>
+                            <i ng-if="metric.TASKS_OPCO" class="fa fa-lg fa-fw fa-check-square btn-red" uib-tooltip="{{metric.TASKS_OPCO}}" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i>
+                            <i ng-if="metric.TASKS_TAG" class="fa fa-lg fa-fw fa-check-square btn-black" uib-tooltip="{{metric.TASKS_TAG}}" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i>
+                            <i ng-if="metric.TASKS_CLOSED" class="fa fa-lg fa-fw fa-check-square btn-green" uib-tooltip="{{metric.TASKS_CLOSED}}" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i>
+                            <!-- <i ng-if="metric.NOTES.length > 0" class="fa fa-lg fa-fw fa-comments" ng-class="{'btn-green':metric.TASKLIST_DONE == 'Y','btn-red':metric.TASKLIST_DONE == 'N'}" uib-tooltip="{{metric.NOTES}}" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i> -->
+                        </span><br>
+                        <small>{{metric.DESCRIPTION}}</small>
+                    </td>
+                    <td style="vertical-align:middle"><a class="btn btn-default btn-xs" ng-repeat="dato in metric.DATOS | split:', '" href="/dato-info/{{metric.OPCO_ID}}/{{dato}}"><i class="fa fa-cube fa-fw"></i>{{dato}}</a></td>                
+                    <td style="text-align:center; vertical-align:middle"><i class="fa fa-2x fa-fw btn-grey" ng-class="{'fa-check-square':metric.RELEVANT=='Y', 'fa-square-o':metric.RELEVANT=='N'}"></i></td>
+                    <td style="text-align:center; vertical-align:middle"><i class="fa fa-2x fa-fw" ng-class="{'fa-check-square btn-green':metric.IMPLEMENTED=='Y', 'fa-square-o btn-red':metric.IMPLEMENTED=='N' && metric.RELEVANT=='Y', 'fa-square-o btn-grey':metric.IMPLEMENTED=='N' && metric.RELEVANT=='N'}"></i></td>
+                    
+                    <td style="vertical-align:middle; text-align: center">
+                        <div ng-if="metric.IN_COVERAGE_MODEL == 'Y'">
+                            <div class="label label-default" layout="row" layout-align="space-between center">
+                                <div uib-tooltip="Risk nodes with this control" tooltip-trigger="mouseenter" tooltip-placement="left"><h5><strong> {{metric.CVG_RN_CNT}} | </strong></h5></div>
+                                <div layout="column" layout-align="space-between center" flex>
+                                    <span style="font-size: 12px; color: #A9F5A9;" uib-tooltip="Risk coverage contribution" tooltip-trigger="mouseenter" tooltip-placement="left"> <i class="fa fa-fw fa-umbrella" aria-hidden="true"></i> {{metric.CTRL_COVERAGE | number:4}} %</span>
+                                    <span ng-if="metric.CTRL_COVERAGE_OVERLAP > 0" style="font-size: 12px; color: #FAAC58; margin-top: 3px" uib-tooltip="Overlap with other controls" tooltip-trigger="mouseenter" tooltip-placement="left"> <i class="fa fa-fw fa-umbrella" aria-hidden="true"></i> {{metric.CTRL_COVERAGE_OVERLAP | number:4}} %</span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    
+                    <td style="vertical-align:middle; text-align: center"><h4><span class="label" ng-class="{'btn-day':metric.FREQUENCY=='D', 'btn-month':metric.FREQUENCY=='M', 'btn-cycle':metric.FREQUENCY=='C'}">{{metric.FREQUENCY}}</span></h4></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

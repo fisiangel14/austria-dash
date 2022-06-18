@@ -1,0 +1,61 @@
+<div class="md-whiteframe-4dp">
+	<form name="reportForm" ng-submit="modalSubmit()">
+
+<div class="modal-body">
+		<div class="input-group">
+
+        <div class="col-sm-4">
+          <label for="incidentOPENING_DATE-group">From date</label>
+          <p name="incidentOPENING_DATE-group" class="input-group">
+            <input name="qFROM" datepicker-localdate type="text" class="form-control" datepicker-popup="dd.MM.yyyy" datepicker-options="dp1.dateOptions" ng-model="q.FROM" is-open="dp1.status.opened" ng-required="true" close-text="Close" ng-change="fromDateChanged()" />
+            <span class="input-group-btn">
+              <button type="button" class="btn btn-default" ng-click="dp1.open($event)"><i class="glyphicon glyphicon-calendar" ></i></button>
+              <div ng-messages="reportForm.qFROM.$error"> 
+                <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+                <div ng-message="date"><small class="label label-danger">Invalid date</small></div>
+              </div> 
+            </span>
+          </p>
+        </div>
+        
+        <div class="col-sm-4">
+          <label for="incidentCLOSINGDATE-group">To date</label>
+          <p name="incidentCLOSINGDATE-group" class="input-group">
+            <input name="qTO" datepicker-localdate type="text" class="form-control" datepicker-popup="dd.MM.yyyy" datepicker-options="dp3.dateOptions" ng-model="q.TO" is-open="dp3.status.opened" close-text="Close" ng-change="getCsvObject()"/>
+            <span class="input-group-btn">
+              <button type="button" class="btn btn-default" ng-click="dp3.open($event)"><i class="glyphicon glyphicon-calendar" ></i></button>
+              <div ng-messages="reportForm.qTO.$error"> 
+                <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+                <div ng-message="date"><small class="label label-danger">Invalid date</small></div>
+              </div>               
+            </span>
+          </p>
+        </div>
+
+        <div class="col-sm-4">
+            <label for="incidentSTATUS">Include open incidents</label>
+            <select name="incidentSTATUS" class="form-control" ng-model="q.INCLUDE_OPEN" ng-change="getCsvObject()">
+              <option value="%">Y</option>
+              <option value="Closed">N</option>
+            </select>
+            <div ng-messages="reportForm.incidentSTATUS.$error">
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            </div>              
+        </div>
+
+    </div>
+	</div>
+
+	<div class="modal-footer">
+    <div class="input-group">
+			<button type="button" class="btn btn-default" ng-click="modalCancel()">Cancel</button>
+			<button type="submit" class="btn btn-primary" ng-csv="incidents.lines" csv-header="incidents.header" lazy-load="true" filename="RA_Incidents_{{entry.lookup.getOpcoById(entry.OPCO_ID).COUNTRY}}_{{q.FROM | date:'yyyy_MM'}}.xls" field-separator="\t" decimal-separator=".">
+				<i class="fa fa-download"></i> 
+				Download report for {{q.FROM | date:'MMMM yyyy'}}
+			</button>
+    </div>
+  </div>
+
+	</form>
+
+</div>

@@ -1,0 +1,279 @@
+<div id="main-div">
+
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li><a href="/control-results?opcoId={{entry.OPCO_ID}}"><i class="fa fa-area-chart fa-fw"></i> Control results</a></li>
+  <li class="active"><i class="fa fa-th-list fa-fw"></i> Monitor</li>
+</ol>
+<!-- Breadcrumbs -->
+
+<div class="row" >
+  <div class="col-md-12 text-left" layout="row" layout-align="start center">
+
+    <h3 class="sub-header">
+        <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+        {{entry.state.data.title}}
+    </h3>
+
+    <h4>
+      &nbsp;
+      <i class="fa fa-calendar fa-fw"></i>
+      {{toDateText}}
+    </h4>
+    
+  </div>
+</div>
+
+<br>
+
+<!-- Navigate -->
+<div class="row hidden-print" layout="row" layout-align="space-between center">
+
+  <div class="col-md-2 text-left">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/control-monitor?opcoId={{entry.OPCO_ID}}&toDate={{goBack}}" uib-tooltip="Slide {{entry.searchControlResultTable.limitDays}} days left" tooltip-trigger="mouseenter" tooltip-placement="bottom" tooltip-popup-delay="300">
+      <i class="fa fa-chevron-left fa-fw"></i>
+      {{goBackText}}
+    </a>
+  </div>
+
+  <div class="col-md-8 text-center">
+      <div layout="row" layout-align="space-between center" flex>
+
+        
+        <div class="input-group" layout="row" > 
+          <input class="form-control input-sm" style="width: 150px" type="text" ng-model="entry.searchControlResultTable.text" placeholder="Search control name" ng-change="filterChanged()">
+          <span class = "input-group-btn">
+            <button class="btn btn-default btn-sm" ng-click="searchTextClear()">
+              <i class="fa fa-times"></i>
+            </button>
+          </span>      
+        </div>
+        
+        <div layout="row" layout-align="space-around center" flex>            
+          <span>
+            Control runs <span class="label label-primary label-badge"> {{totalNumberOfControls}}</span>
+          </span>
+          <span>
+            <md-switch class="md-primary md-hue-1 no-margins" ng-true-value="true" ng-false-value="false" ng-model="entry.searchControlResultTable.alarmsOnly" ng-change="filterChanged()" aria-label="Alarms only"> 
+              Show alarms <span class="label label-danger label-badge"> {{totalNumberOfAlarms}}</span>
+            </md-switch>
+          </span>
+          <span>
+            <md-switch class="md-primary md-hue-1 no-margins" ng-true-value="'Y'" ng-false-value="'N'" ng-model="entry.showAuditing" ng-change="auditChanged()" aria-label="Show audit"> 
+              Audit
+            </md-switch>
+          </span>
+        </div>
+        
+        <!-- Spinner -->
+        <div style="min-width: 50px; max-width: 50px;">
+            <div ng-if="!loadFinished">
+              <i class="fa fa-spinner fa-pulse fa-2x"></i>
+          </div>
+        </div>
+        <!-- Spinner -->
+          
+      </div>
+  </div>
+
+  <div class="col-md-2 text-right" layout="row">
+      <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/control-monitor?opcoId={{entry.OPCO_ID}}&toDate={{goForward}}" ng-if="goForward <= currDate" uib-tooltip="Slide {{entry.searchControlResultTable.limitDays}} days right" tooltip-trigger="mouseenter" tooltip-placement="bottom" tooltip-popup-delay="300"> 
+        {{goForwardText}}
+        <i class="fa fa-chevron-right fa-fw"></i>
+      </a>
+      <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/control-monitor?opcoId={{entry.OPCO_ID}}&toDate={{currDate}}" ng-if="goForward <= currDate" uib-tooltip="Slide to present" tooltip-trigger="mouseenter" tooltip-placement="bottom" tooltip-popup-delay="300"> 
+        <i class="fa fa-step-forward fa-fw"></i>
+      </a>    
+  </div>
+</div>
+<!-- Navigate -->
+
+<br>
+<div class="panel panel-default md-whiteframe-4dp md-padding">
+
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="table-full-page">
+          <table name="controlTable" class="table table-condensed table-striped">
+            
+              <thead>
+                <tr fixed-header style="position: static; z-index: 3; display: none;">
+                  <th class="text-center" ng-if="entry.showAuditing==='Y'">
+                    <span class="input-group btn-group btn-block dropdown" ng-if="_und.size(controlsDataFiltered)">
+                      <button class="btn btn-xs dropdown-toggle btn-block btn-default pointer-row" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-vcard"></i>
+                        <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu">
+                        <!-- Executor -->
+                        <li ng-class="{'disabled': entry.isDisabled()}"><a href="" ng-click="!entry.isDisabled() && auditAll('+E')"><i class="fa fa-check-circle-o fa-fw"></i> Sign all as executor</a></li>
+                        <li ng-class="{'disabled': entry.isDisabled()}"><a href="" ng-click="!entry.isDisabled() && auditAll('+A')"><i class="fa fa-check-circle fa-fw"></i> Sign all as approver</a></li>
+                      </ul>
+                    </span>
+                  </th>
+                  <th>Run timestamp</th>
+                  <th class="text-center">Run duration</th>
+                  <th>PID</th>
+                  <th>Processname</th>
+                  <th>Run for date</th>
+                  <th class="text-right">KPI</th>
+                  <th class="text-right">Fetched A</th>
+                  <th class="text-right">Fetched B</th>
+                  <th class="text-right">Discr. A</th>
+                  <th class="text-right">Discr. B</th>
+                  <th class="text-right">Err. lvl A %</th>
+                  <th class="text-right">Err. lvl B %</th>
+                  <th></th>
+                </tr>
+              </thead>            
+              <thead>
+                <tr id="reference-row" style="position: static; z-index: 3;">
+                  <th class="text-center" style="min-width: 60px; max-width: 60px;" ng-if="entry.showAuditing==='Y'">
+                    <span class="input-group btn-group btn-block dropdown">
+                      <button class="btn btn-xs dropdown-toggle btn-block btn-default pointer-row" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-vcard"></i>
+                        <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu">
+                        <!-- Executor -->
+                        <li ng-class="{'disabled': entry.isDisabled()}"><a href="" ng-click="!entry.isDisabled() && auditAll('+E')"><i class="fa fa-check-circle-o fa-fw"></i> Sign all as executor</a></li>
+                        <li ng-class="{'disabled': entry.isDisabled()}"><a href="" ng-click="!entry.isDisabled() && auditAll('+A')"><i class="fa fa-check-circle fa-fw"></i> Sign all as approver</a></li>
+                      </ul>
+                    </span> 
+                  </th>
+                  <th>Run timestamp</th>
+                  <th class="text-center">Run duration</th>
+                  <th>PID</th>
+                  <th>Processname</th>
+                  <th>Run for date</th>
+                  <th class="text-right">KPI</th>
+                  <th class="text-right">Fetched A</th>
+                  <th class="text-right">Fetched B</th>
+                  <th class="text-right">Discr. A</th>
+                  <th class="text-right">Discr. B</th>
+                  <th class="text-right">Err. lvl A %</th>
+                  <th class="text-right">Err. lvl B %</th>
+                  <th></th>
+                </tr>
+              </thead>
+
+              <tbody>                
+                <tr ng-if="_und.size(moneyMapStatusData)">
+                    <th colspan="{{colspan+2}}" class="text-center">In progress (<span class="btn-blue">{{_und.size(moneyMapStatusData)}}</span>)</th>
+                </tr>
+
+                <!-- Money Map active requests  -->      
+                <tr ng-if="_und.size(moneyMapStatusData)" ng-repeat="control in moneyMapStatusData">
+                  <td ng-if="entry.showAuditing==='Y'"></td>
+                  <td><strong>{{control.CREATED | date:"dd.MM.yyyy"}}</strong>&nbsp;<small>{{control.CREATED | date:"HH:mm"}}</small></td>
+                  <td class="text-center"><i class="fa fa-refresh fa-pulse fa-fw btn-orange"></i></td>
+                  <td>{{control.PROCESSID}}</td>
+                  <td><a href="/control-runhistory?opcoId=36&processname={{control.PROCESSNAME}}">{{control.PROCESSNAME}}</a></td>
+                  <td><span ng-class="{'btn-grey':control.DAY_OF_WEEK == 6 || control.DAY_OF_WEEK == 7, 'btn-black': control.DAY_OF_WEEK < 6}">{{control.RUN_FOR_DATE | date:"dd.MM.yyyy"}}</span>&nbsp;<small ng-class="{'btn-red':control.DAY_OF_WEEK == 7, 'btn-orange':control.DAY_OF_WEEK == 6, 'btn-grey':control.DAY_OF_WEEK < 6}">{{control.RUN_FOR_DATE | date:"EEE"}}</small></td>
+                  
+                  <td colspan="{{colspan-5}}">
+                    <i class="fa fa-fw" ng-class="{'fa-play-circle btn-green':control.ACTION == 'R','fa-stop-circle btn-blue':control.ACTION == 'S', 'fa-dot-circle-o btn-red':control.ACTION == 'D'}"></i>
+                    {{(control.RULE_TYPE == 'R'?'RAPO control':(control.RULE_TYPE == 'C'?'Money Map configuration rule':'Money Map usage rule'))}}
+                    <span ng-if="control.ACTION == 'R'"> <strong class="btn-green">run</strong></span>
+                    <span ng-if="control.ACTION == 'D'"> <strong class="btn-red">delete</strong></span>
+                    <span ng-if="control.ACTION == 'S'"> <strong class="btn-blue">stop</strong></span>
+                    <span ng-if="control.STATUS == 'S1'"> request pending</span>
+                    <span ng-if="control.STATUS != 'S1'"> in progress</span>
+                    <span ng-if="control.ACTION == 'R' && control.STATUS != 'S1'"><strong>Status: </strong>{{control.STATUS}}</span></span>
+                  </td>
+                  
+                  <td>
+                    <a ng-if="control.ACTION == 'R'" class="pointer-row" ng-click="!entry.isDisabled() && stop(control)" ng-disabled="entry.isDisabled()" uib-tooltip="Stop run with PID: {{control.PROCESSID}}" tooltip-trigger="mouseenter"
+                    tooltip-placement="left" tooltip-popup-delay="800">
+                      <i class="fa fa-fw fa-stop btn-blue"></i>
+                    </a>
+                  </td>
+                </tr>
+                <!-- Money Map active requests  -->      
+                
+                <tr ng-if="_und.size(moneyMapStatusData)">
+                  <th colspan="{{colspan+2}}" class="text-center">Completed (<span class="btn-blue">{{_und.size(controlsDataFiltered)}}</span>)</th>
+                </tr>
+
+                <!-- No results -->      
+                <tr ng-if="!_und.size(controlsDataFiltered) && loadFinished">
+                    <td colspan="{{colspan+2}}">
+                        <h4>No control results found</h4>
+                    </td>
+                </tr>                  
+                <!-- No results -->  
+
+                <!-- Controls -->      
+                <tr ng-if="_und.size(controlsDataFiltered)" ng-repeat="control in controlsDataFiltered">
+                  <td ng-if="control.PROCESSID && entry.showAuditing==='Y'">
+                    <div layout="row" layout-align="center center">
+                      <div class="dropdown">
+                        <span>
+                          <button class="btn btn-xs dropdown-toggle" ng-class="{'btn-primary': control.EXECUTOR, 'btn-default': !control.EXECUTOR}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="entry.isDisabled()">
+                            <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu">
+                            <!-- Executor -->
+                            <li ng-if="control.EXECUTOR" class="disabled"><a href=""><i class="fa fa-user-circle-o fa-fw"></i>Executor: {{control.EXECUTOR}}</a></li>
+                            <li ng-if="!control.EXECUTOR"><a href="" ng-click="audit(control, '+E')"><i class="fa fa-check-circle-o fa-fw"></i> Sign as executor</a></li>
+                            <li ng-if="control.EXECUTOR == entry.currentUser.userAlias"><a href="" ng-click="audit(control, '-E')"><i class="fa fa-user-times fa-fw"></i> Remove executor</a></li>
+                          </ul>
+                        </span>
+
+                        <span>
+                          <button class="btn btn-xs" ng-class="{'btn-success': control.APPROVER, 'btn-default': !control.APPROVER}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="entry.isDisabled()">
+                            <span class="caret"></span>
+                          </button>                      
+                          <ul class="dropdown-menu">
+                            <!-- Approver -->
+                            <li ng-if="control.APPROVER" class="disabled"><a href=""><i class="fa fa-user-circle-o fa-fw"></i> Approver: {{control.APPROVER}}</small></a></li>
+                            <li ng-if="!control.APPROVER"><a href="" ng-click="audit(control, '+A')"><i class="fa fa-check-circle fa-fw"></i> Sign as approver</a></li>
+                            <li ng-if="control.APPROVER == entry.currentUser.userAlias"><a href="" ng-click="audit(control, '-A')"><i class="fa fa-user-times fa-fw"></i> Remove approver</a></li>
+                          </ul>
+                        </span>
+                      </div>                    
+                    </div>
+                  </td>
+                  <td ng-if="control.PROCESSID"><strong>{{control.STARTRUNDATE | date:"dd.MM.yyyy"}}</strong>&nbsp;<small>{{control.STARTRUNDATE | date:"HH:mm"}}</small></td>
+                  <td ng-if="control.PROCESSID" class="text-center"><small>{{control.RUN_DURATION | number:1}} min</small></td>
+                  <td ng-if="control.PROCESSID">{{control.PROCESSID}}</td>
+                  <td><a href="/control-runhistory?opcoId=36&processname={{control.PROCESSNAME}}"><strong ng-class="{'btn-dark-blue': control.RULE_TYPE === 'C', 'btn-blue': control.RULE_TYPE === 'U'}">{{control.PROCESSNAME}}</strong></a></td>
+                  <td><a href="/control-results-day?opcoId=36&processname={{control.PROCESSNAME}}&runForDate={{control.RUN_FOR_DATE | date:'yyyy-MM-dd'}}"><span ng-class="{'btn-grey':control.DAY_OF_WEEK == 6 || control.DAY_OF_WEEK == 7, 'btn-black': control.DAY_OF_WEEK < 6}">{{control.RUN_FOR_DATE | date:"dd.MM.yyyy"}}</span>&nbsp;<small ng-class="{'btn-red':control.DAY_OF_WEEK == 7, 'btn-orange':control.DAY_OF_WEEK == 6, 'btn-grey':control.DAY_OF_WEEK < 6}">{{control.RUN_FOR_DATE | date:"EEE"}}</small></td>
+                  <td ng-if="control.PROCESSID" class="control-results-table-value"> 
+                    <span ng-repeat="(kpiId, kpi) in control.KPI_JSON" class="pointer-row" ng-class="{'btn-green':(kpi.ALARM_LEVEL == 0), 'btn-blue': (kpi.ALARM_LEVEL == 1), 'btn-orange': (kpi.ALARM_LEVEL == 2), 'btn-red': (kpi.ALARM_LEVEL == 3), 'btn-red-strong': (kpi.ALARM_LEVEL > 3)}" uib-tooltip="{{kpi.KPI_TYPE_DESC}}" tooltip-trigger="mouseenter" tooltip-placement="top" tooltip-popup-delay="300">
+                      <span style="color: #333333;">{{(kpiId>0?', ':'')}}</span> {{kpi.KPI_VALUE | number:(kpi.KPI_DECIMAL_PLACES?kpi.KPI_DECIMAL_PLACES:1)}}&nbsp;{{kpi.KPI_VALUE_UNIT}}
+                    </span>
+                  </td>
+                  <td ng-if="control.PROCESSID" class="control-results-table-value">{{control.RECORDSFETCHED_A | number:0}}</td>
+                  <td ng-if="control.PROCESSID" class="control-results-table-value">{{control.RECORDSFETCHED_B | number:0}}</td>
+                  <td ng-if="control.PROCESSID" class="control-results-table-value">{{control.DISC_COUNT_A | number:0}}</td>
+                  <td ng-if="control.PROCESSID" class="control-results-table-value">{{control.DISC_COUNT_B | number:0}}</td>
+                  <td ng-if="control.PROCESSID" class="control-results-table-value">{{control.ERRORLEVEL_A | number:1}}%</td>
+                  <td ng-if="control.PROCESSID" class="control-results-table-value">{{control.ERRORLEVEL_B | number:1}}%</td>
+                  <td ng-if="control.PROCESSID">
+                    <span layout="row" layout-align="start center">
+                      <a class="pointer-row" ng-if="control.PROCESSID" ng-click="!entry.isDisabled() && delete(control)"
+                        ng-disabled="entry.isDisabled()" uib-tooltip="Delete PID: {{control.PROCESSID}}" tooltip-trigger="mouseenter"
+                        tooltip-placement="left" tooltip-popup-delay="800">
+                        <i class="fa fa-fw fa-trash"></i>
+                      </a>
+                      <a ng-if="control.ALARM_ID" ng-href="/alarms?opcoId={{control.OPCO_ID}}&month={{control.RUN_FOR_DATE | date:'yyyy-MM'}}&filterText={{control.ALARM_ID}}">
+                        <i class="fa fa-fw pointer-row" ng-class="{'fa-bell btn-red':control.ALARM_STATUS == 'Pending', 'fa-bell btn-blue': control.ALARM_STATUS == 'In progress', 'fa-bell-slash btn-green': control.ALARM_STATUS == 'Closed'}"  uib-tooltip="Alarm {{control.ALARM_ID}} ({{control.ALARM_STATUS}}) {{control.ASSIGNED_TO?control.ASSIGNED_TO:''}}" tooltip-trigger="mouseenter" tooltip-placement="left" tooltip-popup-delay="300"></i>
+                      </a>
+                      <a ng-if="control.INCIDENT_ID" ng-href="/incident-info/{{control.INCIDENT_ID}}">
+                        <i class="fa fa-exclamation-circle fa-fw" ng-class="{'btn-green':control.INCIDENT_STATUS == 'Closed', 'btn-red':(control.INCIDENT_STATUS == 'Expired' || control.INCIDENT_STATUS == 'Pending'), 'btn-blue':control.INCIDENT_STATUS == 'In progress'}" uib-tooltip="Incident I_{{control.OPCO_ID}}_{{control.INCIDENT_ID}} ({{control.INCIDENT_STATUS}})" tooltip-trigger="mouseenter" tooltip-placement="left" tooltip-popup-delay="300"></i>
+                      </a>
+                    </span>                   
+                  </td>
+                </tr>
+                <!-- Controls -->
+              </tbody>
+          </table>    
+<br>
+<br>
+        </div>
+      </div>
+    </div>
+
+</div>
+</div>

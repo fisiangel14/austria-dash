@@ -1,0 +1,288 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li><a href="/dato-catalogue?opcoId={{entry.OPCO_ID}}"><i class="fa fa-cubes fa-fw"></i> Dato catalogue</a></li>
+  <li><a href="/dato-results-overview?month={{entry.searchMDmonth}}&opcoId={{entry.OPCO_ID}}"><i class="fa fa-th-list fa-fw"></i> Dato overview</a></li>  
+  <li class="active"><i class="fa fa-cubes fa-fw"></i> Dato results <strong>{{dato.DATO_ID}}</strong></li>
+  <li><a href="/dato-info/{{dato.OPCO_ID}}/{{dato.DATO_ID}}"><i class="fa fa-edit fa-fw"></i> Edit dato <strong>{{dato.DATO_ID}}</strong></a></li> 
+  <li ng-if="dato.PROCEDURE_ID"><a ng-href="/procedure-info?procedureId={{dato.PROCEDURE_ID}}"><i class="fa fa-sitemap fa-fw"></i> Dato <strong>{{dato.DATO_ID}}</strong> dataflow</a></li>  
+</ol>
+<!-- Breadcrumbs -->
+
+<h3 class="sub-header">
+    <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+    {{entry.state.data.title}} 
+    <small> - {{entry.currDay}}</small>
+</h3>
+
+<!-- Navigate months -->
+<div class="row">
+  <div class="col-md-4 text-left">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/dato-result/{{dato.OPCO_ID}}/{{dato.DATO_ID}}?month={{prevMonth}}" ng-if="prevMonth >= (dato.START_DATE | date:'yyyy-MM')"> 
+      <i class="fa fa-chevron-left fa-fw"></i>
+      {{prevMonthText}}
+    </a>
+  </div>
+  <div class="col-md-4 text-center">
+    <h4 class="sub-header">
+      <i class="fa fa-calendar fa-fw"></i>
+      {{workMonthText}}
+    </h4>
+  </div>
+  <div class="col-md-4 text-right">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/dato-result/{{dato.OPCO_ID}}/{{dato.DATO_ID}}?month={{nextMonth}}" ng-if="currMonth >= nextMonth"> 
+      {{nextMonthText}}
+      <i class="fa fa-chevron-right fa-fw"></i>
+    </a>
+  </div>
+</div>
+<!-- Navigate months -->
+
+<div class="panel panel-default md-whiteframe-4dp" ng-class="{'panel-danger':dato.IMPLEMENTED=='N' && dato.RELEVANT=='Y', 'panel-success':dato.IMPLEMENTED=='Y'}">
+  
+  <div class="panel-heading no-margins" ng-click="toggleShowDatoInfo()" style="cursor:pointer">
+    <h3 class="no-margins">
+      <strong><i class="fa fa-cube"></i> {{dato.DATO_ID}}</strong> 
+
+      <small ng-if="!showDatoInfo" class="alert-success">{{dato.NAME}}</small>
+
+      
+      <span class="label pull-right" ng-class="{'btn-day':dato.FREQUENCY=='D', 'btn-month':dato.FREQUENCY=='M', 'btn-cycle':dato.FREQUENCY=='C'}">{{dato.FREQUENCY}}</span>
+      <span class="small label pull-right"><small ng-if="!changeRequest && !newDato">{{flashMessage}}</small></span>
+      
+      <span class="pull-right">
+        <span ng-if="!showDatoInfo"><small><small><i class="fa fa-chevron-down"></i> dato details <i class="fa fa-chevron-down"></i></small></small></span>
+        <span ng-if="showDatoInfo"><small><small><i class="fa fa-chevron-up"></i> dato details <i class="fa fa-chevron-up"></i></small></small></span>
+      </span>
+
+    </h3> 
+  </div>
+
+  <div class="panel-body animation-roll-down" ng-cloak ng-if="showDatoInfo">
+      <div class="row">
+          <div class="col-sm-2">
+            <label for="datoID">Dato ID</label>
+            <input type="text" name="datoID" minlength="3" maxlength="3" class="form-control" placeholder="Dato ID" ng-model="dato.DATO_ID" required ng-disabled="!changeRequest && !newDato">
+            <div ng-messages="datoForm.datoID.$error"> 
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+              <div ng-message="minlength" ng-message="maxlength"><small class="label label-danger">Must be exactly 3 characters long</small></div>
+            </div>             
+          </div>  
+
+          <div class="col-sm-2">
+            <label for="datoFREQUENCY">Frequency</label>
+            <select name="datoFREQUENCY" class="form-control" ng-model="dato.FREQUENCY" ng-disabled="!changeRequest && !newDato" required>
+              <option value="D">Daily</option>
+              <option value="M">Monthly</option>
+              <option value="C">Cycle</option>
+            </select>
+            <div ng-messages="datoForm.datoFREQUENCY.$error"> 
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            </div>              
+          </div>
+
+          <div class="col-sm-2">
+            <label for="datoRELEVANT">Relevant</label>
+            <select name="datoRELEVANT" class="form-control" ng-model="dato.RELEVANT" ng-disabled="!changeRequest && !newDato">
+              <option>Y</option>
+              <option>N</option>
+            </select>
+          </div>
+
+          <div class="col-sm-3">
+            <label for="datoSTART_DATEgroup">Valid from</label>
+            <p name="datoSTART_DATEgroup" class="input-group">
+              <input name="datoSTART_DATE" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" datepicker-options="dp.dateOptions" ng-model="dato.START_DATE" is-open="dp.status.opened" ng-required="true" close-text="Close" ng-disabled="!changeRequest && !newDato"/>
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="dp.open($event)" ng-disabled="!changeRequest && !newDato"><i class="glyphicon glyphicon-calendar"></i></button>
+              <div ng-messages="datoForm.datoSTART_DATE.$error"> 
+                <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+                <div ng-message="date"><small class="label label-danger">Invalid date</small></div>
+              </div> 
+              </span>
+            </p>
+          </div>
+
+          <div class="col-sm-3">
+            <label for="datoAREA">Area</label>
+            <select name="datoAREA" class="form-control" ng-model="dato.AREA_ID" ng-disabled="!changeRequest && !newDato" required>
+              <option ng-repeat="area in localEntry.lookup.areas" value="{{area.AREA_ID}}">{{area.NAME}}</option>
+            </select>
+            <div ng-messages="datoForm.datoAREA.$error"> 
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            </div>            
+          </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-6">
+            <label for="datoNAME">Name</label>
+            <textarea name="datoNAME" type="text" class="form-control" placeholder="Name" ng-model="dato.NAME" rows="3" ng-disabled="!changeRequest && !newDato" required></textarea>
+            <div ng-messages="datoForm.datoNAME.$error">
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            </div>   
+        </div>
+
+        <div class="col-sm-6">
+            <label for="datoDESCRIPTION">Description</label>
+            <textarea name="datoDESCRIPTION" type="text" class="form-control" placeholder="Description" ng-model="dato.DESCRIPTION" rows="3" ng-disabled="!changeRequest && !newDato" required></textarea>
+            <div ng-messages="datoForm.datoDESCRIPTION.$error">
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            </div>            
+        </div>
+      </div>
+      <br>
+    <!-- Layout -->
+    <div class="panel-body" style="padding-left:0px; padding-top:0px; padding-bottom:8px;" ng-cloak> 
+      <div class="row">
+        <div class="col-sm-12">
+          <label>Expected dimensions:</label>
+          <span>
+            <a class="btn btn-default btn-xs" ng-click="toggleLayout()">
+              {{datoLayout.length}}  
+              <i ng-if="showLayout" class="fa fa-chevron-up fa-fw"> </i> 
+              <i ng-if="!showLayout" class="fa fa-chevron-down fa-fw"> </i>
+            </a>
+          </span>
+          
+          <span class="pull-right">
+            <a class="btn btn-default" ng-href="/dato-info/{{dato.OPCO_ID}}/{{dato.DATO_ID}}">
+              <small>Edit dato</small> 
+              <i class="fa fa-fw" ng-class="{'fa-cube': dato.RELEVANT=='Y', 'fa-ban btn-red': dato.RELEVANT=='N'}"></i>
+              <strong>{{dato.DATO_ID}}</strong>
+            </a>
+          </span>
+
+        </div>
+      </div>
+    </div>
+
+    <div ng-if="showLayout" class="panel-body" ng-cloak> 
+      <div class="row" >
+        <div class="col-sm-12">
+
+          <div class="table-responsive small">
+              <table name="datoTABLE" class="table table-condensed no-margins">
+                  <thead>
+                    <tr>
+                      <th width="10px">#</th>
+                      <th class="text-right" ng-if="dato.FREQUENCY=='C'">Cycle</th>
+                      <th>LOB</th>
+                      <th>Technology</th>
+                      <th>Service</th>
+                      <th>Freq.</th>
+                      <th>System</th>
+                      <th>Contact</th>
+                      <th width="80px">Days delay</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="layout in datoLayout" ng-click="">
+                      <td class="text-right">{{$index+1}}. </td>
+                      <td class="text-right" ng-if="layout.BILL_CYCLE"><strong>{{layout.BILL_CYCLE}}</strong></td>
+                      <td>{{localEntry.lookup.getLobById(layout.LOB_ID).NAME}}</td>
+                      <td>{{localEntry.lookup.getTechnologyById(layout.TECHNOLOGY_ID).NAME}}</td>
+                      <td>{{localEntry.lookup.getServiceById(layout.SERVICE_ID).NAME}}</td>
+                      <td><span class="label" ng-class="{'btn-day':layout.PERIODICITY_ID=='1', 'btn-month':layout.PERIODICITY_ID=='3', 'btn-cycle':layout.PERIODICITY_ID=='5'}">{{entry.lookup.getPeriodicityById(layout.PERIODICITY_ID).PERIODICITY_CODE}}</span></td>
+                      <td>{{localEntry.lookup.getSystemById(layout.SYSTEM_ID).NAME}}</td>
+                      <td>{{localEntry.lookup.getContactById(layout.CONTACT_ID).NAME}}</td>
+                      <td class="text-right">{{layout.DELAY}}</td>
+                    </tr>
+                  </tbody>
+              </table>
+          </div>
+        </div>
+      </div>
+    </div> 
+      <!-- Layout -->  
+    </div>
+</div>
+
+<div ng-if="dato.RELEVANT == 'N'" class="panel panel-default md-whiteframe-4dp">
+<div class="panel-body" ng-cloak>
+  <div class="row">
+    <div class="col-sm-12">
+    <h4>Skipping results...</h4> <br>Dato <strong>{{dato.DATO_ID}}</strong> is marked as non-relevant for {{entry.OPCO_NAME}}.
+    </div>
+  </div>
+</div>
+</div>
+
+<div ng-if="dato.RELEVANT == 'Y'" class="panel panel-default md-whiteframe-4dp">
+<div class="panel-body" ng-cloak>
+
+  <!-- Related Metrics  -->
+  <div class="panel">
+    <div class="row">
+      <div class="col-sm-12">
+        Related metrics:
+        <span ng-repeat="metricId in dato.METRICS | split:', '">
+          <a class="btn btn-default btn-sm" ng-href="/metric-result/{{dato.OPCO_ID}}/{{metricId}}?month={{workMonth}}">
+            <i class="fa fa-line-chart fa-fw"></i> 
+            <strong>{{metricId}}</strong> results
+          </a>
+      </span>
+      </div>
+    </div>
+  </div>
+  <!-- Related Metrics  -->
+
+  <!-- Chart -->
+  <div class="row">
+    <div class="col-sm-12">
+      <div ng-if="datoResultsChart.length>0 && datoResultsChartOptions && (dato.FREQUENCY=='D' || dato.FREQUENCY=='M')">
+        <c3-chart id="chartDatos" config="datoResultsChartOptions" data="datoResultsChart"></c3-chart>
+      </div>      
+    </div>      
+  </div>
+  <!-- Chart -->
+
+  <!-- Table -->
+  <div class="row">
+    <div class="col-sm-12">
+      <table name="datoTABLE" class="table table-condensed table-hover no-margins">
+          <thead>
+            <tr>
+              <th ng-click="order('DATE')" style="cursor:pointer">Date <i class="fa fa-sm" ng-class="{'fa-caret-down':!entry.reverse, 'fa-caret-up':entry.reverse}"></i></th>
+              <th ng-if="dato.FREQUENCY=='C'">Cycle</th>
+              <th>LOB</th>
+              <th>Technology</th>
+              <th>Service</th>
+              <th>Freq</th>
+              <th class="text-right">Value</th>
+              <th>Filename :#Line</th>
+              <th>File time</th>
+              <th>Load time</th>
+              <th width="60px" class="text-right">Delay</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-hide="(dato.START_DATE > datoResult.DATE && !datoResult.FILE_NAME) || (!datoResult.FILE_NAME && datoResult.DAYS_LATE < 0)" ng-click="" ng-repeat="datoResult in (datoResultsFiltered = (datoResults | toArray | orderBy:predicate:entry.reverse))" ng-class="{'active':datoResult.DAY_OF_WEEK == 6 || datoResult.DAY_OF_WEEK == 7, 'table-segment-bottom':(datoResult.DATE | date:'dd.MM.yyyy') != (datoResultsFiltered[$index+1].DATE | date:'dd.MM.yyyy')}">
+              <td ng-if="dato.FREQUENCY=='D'"><strong ng-class="{'btn-grey':datoResult.DAY_OF_WEEK == 6 || datoResult.DAY_OF_WEEK == 7}">{{datoResult.DATE | date:"dd.MM.yyyy"}}</strong> <small ng-class="{'btn-red':datoResult.DAY_OF_WEEK == 7, 'btn-orange':datoResult.DAY_OF_WEEK == 6, 'btn-grey':datoResult.DAY_OF_WEEK < 6}">{{datoResult.DATE | date:"EEE"}}</small></td>
+              <td ng-if="dato.FREQUENCY!='D'"><strong>{{datoResult.DATE | date:"MMM yyyy"}}</strong></td>
+              <td ng-if="dato.FREQUENCY=='C'" class="text-center"><i class="fa fa-calendar-check-o fa-fw"></i><strong>{{datoResult.BILL_CYCLE}}</strong></td>
+              <td><small>{{datoResult.LOB_NAME}}</small></td>
+              <td><small>{{datoResult.TECHNOLOGY_NAME}}</small></td>
+              <td><small>{{datoResult.SERVICE_NAME}}</small></td>
+              <td><span class="label" ng-class="{'btn-day':datoResult.PERIODICITY_ID=='1', 'btn-month':datoResult.PERIODICITY_ID=='3', 'btn-cycle':datoResult.PERIODICITY_ID=='5'}">{{entry.lookup.getPeriodicityById(datoResult.PERIODICITY_ID).PERIODICITY_CODE}}</span></td>
+              <td ng-if="!datoResult.FILE_NAME && datoResult.DAYS_LATE >= 1" class="text-center btn-red" colspan="5"><i class="fa fa-exclamation-triangle"></i> Delayed <strong>{{datoResult.DAYS_LATE | number:0}}</strong> days.</td>
+              <td ng-if="!datoResult.FILE_NAME && datoResult.DAYS_LATE < -1" class="text-center btn-orange" colspan="5"><i class="fa fa-clock-o"></i> Expected in <strong>{{-1 * datoResult.DAYS_LATE | number:0}}</strong> days.</td>
+              <td ng-if="!datoResult.FILE_NAME && datoResult.DAYS_LATE < 1 && datoResult.DAYS_LATE > -1" class="text-center btn-orange" colspan="5"><i class="fa fa-clock-o"></i> Expected <strong>today</strong>.</td>
+              <td ng-if="datoResult.FILE_NAME" class="text-right">
+                  <strong ng-if="(datoResult.VALUE - Math.round(datoResult.VALUE)) != 0">{{datoResult.VALUE | number:2}}</strong>
+                  <strong ng-if="(datoResult.VALUE - Math.round(datoResult.VALUE)) == 0">{{datoResult.VALUE | number:0}}</strong>
+              </td>
+              <td ng-if="datoResult.FILE_NAME"><a target="_blank" ng-href="/files/{{datoResult.FILE_NAME}}"><small>{{datoResult.FILE_NAME}}</small></a> : <small>{{datoResult.FILE_ROWNUM}}</small></td>
+              <td ng-if="datoResult.FILE_NAME">{{datoResult.FILE_DATE | date:"dd.MM.yyyy"}} <small class="btn-grey">{{datoResult.FILE_DATE | date:"HH:mm"}}</small></td>
+              <td ng-if="datoResult.FILE_NAME">{{datoResult.CREATED | date:"dd.MM.yyyy"}} <small class="btn-grey">{{datoResult.CREATED | date:"HH:mm"}}</small></td>
+              <td ng-if="datoResult.FILE_NAME" class="text-right">{{datoResult.DAYS_LATE | number:0}} <small>days</small></td>
+            </tr>
+          </tbody>
+      </table>    
+    </div>
+  </div>
+  <!-- Table -->
+  
+</div>
+
+</div>
+</div>

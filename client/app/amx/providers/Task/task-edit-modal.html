@@ -1,0 +1,91 @@
+<div class="md-whiteframe-4dp">
+	<form ng-submit="submit()">
+
+		<div class="modal-body">
+			<h4>Task <strong>T_{{task.OPCO_ID}}_{{Lpad(taskId, 3, '0')}}</strong></h4>
+			<br>
+
+	    <div class="row form-group">
+	      <div class="col-sm-4">
+	        <label for="taskCREATED">Created</label>
+	        <input type="text" name="taskCREATED" class="form-control" placeholder="0" value="{{task.CREATED | date:'dd.MM.yyyy HH:mm:ss'}}" disabled>
+	      </div>
+	      <div class="col-sm-8">
+	        <label for="taskMODIFIED">Last modified</label>
+	        <input type="text" name="taskMODIFIED" class="form-control" placeholder="0" value="{{task.MODIFIED_BY}} / {{task.MODIFIED | date:'dd.MM.yyyy HH:mm:ss'}}" disabled>
+	      </div>
+	    </div>
+
+	    <div class="row form-group">
+	      <div class="col-sm-4">
+	        <label for="taskTYPE">Tasks type</label>
+	        <select name="taskTYPE" class="form-control" ng-model="task.SOURCE" ng-disabled="entry.currentUser.userOpcoId">
+	          <option value="METRIC">Metric</option>
+	        </select>
+	      </div>
+	      <div class="col-sm-4">
+	        <label for="taskOBJECT">{{task.SOURCE}}</label>
+	        <select name="taskOBJECT" class="form-control" ng-model="task.OBJECT_ID" ng-disabled="(task.OPCO_ID != entry.currentUser.userOpcoId && entry.currentUser.userOpcoId) || (task.STATUS == 'Closed' && entry.currentUser.userOpcoId)" required>
+	          <option ng-repeat="obj in objectIds">{{obj.OBJECT_ID}}</option>
+	        </select>	        
+	      </div>
+	      <div class="col-sm-4">
+	        <label for="taskDEPENDENCIES">Dependencies</label>
+	        <input type="text" name="taskDEPENDENCIES" class="form-control" placeholder="" ng-model="task.DEPENDENCIES" ng-disabled="(task.OPCO_ID != entry.currentUser.userOpcoId && entry.currentUser.userOpcoId) || (task.STATUS == 'Closed' && entry.currentUser.userOpcoId)">
+	      </div>	      
+	    </div>
+
+	    <div class="row form-group">
+	      <div class="col-sm-4">
+	        <label for="taskOPCO">OPCO</label>
+	        <select name="taskOPCO" class="form-control" ng-model="task.OPCO_ID" ng-disabled="entry.currentUser.userOpcoId" required>
+	          <option ng-repeat="opco in entry.lookup.opcos | filter: '!' + 'Extern' " value="{{opco.OPCO_ID}}">{{opco.OPCO_NAME}}</option>
+	        </select>
+	        <div ng-messages="metricForm.metricAREA.$error">
+	          <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+	        </div>        
+	      </div>
+	      <div class="col-sm-4">
+	        <label for="taskUSER">Assigned to</label>
+	        <select name="taskUSER" class="form-control" ng-model="task.ASSIGNED_TO" ng-disabled="(task.OPCO_ID != entry.currentUser.userOpcoId && entry.currentUser.userOpcoId) || (task.STATUS == 'Closed' && entry.currentUser.userOpcoId)" required>
+	          <option ng-repeat="user in users" value="{{user.EMAIL}}">{{user.USERNAME}}</option>
+	        </select>	        
+	      </div>
+	      <div class="col-sm-4">
+	        <label for="taskSTATUS">Tasks status</label>
+	        <select name="taskSTATUS" class="form-control" ng-model="task.STATUS" ng-disabled="(task.OPCO_ID != entry.currentUser.userOpcoId && entry.currentUser.userOpcoId) || (task.STATUS == 'Closed' && entry.currentUser.userOpcoId)">
+	          <option>Open - OPCO</option>
+	          <option>Open - TAG</option>
+	          <option ng-disabled="entry.currentUser.userOpcoId">Closed</option>
+	        </select>	      
+	      </div>	      
+	    </div>
+
+	    <div class="row form-group">
+	      <div class="col-sm-12">
+	        <label for="taskDESCRIPTION">Task description</label>
+	        <textarea name="taskDESCRIPTION" type="text" rows="1" class="form-control msd-elastic" placeholder="" ng-model="task.DESCRIPTION" required ng-disabled="(task.OPCO_ID != entry.currentUser.userOpcoId && entry.currentUser.userOpcoId) || (task.STATUS == 'Closed' && entry.currentUser.userOpcoId) || (task.CREATED_BY !== entry.currentUser.userName && entry.currentUser.userOpcoId)"></textarea>
+	        <div ng-messages="incidentForm.taskDESCRIPTION.$error">
+	          <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+	        </div>           
+	      </div>
+	    </div>
+
+	    <div class="row form-group">
+	      <div class="col-sm-12">
+	        <label for="taskNOTE">Task notes</label>
+	        <textarea focus-me name="taskNOTE" type="text" rows="1" class="form-control msd-elastic" placeholder="" ng-model="task.NOTE" ng-disabled="task.OPCO_ID != entry.currentUser.userOpcoId && entry.currentUser.userOpcoId"></textarea>
+	      </div>
+	    </div>
+
+    </div>
+
+		<div class="modal-footer">
+      <div class="input-group">
+				<button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+				<button type="submit" class="btn btn-primary" ng-hide="task.OPCO_ID != entry.currentUser.userOpcoId && entry.currentUser.userOpcoId">Save</button>
+      </div>
+	   </div>
+
+	</form>
+</div>

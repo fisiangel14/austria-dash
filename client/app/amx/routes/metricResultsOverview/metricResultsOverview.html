@@ -1,0 +1,150 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li><a href="/metric-catalogue?opcoId={{entry.OPCO_ID}}"><i class="fa fa-line-chart fa-fw"></i> Metric catalogue</a></li>
+  <li class="active"><i class="fa fa-th-list fa-fw"></i> Metrics overview</a></li>
+  <li><a href="/metric-result-table?opcoId={{entry.OPCO_ID}}&month={{entry.searchMDmonth}}&frequency=D&finetuned={{entry.overviewShowFineTunedOnly}}"><i class="fa fa-table fa-fw"></i> Daily metrics results table</a></li>
+  <li><a href="/metric-result-table?opcoId={{entry.OPCO_ID}}&month={{entry.searchMDmonth}}&frequency=M&finetuned={{entry.overviewShowFineTunedOnly}}"><i class="fa fa-list-alt fa-fw"></i> Monthly metrics results table</a></li>
+</ol>
+<!-- Breadcrumbs -->
+
+<div class="row">
+  <div class="col-md-9 text-left">
+    <h3 class="sub-header">
+        <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+        {{entry.state.data.title}} 
+        <small> - {{entry.currDay}}</small>
+    </h3>
+  </div>
+  <div class="col-md-3 text-right">
+    <md-switch class="md-primary md-hue-1" ng-model="entry.searchMetricOverview.IMPLEMENTED" aria-label="Fine tuned Metrics">
+        <span ng-if="entry.searchMetricOverview.IMPLEMENTED"> Fine-tuned metrics (<strong class="btn-green">{{(metricResults | metricResultsOverviewFilter:entry.searchMetricOverview).length}}</strong>)</span>
+        <span ng-if="!entry.searchMetricOverview.IMPLEMENTED"> All relevant metrics (<strong>{{(metricResults | metricResultsOverviewFilter:entry.searchMetricOverview).length}}</strong>)</span>
+    </md-switch>
+  </div>  
+</div>
+
+
+<!-- Navigate months -->
+<div class="row">
+  <div class="col-md-4 text-left">
+
+  </div>
+  <div class="col-md-4 text-center">
+    <h4 class="sub-header">
+      <i class="fa fa-calendar fa-fw"></i>
+      {{workMonth}}
+    </h4>
+  </div>
+  <div class="col-md-4 text-right">
+
+  </div>
+</div>
+<!-- Navigate months -->
+
+<!-- Filter buttons -->
+<div class="row panel-metric-results-group-container">
+  
+  <div class="col-sm-3 text-right">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" href="/metric-results-overview?month={{prevMonth}}&opcoId={{entry.OPCO_ID}}"> 
+      <i class="fa fa-chevron-left fa-fw"></i>
+      {{prevMonthText}}
+    </a>    
+  </div>
+
+  <div class="col-sm-6 text-center">
+    <div class="input-group" style="padding-left:7px">
+      <span class = "input-group-btn" data-toggle="buttons">
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchMetricOverview.GREEN}"  ng-click="searchMetricOverviewToggle('GREEN')"> 
+          <i class="fa fa-lg btn-green" ng-class="{'fa-check-circle':entry.searchMetricOverview.GREEN, 'fa-circle-o':!entry.searchMetricOverview.GREEN}"></i>
+        </button>
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchMetricOverview.YELLOW}"  ng-click="searchMetricOverviewToggle('YELLOW')"> 
+          <i class="fa fa-lg btn-yellow" ng-class="{'fa-minus-circle':entry.searchMetricOverview.YELLOW, 'fa-circle-o':!entry.searchMetricOverview.YELLOW}"></i>
+        </button>           
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchMetricOverview.ORANGE}" ng-click="searchMetricOverviewToggle('ORANGE')"> 
+          <i class="fa fa-lg btn-orange" ng-class="{'fa-times-circle':entry.searchMetricOverview.ORANGE, 'fa-circle-o':!entry.searchMetricOverview.ORANGE}"></i>
+        </button>
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchMetricOverview.RED}"  ng-click="searchMetricOverviewToggle('RED')"> 
+          <i class="fa fa-lg btn-red" ng-class="{'fa-times-circle':entry.searchMetricOverview.RED, 'fa-circle-o':!entry.searchMetricOverview.RED}"></i>
+        </button>
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchMetricOverview.NO_RESULT}"  ng-click="searchMetricOverviewToggle('NO_RESULT')"> 
+          <i class="fa fa-lg btn-blue" ng-class="{'fa-question-circle':entry.searchMetricOverview.NO_RESULT, 'fa-circle-o':!entry.searchMetricOverview.NO_RESULT}"></i>
+        </button>
+        
+        <button class="btn btn-default btn-sm disabled" > 
+          <i class="fa"></i>
+        </button> 
+
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchMetricOverview.D}"  ng-click="searchMetricOverviewToggle('D')"> 
+          <span class="label label-default" ng-class="{'btn-day':entry.searchMetricOverview.D}">D</span>
+        </button>
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchMetricOverview.M}"  ng-click="searchMetricOverviewToggle('M')"> 
+          <span class="label label-default" ng-class="{'btn-month':entry.searchMetricOverview.M}">M</span>
+        </button>
+        <button class="btn btn-default btn-sm" ng-class="{'active':entry.searchMetricOverview.C}"  ng-click="searchMetricOverviewToggle('C')"> 
+          <span class="label label-default" ng-class="{'btn-cycle':entry.searchMetricOverview.C}">C</span>
+        </button>
+
+        <button class="btn btn-default btn-sm disabled" > 
+          <i class="fa"></i>
+        </button>               
+      </span>  
+
+      <input class="form-control input-sm" type="text" ng-model="entry.searchMetricOverview.text" placeholder="Search" focus-me="true">
+      <span class = "input-group-btn">
+        <button class="btn btn-default btn-sm" ng-click="searchMetricOverviewClear()">
+         <i class="fa fa-times"></i>
+        </button>
+      </span>      
+    </div>
+  </div>
+
+  <div class="col-sm-3 text-left">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" href="/metric-results-overview?month={{nextMonth}}&opcoId={{entry.OPCO_ID}}" ng-if="currMonth >= nextMonth"> 
+      {{nextMonthText}}
+      <i class="fa fa-chevron-right fa-fw"></i>
+    </a>    
+  </div>
+
+</div>
+
+<!-- Filter buttons -->
+
+<div ng-repeat="(metricArea, metricGroup) in metricResultsSummary">
+  <div ng-if="(metricGroup | metricResultsOverviewFilter:entry.searchMetricOverview).length > 0" class="row panel-metric-results-group-container">
+    <div class="col-sm-2">
+      <h4 class="sub-header no-margins" style="padding-top:10px;text-align:right;">
+        <strong>{{metricArea}}</strong><br>
+        <small>{{localEntry.lookup.getAreaById(metricArea).NAME}}</small>
+      </h4>
+    </div>
+    <div class="col-sm-10">
+      <div class="panel-metric-results-container animation" ng-repeat="metric in metricGroup | metricResultsOverviewFilter:entry.searchMetricOverview">
+        <metric-results-box  metric="metric"></metric-results-box>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- No metrics to show -->
+<div ng-if="metricResultsSummary.length != 0 && (metricResults | metricResultsOverviewFilter:entry.searchMetricOverview).length == 0" class="row panel-metric-results-group-container">
+  <div class="col-sm-2">
+
+  </div>
+  <div class="col-sm-10">
+    <h4 class="sub-header no-margins" style="padding-top:10px;text-align:left;">
+      <strong>&nbsp;</strong><br>
+      <small>No metrics to show...</small>
+    </h4>
+    <i class="fa fa-meh-o fa-4x btn-grey"></i>
+  </div>
+</div>
+<!-- No metrics to show -->
+
+<!-- Spinner -->
+<div ng-if="metricResultsSummary.length == 0">
+  <div class="col-sm-12 text-center">
+    <br><br>
+    <i class="fa fa-spinner fa-pulse fa-3x"></i>
+  </div>
+</div>
+<!-- Spinner -->

@@ -1,0 +1,85 @@
+<h3 class="sub-header">
+  <span class="input-group btn-group pull-left">
+    <a class="btn btn-primary dropdown-toggle no-margins no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+      <li><a href="#" ng-href="/change-requests?opcoId={{entry.OPCO_ID}}&archive={{toggleArchive}}"><i class="fa fa-fw" ng-class="{'fa-archive':showArchive=='N', 'fa-edit':showArchive=='Y'}"></i> {{showArchivedLabel}}</a></li>
+    </ul>
+  </span> 
+  &nbsp;
+  <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+  {{entry.state.data.title}} 
+  <span ng-if="showArchive == 'Y'">archive <a href="/change-requests?opcoId={{entry.OPCO_ID}}&archive={{toggleArchive}}"><i class="fa fa-reply fa-fw"></i></a></span>
+</h3> 
+
+<div class="panel panel-default md-whiteframe-4dp md-padding">
+
+<div class="table-responsive">
+
+		<table class="table table-hover table-condensed">
+				<thead>
+						<tr>
+								<th width="70px">ID</th>
+								<th width="80px">Change</th>
+								<th width="60px" align="center"></th>
+								<th width="200px">Request</th>
+								<th>Description</th>
+								<th width="100px" style="text-align:center">Changes</th>
+								<th style="min-width:120px">Status</th>
+								<th></th>
+						</tr>
+				</thead>
+				<tbody>
+            <tr ng-if="!changeRequests.length && !loadFinished">
+                <td colspan="8">
+                    <!-- Spinner -->
+                      <div class="col-sm-12 text-center">
+                        <br><br>
+                        <i class="fa fa-spinner fa-pulse fa-3x"></i>
+                      </div>
+                    <!-- Spinner -->                
+                </td>
+            </tr>   
+            <tr ng-if="!changeRequests.length && loadFinished">
+                <td colspan="8">
+                    <h4>No open change requests found.</h4>
+			 							Try here: <a href="#" ng-href="/change-requests?opcoId={{entry.OPCO_ID}}&archive={{toggleArchive}}"><i class="fa fa-fw" ng-class="{'fa-archive':showArchive=='N', 'fa-edit':showArchive=='Y'}"></i> {{showArchivedLabel}}</a>
+                </td>
+            </tr>   				
+						<tr ng-repeat="(rowId, change) in changeRequests | opcoFilter:entry.OPCO_ID | filter:entry.searchChange" ng-click="">
+								<td>
+									<strong>C_{{change.OPCO_ID}}_{{Lpad(change.CHANGE_ID, 3, '0')}}</strong><br>
+								</td>
+								<td>
+									<!-- <strong class="text-center" ng-class="{'change-approved':change.STATUS=='Approved', 'change-rejected':change.STATUS=='Rejected', 'change-requested':change.STATUS=='Requested'}">{{change.CHANGE_TYPE}}</strong><br> -->
+									<a ng-if="change.CHANGE_TYPE.indexOf('dato') > 0" class="btn btn-default btn-sm btn-block" ng-class="{'change-approved':change.STATUS=='Approved', 'change-rejected':change.STATUS=='Rejected', 'change-requested':change.STATUS=='Requested'}" href="/dato-info/{{change.OPCO_ID}}/{{change.OBJECT_ID}}">&nbsp;<i class="fa" ng-class="{'fa-cube':change.CHANGE_TYPE.indexOf('dato')>0, 'fa-line-chart':change.CHANGE_TYPE.indexOf('metric')>0}"></i> <strong>{{change.OBJECT_ID}}</strong></a>
+									<a ng-if="change.CHANGE_TYPE.indexOf('metric') > 0" class="btn btn-default btn-sm btn-block" ng-class="{'change-approved':change.STATUS=='Approved', 'change-rejected':change.STATUS=='Rejected', 'change-requested':change.STATUS=='Requested'}" href="/metric-info/{{change.OPCO_ID}}/{{change.OBJECT_ID}}">&nbsp;<i class="fa" ng-class="{'fa-cube':change.CHANGE_TYPE.indexOf('dato')>0, 'fa-line-chart':change.CHANGE_TYPE.indexOf('metric')>0}"></i> <strong>{{change.OBJECT_ID}}</strong></a>
+								</td>
+								<td style="text-align:center"><strong>{{entry.lookup.getOpcoById(change.OPCO_ID).COUNTRY_CODE}}</strong></td>
+								<td>
+									<strong class="change-requested">Requested</strong><br>
+									<i class="fa fa-fw fa-clock-o"></i> {{change.CREATED | date:'dd.MM.yyyy'}} <small class="btn-grey">{{change.CREATED | date:'HH:mm'}}</small><br>
+									<i class="fa fa-fw fa-user"></i> <small>{{change.REQUESTOR}}</small><br>
+									<span class="change-requested" ng-if="change.REQUESTOR_COMMENT != null"><strong>Comment:</strong> {{change.REQUESTOR_COMMENT}}</span></td>
+								<td><strong>{{change.NEW_OBJECT.NAME}}</strong><br>{{change.NEW_OBJECT.DESCRIPTION}}</td>
+								<td style="text-align:center"><span ng-repeat="chg in change.CHANGES"><button class="btn btn-default btn-xs" popover-title="Old: {{chg.oldValue}}" uib-popover="New: {{chg.newValue}}" popover-trigger="mouseenter" popover-placement="left">{{chg.field | sentencecase}}</button> </span>&nbsp;</td>
+								<td>
+									<strong ng-class="{'change-approved':change.STATUS=='Approved', 'change-rejected':change.STATUS=='Rejected', 'change-requested':change.STATUS=='Requested'}">{{change.STATUS}}</strong><br>
+									<i class="fa fa-fw fa-clock-o"></i> {{change.STATUS_DATE | date:'dd.MM.yyyy'}} <small class="btn-grey">{{change.STATUS_DATE | date:'HH:mm'}}</small><br>
+									<div ng-if="change.APPROVER"><i class="fa fa-fw fa-user"></i> <small>{{change.APPROVER}}</small></div>
+									<span ng-class="{'change-approved':change.STATUS=='Approved', 'change-rejected':change.STATUS=='Rejected', 'change-requested':change.STATUS=='Requested'}" ng-if="change.APPROVER_COMMENT != null"><strong>Comment:</strong> {{change.APPROVER_COMMENT}}</span>
+								</td>
+								<td>
+									<span class="input-group">				
+										<button ng-if="change.STATUS == 'Requested' && entry.currentUser.userOpcoId == 0" type="button" class="btn btn-sm btn-success " ng-click="approveChange(change.CHANGE_ID)" uib-tooltip="Approve" tooltip-trigger="mouseenter" tooltip-placement="top" tooltip-popup-delay="800"><i class="fa fa-check fa-fw"></i> </button>
+										<button ng-if="change.STATUS == 'Requested' && entry.currentUser.userOpcoId == 0" type="button" class="btn btn-sm btn-danger" ng-click="rejectChange(change.CHANGE_ID)" uib-tooltip="Reject" tooltip-trigger="mouseenter" tooltip-placement="top" tooltip-popup-delay="800"><i class="fa fa-times fa-fw"></i> </button>
+										<div ng-if="(change.STATUS == 'Approved' || change.STATUS == 'Rejected') && change.ARCHIVED == 'N' && change.OPCO_ID == entry.currentUser.userOpcoId" class="pointer-div" ng-click="archiveChange(change.CHANGE_ID)">Archive</div>
+									</span>
+								</td>
+						</tr>
+				</tbody>
+		</table>
+</div>
+
+</div>

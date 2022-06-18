@@ -1,0 +1,647 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb" ng-if="entry.currentUser.userAuth">
+  <li><a href="/incidents?opcoId={{entry.OPCO_ID}}&archive=N"><i class="fa fa-exclamation-circle fa-fw"></i> Incidents</a></li>
+  <li class="active"><i class="fa fa-exclamation-circle fa-fw"></i> I_{{incident.OPCO_ID}}_{{Lpad(incident.INCIDENT_ID, 3, '0')}}</a></li>
+  <li><a href="/stakeholder-reports?opcoId={{entry.OPCO_ID}}"><i class="fa fa-wpforms fa-fw"></i> Stakeholder reports</a></li>  
+  <li><a href="/balanced-scorecard?year={{workYear}}&opcoId={{entry.OPCO_ID}}"><i class="fa fa-vcard fa-fw"></i> Balanced scorecard</a></li>
+</ol>
+<!-- Breadcrumbs -->
+
+<a ng-if="!entry.currentUser.userAuth && entry.currentUser.stakeholderUserAuth" class="btn btn-lg btn-primary" ng-href="{{entry.navBarLink}}"><i class="fa fa-fw fa-lg fa-wpforms"></i> <strong>Back to report</strong></a>
+
+<h3 class="sub-header">
+  <span class="input-group btn-group pull-left">
+    <a class="btn btn-primary dropdown-toggle no-margins no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="isDisabled">
+      <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+      <li><a ui-sref="incidentNew"><i class="fa fa-plus fa-fw"></i> New incident</a></li>
+      <li class="divider"></li>
+      <li ng-if="incident.INCIDENT_ID"><a ng-href="/incident-new?cloneFrom={{incident.INCIDENT_ID}}"><i class="fa fa-clone fa-fw"></i> Clone</a></li>
+      <li ng-if="incident.INCIDENT_ID"><a ng-href="#" ng-click="deleteIncident(incident.INCIDENT_ID)"><i class="fa fa-trash fa-fw"></i> Delete</a></li>
+    </ul>
+  </span> 
+  &nbsp;
+  <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>   
+  {{entry.state.data.title}} 
+  <span ng-if="showArchive == 'Y'">archive <a href="/incidents?opcoId={{entry.OPCO_ID}}&archive={{toggleArchive}}"><i class="fa fa-reply fa-fw"></i></a></span>
+</h3> 
+
+<form class="form-horizontal" name="incidentForm">
+<div ng-if="incident.INCIDENT_ID || newIncident || changeRequest">
+<div class="panel panel-default md-whiteframe-4dp" ng-class="{'panel-info':incident.STATUS != 'Closed', 'panel-danger':incident.STATUS == 'Expired', 'panel-success':incident.STATUS == 'Closed'}">
+  
+  <div class="panel-heading no-margins">
+
+    <h3 class="no-margins">
+      <i class="fa fa-exclamation-circle"></i> <strong>{{incident.METRIC_ID}}</strong> <small>I_{{incident.OPCO_ID}}_{{Lpad(incident.INCIDENT_ID, 3, '0')}}</small>
+      <small ng-if="newIncident" class="alert-danger"> new incident </small>
+      <small><small> {{entry.lookup.getOpcoById(incident.OPCO_ID).OPCO_NAME}}</small></small>   
+      
+      
+      <span class="small label pull-right"><small ng-if="!changeRequest && !newIncident">{{flashMessage}}</small></span>
+
+    </h3> 
+  </div>
+
+  <div class="panel-body" ng-cloak>
+  
+  <a ng-if="entry.currentUser.userAuth" href="mailto:{{localEntry.lookup.getContactByName(incident.RESPONSIBLE_TEAM).EMAIL}}?subject=[Revenue%20Assurance - {{normalizeText(entry.lookup.getOpcoById(incident.OPCO_ID).OPCO_NAME)}}]: {{normalizeText(incident.METRIC_ID)}} - {{incident.OPENING_DATE | date:'dd.MM.yyyy'}}&body=Hi{{normalizeText(incident.RESPONSIBLE_TEAM?' ' + incident.RESPONSIBLE_TEAM:'')}},%0A%0AOn {{incident.OPENING_DATE | date:'dd.MM.yyyy'}} our regular checks ('{{normalizeText(incident.METRIC_ID)}}') in {{normalizeText(incident.AREA)}} area brought a potential issue to our attention. Namely - {{normalizeText(incident.PROBLEM_DESCRIPTION)}}.%0A%0AImpact type: {{normalizeText(incident.IMPACT_TYPE)}}%0AEstimated impact value: {{incident.IMPACT?incident.IMPACT:'Unknown'}} {{incident.ROOT_CAUSE?'%0A%0AAccording to the initial checks following may be the cause for this:%0A' + normalizeText(incident.ROOT_CAUSE):''}}%0A%0ACould you please kindly check and provide feedback to us?%0A%0ARegards,%0A{{normalizeText(entry.currentUser.userAlias)}}">
+    <i class="fa fa-fw fa-envelope"></i> Send this incident by Email
+  </a>
+      <!-- Fixed header - Status -->
+      <div class="form-group">
+        <div class="col-sm-4">
+        </div>
+
+        <div class="col-sm-2">
+          <label for="incidentOPENING_DATE-group">Issue start date</label>
+          <p name="incidentOPENING_DATE-group" class="input-group">
+            <input name="incidentOPENING_DATE" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" datepicker-options="dp1.dateOptions" ng-model="incident.OPENING_DATE" is-open="dp1.status.opened" ng-required="true" close-text="Close" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"/>
+            <span class="input-group-btn">
+              <button type="button" class="btn btn-default" ng-click="dp1.open($event)" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"><i class="glyphicon glyphicon-calendar" ></i></button>
+              <div ng-messages="incidentForm.incidentOPENING_DATE.$error"> 
+                <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+                <div ng-message="date"><small class="label label-danger">Invalid date</small></div>
+              </div> 
+            </span>
+          </p>
+        </div>
+
+        <div class="col-sm-2">
+          <label for="incidentEND_DATE-group">Issue end date</label>
+          <p name="incidentEND_DATE-group" class="input-group">
+            <input name="incidentEND_DATE" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" datepicker-options="dp4.dateOptions" ng-model="incident.END_DATE" is-open="dp4.status.opened" close-text="Close" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"/>
+            <span class="input-group-btn">
+              <button type="button" class="btn btn-default" ng-click="dp4.open($event)" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"><i class="glyphicon glyphicon-calendar" ></i></button>
+              <div ng-messages="incidentForm.incidentEND.$error"> 
+                <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+                <div ng-message="date"><small class="label label-danger">Invalid date</small></div>
+              </div> 
+            </span>
+          </p>
+        </div>
+
+        <div class="col-sm-4">
+            <label for="incidentCREATED_BY">Created by</label>
+            <input type="text" class="form-control" placeholder="0" value="{{incident.CREATED_BY}} / {{incident.CREATED | date:'dd.MM.yyyy HH:mm:ss'}}" disabled>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-sm-4">
+            <label for="incidentSTATUS">Status</label>
+            <select name="incidentSTATUS" class="form-control" ng-model="incident.STATUS" required ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'" ng-change="statusChanged()">
+              <option>Pending</option>
+              <option>In progress</option>
+              <option>Closed</option>
+            </select>
+            <div ng-messages="incidentForm.incidentSTATUS.$error">
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            </div>              
+        </div>
+
+        <div class="col-sm-2">
+          <label for="incidentCLOSINGDATE-group">Incident closing date</label>
+          <p name="incidentCLOSINGDATE-group" class="input-group">
+            <input name="incidentCLOSINGDATE" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" datepicker-options="dp3.dateOptions" ng-model="incident.CLOSING_DATE" is-open="dp3.status.opened" close-text="Close" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y' || incident.STATUS != 'Closed'"/>
+            <span class="input-group-btn">
+              <button type="button" class="btn btn-default" ng-click="dp3.open($event)" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y' || incident.STATUS != 'Closed'"><i class="glyphicon glyphicon-calendar" ></i></button>
+            </span>
+          </p>
+        </div>
+
+        <div class="col-sm-2">
+          <label for="incidentDUEDATE-group">Resolution due date</label>
+          <p name="incidentDUEDATE-group" class="input-group">
+            <input name="incidentDUEDATE" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" datepicker-options="dp2.dateOptions" ng-model="incident.DUE_DATE" is-open="dp2.status.opened" ng-required="true" close-text="Close" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"/>
+            <span class="input-group-btn">
+              <button type="button" class="btn btn-default" ng-click="dp2.open($event)" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"><i class="glyphicon glyphicon-calendar" ></i></button>
+            <div ng-messages="incidentForm.incidentDUEDATE.$error"> 
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+              <div ng-message="date"><small class="label label-danger">Invalid date</small></div>
+            </div> 
+            </span>
+          </p>
+        </div>
+
+        <div class="col-sm-4">
+            <label for="incidentMODIFIED_BY">Last status by</label>
+            <input type="text" class="form-control" placeholder="0" value="{{incident.STATUS_BY}} / {{incident.STATUS_DATE | date:'dd.MM.yyyy HH:mm:ss'}}" disabled>
+        </div>
+      </div>
+      <div class="info-title"></div>
+      <!-- Fixed header - Status -->
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+
+      <li role="presentation" class="active">
+        <a href="#general" aria-controls="general" role="tab" data-toggle="tab" ng-click="tabChanged()">
+          <i class="fa fa-lg fa-exclamation-triangle fa-fw"></i>
+          <strong>Issue details</strong>
+        </a>
+      </li>
+
+      <li role="presentation">
+        <a href="#impact" aria-controls="impact" role="tab" data-toggle="tab" ng-click="tabChanged()">
+          <i class="fa fa-lg fa-bolt fa-fw"></i>
+          <strong>Impact assessment</strong>
+        </a>
+      </li>
+
+      <li role="presentation">
+        <a href="#resolution" aria-controls="resolution" role="tab" data-toggle="tab" ng-click="tabChanged()">
+          <i class="fa fa-lg fa-wrench fa-fw"></i>
+          <strong>Resolution</strong>
+        </a>
+      </li>
+
+      <li role="presentation" ng-if="alarms.length > 0">
+        <a href="#linked-alarms" aria-controls="resolution" role="tab" data-toggle="tab" ng-click="tabChanged()">
+          <i class="fa fa-lg fa-bell fa-fw"></i>
+          <strong>Linked alarms ({{alarms.length}})</strong>
+        </a>
+      </li>
+
+    </ul>
+    <!-- Nav tabs -->
+
+      <br>
+
+      <!-- Tab content -->
+      <div class="tab-content">
+
+        <!-- General -->
+        <div role="tabpanel" class="tab-pane fade in active" id="general">
+
+        <div class="form-group">
+
+            <div class="col-sm-4">
+              <!-- Control -->
+              <div class="no-margins">
+                <label for="incidentMETRIC_ID">RA Control / Metric ({{controls.length}} in catalogue)</label>
+                <!-- <input type="text" name="incidentMETRIC_ID" class="form-control" ng-model="incident.METRIC_ID" required ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"> -->
+                <input type="text" focusMe name="incidentMETRIC_ID" class="form-control" ng-model="incident.METRIC_ID" required ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'" uib-typeahead="obj.CONTROL_NAME for obj in controls | filter:$viewValue  | limitTo:8" typeahead-on-select="controlSelectedFromList($item)">
+
+                <div ng-messages="incidentForm.incidentMETRIC_ID.$error">
+                  <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+                </div>    
+              </div>
+
+              <!-- Procedure -->
+              <div class="sm-margins">
+                <label for="amxPROCEDURE">AMX Procedure reference</label>
+                <select name="amxPROCEDURE" class="form-control" ng-model="incident.PROCEDURE_AMX_ID" required ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+                  <option value="N/A">N/A - Not applicable</option>
+                  <option ng-repeat="amxProcedure in amxProcedures" value="{{amxProcedure.PROCEDURE_AMX_ID}}">{{amxProcedure.PROCEDURE_AMX_ID}} - {{amxProcedure.PROCEDURE_NAME}} ({{amxProcedure.PROCESS_AREA}})</option>
+                </select>
+                <div ng-messages="incidentForm.amxPROCEDURE.$error">
+                  <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+                </div>  
+              </div>
+
+            </div>
+
+          <div class="col-sm-8">
+              <label for="incidentMETRIC_DESC">Control Description</label>
+              <textarea msd-elastic name="incidentMETRIC_DESC" type="text" rows="1" class="form-control" placeholder="" ng-model="incident.METRIC_DESCRIPTION" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"></textarea>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+          <div class="col-sm-4">
+            <label for="incidentAREA">Affected process (Area)</label>
+            <select name="incidentAREA" class="form-control" ng-model="incident.AREA" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'" required>
+              <option ng-repeat="area in localEntry.lookup.areas" value="{{area.NAME}}">{{area.NAME}}</option>
+            </select>
+            <div ng-messages="incidentForm.incidentAREA.$error">
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            </div>        
+          </div>
+
+          <div class="col-sm-8">
+              <label for="incidentPROBLEM_DESCRIPTION">Issue</label>
+              <textarea name="incidentPROBLEM_DESCRIPTION" type="text" rows="1" class="form-control msd-elastic" placeholder="Description of the problem / issue(s) that need to be addressed" ng-model="incident.PROBLEM_DESCRIPTION" required ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"></textarea>
+              <div ng-messages="incidentForm.incidentPROBLEM_DESCRIPTION.$error">
+                <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+              </div>             
+          </div>
+
+        </div>
+
+        <div class="form-group">
+          <div class="col-sm-4">
+            <!-- BA             -->
+            <label for="controlTYPE" style="cursor:pointer">Business Assurance Domains</label>
+
+            <div layout="row" flex class="panel-heading no-margins">
+                <div layout="column" flex="50">
+                  <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="incident.BUSINESS_ASSURANCE_DOMAIN.RevenueAndCostAssurance" ng-disabled="isDisabled" aria-label="Revenue & Cost Assurance">
+                    Revenue & Cost Assurance
+                  </md-checkbox>
+                  <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="incident.BUSINESS_ASSURANCE_DOMAIN.MarginAssurance" ng-disabled="isDisabled" aria-label="Margin Assurance">
+                    Margin Assurance
+                  </md-checkbox>
+                  <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="incident.BUSINESS_ASSURANCE_DOMAIN.AssetAssurance" ng-disabled="isDisabled" aria-label="Asset Assurance">
+                    Asset Assurance
+                  </md-checkbox>
+                  <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="incident.BUSINESS_ASSURANCE_DOMAIN.MigrationAssurance" ng-disabled="isDisabled" aria-label="Migration Assurance">
+                    Migration Assurance
+                  </md-checkbox>
+                  <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="incident.BUSINESS_ASSURANCE_DOMAIN.FraudManagement" ng-disabled="isDisabled" aria-label="Fraud Management">
+                    Fraud Management
+                  </md-checkbox>
+                  <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="incident.BUSINESS_ASSURANCE_DOMAIN.RegulatoryAssurance" ng-disabled="isDisabled" aria-label="Regulatory Assurance">
+                    Regulatory Assurance
+                  </md-checkbox>                                    
+                </div>
+
+                <div layout="column" flex="50">
+                  <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="incident.BUSINESS_ASSURANCE_DOMAIN.DigitalTransformationAssurance" ng-disabled="isDisabled" aria-label="Digital Transformation Assurance">
+                    Digital Transformation Assurance
+                  </md-checkbox>
+                  <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="incident.BUSINESS_ASSURANCE_DOMAIN.DigitalEcosystemAssurance" ng-disabled="isDisabled" aria-label="Digital Ecosystem Assurance">
+                    Digital Ecosystem Assurance
+                  </md-checkbox>
+                  <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="incident.BUSINESS_ASSURANCE_DOMAIN.CustomerExperience" ng-disabled="isDisabled" aria-label="Customer Experience">
+                    Customer Experience
+                  </md-checkbox>
+                  <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="incident.BUSINESS_ASSURANCE_DOMAIN.CustomerJourney" ng-disabled="isDisabled" aria-label="Customer Journey">
+                    Customer Journey
+                  </md-checkbox>
+                  <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="incident.BUSINESS_ASSURANCE_DOMAIN.CustomerEquipmentAssurance" ng-disabled="isDisabled" aria-label="Customer Equipment Assurance">
+                    Customer Equipment Assurance
+                  </md-checkbox>
+                </div>
+            </div>
+            <!-- BA             -->
+
+          </div>
+
+          <div class="col-sm-8">
+              <label for="incidentNOTES">Notes / Status updates</label>
+              <textarea msd-elastic name="incidentNOTES" type="text" rows="1" class="form-control" placeholder="Notes, Status updates, Email correspondence, etc." ng-model="incident.NOTES" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"></textarea>
+          </div>
+        </div>
+
+        </div>
+        <!-- General -->
+
+        <!-- Impact -->
+        <div role="tabpanel" class="tab-pane fade" id="impact">
+
+          <!-- Affected cutomers -->
+          <div style="padding-left: 15px; padding-right: 15px;">
+            
+            <div class="form-group ">
+
+              <div class="col-sm-3">
+                <label for="incident">Affected customers</label>
+                <input name="incidentCUSTOMERS" type="number" min="0" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" lang="de" class="form-control text-right panel-affected-customers" placeholder="0" ng-model="incident.AFFECTED_CUSTOMERS" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+                <div ng-messages="incidentForm.incidentCUSTOMERS.$error"> 
+                  <div ng-message="number"><small class="label label-danger">Not a valid number</small></div>
+                  <div ng-message="min"><small class="label label-danger">Must be positive value</small></div>
+                </div>                  
+              </div>
+
+              <div class="col-sm-9">
+                <label for="incident">Impact assessment notes</label>
+                <textarea msd-elastic name="incidentIMPACT_ASSESSMENT_NOTES" type="text" class="form-control" placeholder="Notes about selected impact type / presented impact values etc." ng-model="incident.IMPACT_ASSESSMENT_NOTES" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"></textarea>              
+              </div>
+
+            </div>
+          </div>
+
+          <div layout="row" flex>
+
+            <!-- Primary impact -->
+            <div class="col-sm-6">
+              <div class="form-group">
+                  <div class="col-md-6">
+                    <label for="incidentIMPACT_TYPE">Type of impact</label>
+                    <select name="incidentIMPACT_TYPE" class="form-control" ng-model="incident.IMPACT_TYPE" ng-change="typeOfImpactChanged()" required ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+                      <option>Unknown</option>
+                      <option>No loss</option>
+                      <option>Revenue loss</option>
+                      <option value="Overcharging">Unjustified gain</option>
+                      <option>Excessive costs</option>
+                      <option>Financial reporting misstatement</option>
+                      <option>Usage loss of event CDRs</option>
+                      <option>Usage loss of minutes MoU</option>
+                      <option>Usage loss of data traffic GB</option>
+                      <option>Customer data inconsistency</option>
+                    </select>
+                    <div ng-messages="incidentForm.incidentIMPACT_TYPE.$error">
+                      <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+                    </div>              
+                  </div>     
+
+
+                  <div class="col-md-6" ng-if="visible.impact">
+                      <label for="incidentIMPACT">{{label.impact}}</label>
+                      <input name="incidentIMPACT" type="number" min="0" lang="de" class="form-control text-right panel-revenue-lost" placeholder="0" ng-model="incident.IMPACT" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+                      <div ng-messages="incidentForm.incidentIMPACT.$error"> 
+                        <div ng-message="number"><small class="label label-danger">Not a valid number</small></div>
+                        <div ng-message="min"><small class="label label-danger">Must be positive value</small></div>
+                      </div>                 
+                  </div>
+
+
+              </div>
+
+              <div class="form-group" ng-if="visible.recovered">
+                  <div class="col-md-6">
+                  </div>
+                  <div class="col-md-6">
+                      <label for="incidentRECOVERED">{{label.recovered}}</label>
+                      <input name="incidentRECOVERED" type="number" min="0" lang="de" class="form-control text-right panel-revenue-recovered" placeholder="0" ng-model="incident.RECOVERED" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+                      <div ng-messages="incidentForm.incidentRECOVERED.$error"> 
+                        <div ng-message="number"><small class="label label-danger">Not a valid number</small></div>
+                        <div ng-message="min"><small class="label label-danger">Must be positive value</small></div>
+                      </div>                  
+                  </div>
+              </div>
+
+              <div class="form-group" ng-if="visible.prevented">
+                  <div class="col-md-6">
+                  </div>
+                  <div class="col-md-6">
+                      <label for="incidentPREVENTED">{{label.prevented}}</label>
+                      <input name="incidentPREVENTED" type="number" min="0" lang="de" class="form-control text-right panel-revenue-prevented" placeholder="0" ng-model="incident.PREVENTED" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+                      <div ng-messages="incidentForm.incidentPREVENTED.$error"> 
+                        <div ng-message="number"><small class="label label-danger">Not a valid number</small></div>
+                        <div ng-message="min"><small class="label label-danger">Must be positive value</small></div>
+                      </div>                   
+                  </div>
+              </div>
+
+            </div>
+            <!-- Primary impact -->
+
+            <!-- Secondary impact -->
+            <div class="col-sm-6" ng-if="visible.secondaryImpactSection">
+
+              <div class="form-group">
+                  <div class="col-md-6">
+                    <label for="incidentSECONDARY_IMPACT_TYPE">Secondary impact <i class="fa fa-info-circle fa-fw pointer-row" uib-tooltip="Secondary impact information is curently just recorded but not reported" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></label>
+                    <select name="incidentSECONDARY_IMPACT_TYPE" class="form-control" ng-model="incident.SECONDARY_IMPACT_TYPE" ng-change="typeOfSecondaryImpactChanged()" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+                      <option value=''>None</option>
+                      <option value="Overcharging" ng-if="incident.IMPACT_TYPE != 'Overcharging'">Unjustified gain</option>
+                      <option ng-if="incident.IMPACT_TYPE != 'Excessive costs'">Excessive costs</option>
+                      <option ng-if="incident.IMPACT_TYPE != 'Financial reporting misstatement'">Financial reporting misstatement</option>
+                      <option ng-if="incident.IMPACT_TYPE != 'Usage loss of event CDRs'">Usage loss of event CDRs</option>
+                      <option ng-if="incident.IMPACT_TYPE != 'Usage loss of minutes MoU'">Usage loss of minutes MoU</option>
+                      <option ng-if="incident.IMPACT_TYPE != 'Usage loss of data traffic GB'">Usage loss of data traffic GB</option>
+                      <option ng-if="incident.IMPACT_TYPE != 'Customer data inconsistency'">Customer data inconsistency</option>
+                    </select>          
+                  </div>
+
+                  <div class="col-md-6" ng-if="visible.secondaryImpact">
+                      <label for="incidentSECONDARY_IMPACT">{{label.secondaryImpact}}</label>
+                      <input name="incidentSECONDARY_IMPACT" type="number" min="0" lang="de" class="form-control text-right panel-revenue-lost" placeholder="0" ng-model="incident.SECONDARY_IMPACT" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+                      <div ng-messages="incidentForm.incidentSECONDARY_IMPACT.$error"> 
+                        <div ng-message="number"><small class="label label-danger">Not a valid number</small></div>
+                        <div ng-message="min"><small class="label label-danger">Must be positive value</small></div>
+                      </div>                 
+                  </div>
+
+              </div>
+
+              <div class="form-group" ng-if="visible.secondaryRecovered">
+                  <div class="col-md-6">
+                  </div>
+                  <div class="col-md-6">
+                      <label for="incidentSECONDARY_RECOVERED">{{label.secondaryRecovered}}</label>
+                      <input name="incidentSECONDARY_RECOVERED" type="number" min="0" lang="de" class="form-control text-right panel-revenue-recovered" placeholder="0" ng-model="incident.SECONDARY_RECOVERED" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+                      <div ng-messages="incidentForm.incidentSECONDARY_RECOVERED.$error"> 
+                        <div ng-message="number"><small class="label label-danger">Not a valid number</small></div>
+                        <div ng-message="min"><small class="label label-danger">Must be positive value</small></div>
+                      </div>                  
+                  </div>
+              </div>
+
+              <div class="form-group" ng-if="visible.secondaryPrevented">
+                  <div class="col-md-6">
+                  </div>
+                  <div class="col-md-6">
+                      <label for="incidentSECONDARY_PREVENTED">{{label.secondaryPrevented}}</label>
+                      <input name="incidentSECONDARY_PREVENTED" type="number" min="0" lang="de" class="form-control text-right panel-revenue-prevented" placeholder="0" ng-model="incident.SECONDARY_PREVENTED" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+                      <div ng-messages="incidentForm.incidentSECONDARY_PREVENTED.$error"> 
+                        <div ng-message="number"><small class="label label-danger">Not a valid number</small></div>
+                        <div ng-message="min"><small class="label label-danger">Must be positive value</small></div>
+                      </div>                   
+                  </div>
+              </div>
+
+            </div> 
+            <!-- Secondary impact -->
+     
+          </div>
+
+        </div>
+        <!-- Impact -->
+
+
+        <!-- Resolution -->
+        <div role="tabpanel" class="tab-pane fade" id="resolution">
+
+          <div class="form-group ">
+              <div class="col-sm-4">
+                <label for="incidentCLASIFICATION">Classification</label>
+                <select type="text"  name="incidentCLASIFICATION" class="form-control" ng-model="incident.CLASIFICATION" required ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+                  <option>Unknown</option>
+                  <option>Not applicable</option>
+                  <option>Initial load</option>
+                  <option>Data quality issue</option>
+                  <option>Operations - System capacity issue</option>
+                  <option>Operations - Configuration error</option>
+                  <option>Operations - Synchronisation error</option>
+                  <option>Operations - System maintenance</option>
+                  <option>Operations - System migration</option>
+                  <option>Operations error</option>
+                  <option>Preventive action</option>
+                  <option>Company merger</option>
+                </select>
+                <div ng-messages="incidentForm.incidentCLASIFICATION.$error">
+                  <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+                </div>                             
+              </div>
+
+              <div class="col-sm-8">
+                  <label for="incidentROOT_CAUSE">Cause</label>
+                  <textarea msd-elastic name="incidentROOT_CAUSE" type="text" minlength="5" class="form-control" placeholder="Factor that caused the problem" ng-model="incident.ROOT_CAUSE" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"></textarea>
+                  <div ng-messages="incidentForm.incidentROOT_CAUSE.$error"> 
+                    <div ng-message="minlength"><small class="label label-danger">Must be longer then 5 characters</small></div>
+                  </div>                  
+              </div>
+          </div>
+
+          <div class="form-group ">
+            <div class="col-sm-4">
+            </div>        
+            <div class="col-sm-8">
+                <label for="incidentCORRECTIVE_ACTION">Corrective Measure</label>
+                <textarea msd-elastic name="incidentCORRECTIVE_ACTION" type="text" minlength="5" class="form-control" placeholder="Solution, corrective action or process improvement activities" ng-model="incident.CORRECTIVE_ACTION" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"></textarea>
+                <div ng-messages="incidentForm.incidentCORRECTIVE_ACTION.$error"> 
+                  <div ng-message="minlength"><small class="label label-danger">Must be longer then 5 characters</small></div>
+                </div>                
+            </div>
+          </div>
+
+          <div class="form-group ">
+            <div class="col-sm-4">
+                <label for="incidentINC_NUMBER">Remedy ticket refference #</label>
+                <input type="text" ng-model="incident.INC_NUMBER" class="form-control" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+            </div>
+
+            <div class="col-sm-3">
+              <label for="incidentDUEDATE-group">Resolution due date</label>
+              <p name="incidentDUEDATE-group" class="input-group">
+                <input name="incidentDUEDATE" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" datepicker-options="dp2.dateOptions" ng-model="incident.DUE_DATE" is-open="dp2.status.opened" ng-required="true" close-text="Close" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"/>
+                <span class="input-group-btn">
+                  <button type="button" class="btn btn-default" ng-click="dp2.open($event)" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'"><i class="glyphicon glyphicon-calendar" ></i></button>
+                <div ng-messages="incidentForm.incidentDUEDATE.$error"> 
+                  <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+                  <div ng-message="date"><small class="label label-danger">Invalid date</small></div>
+                </div> 
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div class="form-group ">
+            <div class="col-sm-4">
+            </div>
+            <div class="col-sm-8">
+                <label for="incidentRESPONSIBLE_PERSON">Person responsible for the solution</label>
+                <div name ="incidentRESPONSIBLE_PERSON" class="input-group">
+                  <input type="text" ng-model="incident.RESPONSIBLE_PERSON" placeholder="Responsible person" uib-typeahead="obj.NAME for obj in localEntry.lookup.contacts | filter:{'CONTACT_TYPE':'P', 'OPCO_ID':entry.currentUser.userOpcoId} | filter:$viewValue | limitTo:8" class="form-control" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+                  <a type="button" class="btn btn-primary input-group-addon" ng-click="saveContact('P', incident.RESPONSIBLE_PERSON)"><i class="fa fa-save"></i></a>                
+                </div>                
+            </div>
+          </div>
+
+          <div class="form-group ">
+            <div class="col-sm-4">
+            </div>        
+            <div class="col-sm-8">
+                <label for="incidentRESPONSIBLE_TEAM">Department responsible for the solution</label>
+                <div name ="incidentRESPONSIBLE_TEAM" class="input-group">
+                  <input type="text" ng-model="incident.RESPONSIBLE_TEAM" placeholder="Responsible Department" uib-typeahead="obj.NAME for obj in localEntry.lookup.contacts | filter:{'CONTACT_TYPE':'G', 'OPCO_ID':entry.currentUser.userOpcoId} | filter:$viewValue | limitTo:8" class="form-control" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+                  <a type="button" class="btn btn-primary input-group-addon" ng-click="saveContact('G', incident.RESPONSIBLE_TEAM)"><i class="fa fa-save"></i></a>                
+                </div>
+            </div>
+
+          </div>
+
+          <div class="form-group ">
+            <div class="col-sm-4">
+            </div>
+            <div class="col-sm-8">
+                <label for="incidentRESPONSIBLE_DIRECTOR">Division Director (ultimately responsibile for the solution) <i class="fa fa-info-circle" uib-tooltip="You can maintain the list of Divisions and Division Directors through 'Settings / Contacts' menu. Expected format: <Director Name, Division Name> " uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></label>
+                  <select name ="incidentRESPONSIBLE_DIRECTOR" ng-model="incident.RESPONSIBLE_DIRECTOR" class="form-control" ng-disabled="incident.OPCO_ID != entry.currentUser.userOpcoId || incident.ARCHIVED == 'Y'">
+                    <option value="">N/A</option>
+                    <option ng-repeat="obj in localEntry.lookup.contacts | filter:{'CONTACT_TYPE':'H', 'OPCO_ID':entry.currentUser.userOpcoId}" value="{{obj.NAME}}">{{obj.NAME}}</option>
+                  </select>                
+            </div>
+          </div>
+
+        </div>
+        <!-- Resolution -->
+        
+        <!-- Linked alarms -->
+        <div role="tabpanel" class="tab-pane fade" id="linked-alarms">
+          <div ng-if="alarms.length > 0" class="form-group">
+
+            <div class="col-sm-12">
+              <label for="incidentALARMS">Following alarms have been linked to this incident:</label>
+              <div class="panel panel-default" name="incidentALARMS">
+                <table class="table table-condensed">
+                  <tbody>
+                    <tr ng-repeat="alarm in alarms">
+                      <td style="vertical-align:middle; width: 70px;">
+                        <span
+                          ng-class="{'btn-red':alarm.SEVERITY_ID == 3, 'btn-orange':alarm.SEVERITY_ID == 2, 'btn-blue':alarm.SEVERITY_ID == 1}">
+                          <i class="fa fa-lg fa-fw fa-bell"></i>
+                        </span>
+                        <a ng-if="alarm.ALARM_ID"
+                          ng-href="/alarms?opcoId={{alarm.OPCO_ID}}&month={{alarm.OBJECT_DATE | date:'yyyy-MM'}}&filterText={{alarm.ALARM_ID}}">
+                          <strong>{{alarm.ALARM_ID}}</strong>
+                          <!-- <i class="fa fa-fw pointer-row" ng-class="{'fa-bell btn-red':control.ALARM_STATUS == 'Pending', 'fa-bell btn-blue': control.ALARM_STATUS == 'In progress', 'fa-bell-slash btn-green': control.ALARM_STATUS == 'Closed'}"  uib-tooltip="Alarm {{control.ALARM_ID}} ({{control.ALARM_STATUS}}) {{control.ASSIGNED_TO?control.ASSIGNED_TO:''}}" tooltip-trigger="mouseenter" tooltip-placement="left" tooltip-popup-delay="300"></i> -->
+                        </a>
+                      </td>
+                      <td
+                        ng-class="{'panel-red':alarm.SEVERITY_ID == 3, 'panel-orange':alarm.SEVERITY_ID == 2, 'panel-blue':alarm.SEVERITY_ID == 1}">
+                      </td>
+                      <td style="vertical-align:middle; padding-left: 5px;">
+                        <i class="fa fa-lg fa-fw"
+                          ng-class="{'fa-cube':alarm.SOURCE=='DATO', 'fa-line-chart':alarm.SOURCE=='METRIC', 'fa-area-chart':alarm.SOURCE=='CONTROL', 'fa-edit':alarm.SOURCE=='CHANGE', 'fa-file-text':alarm.SOURCE=='FILE'}"></i>
+                        <span class="alarm-object">{{alarm.OBJECT_ID}}</span>
+                      </td>
+                      <td style="vertical-align:middle; padding-left: 5px;">
+                        <span class="alarm-object">
+                          <i class="fa fa-calendar fa-fw"></i>
+                          <span ng-if="!alarm.FREQUENCY">{{alarm.OBJECT_DATE | date:"dd.MM.yyyy"}}</span>
+                          <span ng-if="alarm.FREQUENCY === 'D'">{{alarm.OBJECT_DATE | date:"dd.MM.yyyy"}}</span>
+                          <span ng-if="alarm.FREQUENCY === 'M'">{{alarm.OBJECT_DATE | date:"MMM yyyy"}}</span>
+                          <span ng-if="alarm.FREQUENCY === 'C'">{{alarm.OBJECT_DATE | date:"MMM yyyy"}}</span>
+                        </span>
+                      </td>
+                      <td style="vertical-align:middle; padding-left: 5px;" flex>
+                        <small>{{alarm.DESCRIPTION}} </smal>
+                          <span ng-if="alarm.FREQUENCY"> | <span class="label"
+                              ng-class="{'btn-day':alarm.FREQUENCY=='D', 'btn-month':alarm.FREQUENCY=='M', 'btn-cycle':alarm.FREQUENCY=='C'}">{{alarm.FREQUENCY}}</span></span>
+                          <span ng-if="alarm.FREQUENCY =='C'"><strong>{{alarm.OBJECT_VERSION}}</strong></span>
+                          <span ng-if="alarm.LINK">| <a ng-href="{{alarm.LINK}}">Details</a></span>
+                      </td>
+                      <td style="vertical-align:middle">{{alarm.CREATED | date:"dd.MM.yyyy"}}&nbsp;<small
+                          class="btn-grey">{{alarm.CREATED | date:"HH:mm"}}</small></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Linked alarms -->
+
+        <!-- Fixed footer - last modiefied -->
+        <div class="info-title">
+
+        </div>
+        
+        <div class="form-group">
+          <div class="col-sm-4">            
+          </div>
+
+          <div class="col-sm-5">
+              <label for="incidentMODIFIED_BY">Last modified by</label>
+              <input type="text" class="form-control" placeholder="0" value="{{incident.MODIFIED_BY}} / {{incident.MODIFIED | date:'dd.MM.yyyy HH:mm:ss'}}" disabled>
+          </div>
+
+        </div>
+        <!-- Fixed footer - last modiefied -->
+
+      </div>  
+      <!-- Tab content -->
+
+    </div> 
+    <!-- Panel body -->
+
+      <div class="panel-footer no-margins">
+        <!-- Buttons -->
+        <div class="form-group" ng-if="incident.OPCO_ID == entry.currentUser.userOpcoId && incident.ARCHIVED != 'Y'">
+          <div class="col-sm-12">
+            <button type="button" class="btn btn-primary" ng-click="saveIncident()"><i class="fa fa-save"></i> Save</button>  
+            <button type="button" class="btn btn-default" ng-click="cancelIncident()"><i class="fa "></i> Cancel</button>  
+            
+          </div>
+        </div>
+        <!-- Buttons -->
+      </div>
+      
+</div>
+</div>
+</form>

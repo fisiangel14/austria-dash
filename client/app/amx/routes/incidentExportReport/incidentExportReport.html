@@ -1,0 +1,130 @@
+<div class="md-whiteframe-4dp">
+	<form name="reportForm" ng-submit="modalSubmit()">
+
+<div class="modal-body">
+		<div class="input-group">
+
+    <div class="col-sm-4">
+     <label for="incidentOPENING_DATE-group">From date</label>
+     <p name="incidentOPENING_DATE-group" class="input-group">
+      <input name="qFROM" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" datepicker-options="dp1.dateOptions" ng-model="q.FROM" is-open="dp1.status.opened" ng-required="true" close-text="Close" ng-change="fromDateChanged()" />
+      <span class="input-group-btn">
+       <button type="button" class="btn btn-default" ng-click="dp1.open($event)"><i class="glyphicon glyphicon-calendar" ></i></button>
+       <div ng-messages="reportForm.qFROM.$error"> 
+        <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+        <div ng-message="date"><small class="label label-danger">Invalid date</small></div>
+       </div> 
+      </span>
+     </p>
+    </div>
+    
+    <div class="col-sm-4">
+     <label for="incidentCLOSINGDATE-group">To date</label>
+     <p name="incidentCLOSINGDATE-group" class="input-group">
+      <input name="qTO" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" datepicker-options="dp3.dateOptions" ng-model="q.TO" is-open="dp3.status.opened" close-text="Close" ng-change="getCsvObject()"/>
+      <span class="input-group-btn">
+       <button type="button" class="btn btn-default" ng-click="dp3.open($event)"><i class="glyphicon glyphicon-calendar" ></i></button>
+       <div ng-messages="reportForm.qTO.$error"> 
+        <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+        <div ng-message="date"><small class="label label-danger">Invalid date</small></div>
+       </div>        
+      </span>
+     </p>
+    </div>
+
+    <div class="col-sm-4">
+      <label for="incidentSTATUS">Include open incidents</label>
+      <select name="incidentSTATUS" class="form-control" ng-model="q.INCLUDE_OPEN" ng-change="getCsvObject()">
+       <option value="%">Y</option>
+       <option value="Closed">N</option>
+      </select>
+      <div ng-messages="reportForm.incidentSTATUS.$error">
+       <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+      </div>       
+    </div>
+
+  </div>
+	</div>
+
+	<div class="modal-footer">
+  <div class="input-group">
+			<button class="btn btn-primary" ng-click="tableToExcel('incTable', 'RA_Incidents_' + entry.OPCO_ID + '_' + (q.FROM | date:'MMMM-yyyy') + '.xls')" filename="RA_Incidents_{{entry.lookup.getOpcoById(entry.OPCO_ID).COUNTRY}}_{{q.FROM | date:'yyyy_MM'}}.xls" field-separator="\t" decimal-separator=".">
+				<i class="fa fa-download"></i> 
+				Download report for {{q.FROM | date:'MMMM yyyy'}}
+			</button>
+  </div>
+ </div>
+
+	</form>
+
+</div>
+
+<div class="hidden">
+<table id="incTable" border="0" cellpadding="0" cellspacing="0" width="1008" style="border-collapse: collapse;table-layout: fixed;width: 756pt;">
+<thead>
+<tr height="45" style="height:33.75pt">
+   <td height="45" style="height: 33.75pt;width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;">RA Ref.</td>
+   <td style="width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;">Country</td>
+   <td style="width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;">Affected
+   Process</td>
+   <td style="width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;">AMX Procedure Ref.</td>
+   <td style="width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;">RA Control</td>
+   <td style="width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;">Control Description</td>
+   <td style="width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;">Start Date / End Date</td>
+   <td style="width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;">Issue</td>
+   <td style="width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;">Cause</td>
+   <td style="width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;">Type of
+   Impact</td>
+   <td style="width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;mso-font-charset: 0;mso-number-format: 0;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;mso-pattern: black none;mso-protection: unlocked visible;white-space: normal;">Impact</td>
+   <td style="width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;">Corrective
+   Measure</td>
+   <td style="width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;">Responsible
+   for Solution</td>
+   <td style="width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;">Closing Date</td>
+   <td style="width: 54pt;color: white;font-size: 9.0pt;font-weight: 700;font-family: Verdana, sans-serif;text-align: center;vertical-align: middle;border: .5pt solid;background: #DA291C;">Status</td>
+</tr>
+</thead>
+<tbody>
+ <tr height="100%" style="height:100%" ng-repeat="incident in incidents.lines">
+   <td height="100%" width="43"  style="height:100%;border-top: none;color: black;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;text-align: left;vertical-align: top;border: .5pt solid;">I_{{incident.OPCO_ID}}_{{Lpad(incident.INCIDENT_ID, 3, '0')}}</td>
+   <td height="100%" width="46"  style="height:100%;border-top: none;color: black;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;text-align: left;vertical-align: top;border: .5pt solid;">{{entry.lookup.getOpcoById(incident.OPCO_ID).COUNTRY}}</td>
+   <td height="100%" width="43"  style="height:100%;border-top: none;color: black;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;text-align: left;vertical-align: top;border: .5pt solid;">{{incident.AREA}}</td>
+   <td height="100%" width="89"  style="height:100%;border-top: none;color: black;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;text-align: left;vertical-align: top;border: .5pt solid;">{{incident.PROCEDURE_AMX_ID}}</td>
+   <td height="100%" width="89"  style="height:100%;border-top: none;color: black;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;text-align: left;vertical-align: top;border: .5pt solid;">{{incident.METRIC_ID}}</td>
+   <td height="100%" width="205" style="height:100%;border-top: none;color: black;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;text-align: left;vertical-align: top;border: .5pt solid;">{{incident.METRIC_DESCRIPTION}}</td>
+   <td height="100%" width="65"  style="height:100%;border-top: none;color: black;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;mso-font-charset: 0;text-align: left;vertical-align: top;border: .5pt solid;">{{incident.OPENING_DATE | date: 'dd. MMM yyyy'}} <span ng-if="incident.END_DATE">/ {{incident.END_DATE | date: 'dd. MMM yyyy'}}</span> &nbsp;</td>
+   <td height="100%" width="205" style="height:100%;border-top: none;color: black;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;text-align: left;vertical-align: top;border: .5pt solid;">{{incident.PROBLEM_DESCRIPTION}}</td>
+   <td height="100%" width="205" style="height:100%;border-top: none;color: black;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;text-align: left;vertical-align: top;border: .5pt solid;">{{incident.ROOT_CAUSE}}</td>
+   <td height="100%" width="108" style="height:100%;border-top: none;color: black;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;text-align: left;vertical-align: top;border: .5pt solid;">
+      <div ng-if="!incident.IMPACT && !incident.RECOVERED && !incident.PREVENTED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 1)}}) {{getTypeOfImpactText(incident.IMPACT_TYPE, 1)}}</div>
+      <div ng-if="incident.IMPACT && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 1)}}) {{getTypeOfImpactText(incident.IMPACT_TYPE, 1)}}</div>
+      <div ng-if="incident.RECOVERED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 2)}}) {{getTypeOfImpactText(incident.IMPACT_TYPE, 2)}}</div>
+      <div ng-if="incident.PREVENTED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 3)}}) {{getTypeOfImpactText(incident.IMPACT_TYPE, 3)}}</div>
+      <div ng-if="incident.IMPACT_TYPE == 'No loss'">No loss</div>
+      <div ng-if="incident.IMPACT_TYPE == 'Unknown'">Unknown</div>
+   </td>
+   <td height="100%" width="90"  style="height:100%;border-top: none;color: black;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;mso-font-charset: 0;mso-number-format: 0;text-align: left;vertical-align: top;border: .5pt solid;">
+      <div ng-if="!incident.IMPACT && !incident.RECOVERED && !incident.PREVENTED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 1)}}) <span class='btn-red pull-right'>{{0 | number:0}}</span></div>
+      <div ng-if="incident.IMPACT && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 1)}}) <span style='color:red'>{{incident.IMPACT | number:0}}</span></div>
+      <div ng-if="incident.RECOVERED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 2)}}) <span style='color:green'>{{incident.RECOVERED | number:0}}</span></div>
+      <div ng-if="incident.PREVENTED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 3)}}) <span style='color:blue'>{{incident.PREVENTED | number:0}}</span></div>
+      <div ng-if="incident.IMPACT_TYPE == 'No loss'"><span class='pull-right'>{{0 | number:0}}</span></div>
+      <div ng-if="incident.IMPACT_TYPE == 'Unknown'"><span class='pull-right'>Unknown</span></div>
+   </td>
+   <td height="100%" width="205" style="height:100%;border-top: none;color: black;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;text-align: left;vertical-align: top;border: .5pt solid;">{{incident.CORRECTIVE_ACTION}}</td>
+   <td height="100%" width="92"  style="height:100%;border-top: none;color: black;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;text-align: left;vertical-align: top;border: .5pt solid;">
+      <span ng-if="incident.RESPONSIBLE_PERSON && incident.RESPONSIBLE_TEAM && incident.RESPONSIBLE_DIRECTOR">{{incident.RESPONSIBLE_PERSON}}, {{incident.RESPONSIBLE_TEAM}} ({{incident.RESPONSIBLE_DIRECTOR}}), {{incident.USERNAME}} (Revenue Assurance)</span> 
+      <span ng-if="((!incident.RESPONSIBLE_PERSON && incident.RESPONSIBLE_TEAM) || (incident.RESPONSIBLE_PERSON && !incident.RESPONSIBLE_TEAM)) && incident.RESPONSIBLE_DIRECTOR">{{incident.RESPONSIBLE_TEAM || incident.RESPONSIBLE_PERSON}} ({{incident.RESPONSIBLE_DIRECTOR}}), {{incident.USERNAME}} (Revenue Assurance)</span> 
+      <span ng-if="incident.RESPONSIBLE_PERSON && incident.RESPONSIBLE_TEAM && !incident.RESPONSIBLE_DIRECTOR">{{incident.RESPONSIBLE_PERSON}}, {{incident.RESPONSIBLE_TEAM}}, {{incident.USERNAME}} (Revenue Assurance)</span> 
+      <span ng-if="((!incident.RESPONSIBLE_PERSON && incident.RESPONSIBLE_TEAM) || (incident.RESPONSIBLE_PERSON && !incident.RESPONSIBLE_TEAM)) && !incident.RESPONSIBLE_DIRECTOR">{{incident.RESPONSIBLE_TEAM || incident.RESPONSIBLE_PERSON}}, {{incident.USERNAME}} (Revenue Assurance)</span> 
+      <span ng-if="!incident.RESPONSIBLE_PERSON && !incident.RESPONSIBLE_TEAM && incident.RESPONSIBLE_DIRECTOR">({{incident.RESPONSIBLE_DIRECTOR}}), {{incident.USERNAME}} (Revenue Assurance)</span> 
+      <span ng-if="!incident.RESPONSIBLE_PERSON && !incident.RESPONSIBLE_TEAM && !incident.RESPONSIBLE_DIRECTOR">{{incident.USERNAME}} (Revenue Assurance)</span> 
+   </td>
+   <td height="100%" width="65"  style="height:100%;border-top: none;color: black;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;mso-font-charset: 0;text-align: left;vertical-align: top;border: .5pt solid;">{{incident.CLOSING_DATE | date: 'dd. MMM yyyy'}} &nbsp;</td>
+   <td height="100%" ng-if="incident.STATUS != 'Closed'" width="60" style="border-top: none;color:;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;text-align: left;vertical-align: top;border: .5pt solid;background: #FED517;">{{incident.STATUS}}</td>
+   <td height="100%" ng-if="incident.STATUS == 'Closed'" width="60" style="border-top: none;color: white;font-size: 9.0pt;font-weight: 400;font-family: Verdana, sans-serif;text-align: left;vertical-align: top;border: .5pt solid;background: #4C8328;">{{incident.STATUS}}</td>
+ </tr>
+</tbody>
+
+</table>
+</div>

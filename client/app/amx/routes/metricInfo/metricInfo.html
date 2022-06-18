@@ -1,0 +1,510 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li><a href="/metric-catalogue?opcoId={{entry.OPCO_ID}}"><i class="fa fa-line-chart fa-fw"></i> Metric catalogue</a></li>
+  <li><a href="/metric-results-overview?opcoId={{entry.OPCO_ID}}&month={{entry.searchMDmonth}}"><i class="fa fa-th-list fa-fw"></i> Metrics overview</a></li>
+  <li ng-if="metric.FREQUENCY=='D'"><a href="/metric-result-table?opcoId={{entry.OPCO_ID}}&month={{entry.searchMDmonth}}&frequency=D&finetuned={{entry.overviewShowFineTunedOnly}}"><i class="fa fa-table fa-fw"></i> Daily metrics results table</a></li>
+  <li ng-if="metric.FREQUENCY=='M' || metric.FREQUENCY=='C'"><a href="/metric-result-table?opcoId={{entry.OPCO_ID}}&month={{entry.searchMDmonth}}&frequency=M&finetuned={{entry.overviewShowFineTunedOnly}}"><i class="fa fa-list-alt fa-fw"></i> Monthly metrics results table</a></li>
+  <li class="active"><i class="fa fa-edit fa-fw"></i> Edit {{metric.METRIC_ID}}</a></li>
+  <li><a href="/metric-result/{{metric.OPCO_ID}}/{{metric.METRIC_ID}}?month={{entry.searchMDmonth}}"><i class="fa fa-area-chart fa-fw"></i> <strong>{{metric.METRIC_ID}}</strong> results</a></li>
+  <li><a href="/dataflow-graph?datasourceId=M-{{metric.METRIC_ID}}-{{metric.OPCO_ID}}""><i class="fa fa-sitemap fa-fw"></i> <strong>{{metric.METRIC_ID}}</strong> dataflow</a></li>
+</ol>
+<!-- Breadcrumbs -->
+
+<h3 class="sub-header">
+    <span class="input-group btn-group pull-left">
+      <a class="btn btn-primary dropdown-toggle no-margins no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="isDisabled && entry.currentUser.userOpcoId">
+        <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a ui-sref="metricNew"><i class="fa fa-plus fa-fw"></i> New metric</a></li>
+        <li><a ng-href="#" ng-click="newTask()"><i class="fa fa-check-square-o fa-fw"></i> New task</a></li>        
+      </ul>
+    </span> 
+    &nbsp;
+    <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+    {{entry.state.data.title}} 
+</h3>
+
+<form  class="form-horizontal" name="metricForm">
+<div ng-if="metric.METRIC_ID || newMetric || changeRequest">
+<div class="panel panel-default md-whiteframe-4dp" ng-class="{'panel-danger':metric.IMPLEMENTED=='N' && metric.RELEVANT=='Y', 'panel-success':metric.IMPLEMENTED=='Y'}">  
+
+  <div class="panel-heading no-margins">
+
+    <h4 class="no-margins">
+      <strong>
+        <i class="fa fa-line-chart"></i> 
+        {{metric.METRIC_ID}}
+        <i class="fa fa-ban btn-red fa-fw" ng-if="metric.RELEVANT=='N'"></i>
+      </strong> 
+      <small>{{entry.lookup.getOpcoById(metric.OPCO_ID).OPCO_NAME}}</small>
+
+      <small ng-if="changeRequest" class="alert-danger"> change request </small>
+      <small ng-if="newMetric" class="alert-danger"> new metric </small>
+
+      <span class="label pull-right" ng-class="{'btn-day':metric.FREQUENCY=='D', 'btn-month':metric.FREQUENCY=='M', 'btn-cycle':metric.FREQUENCY=='C'}">{{metric.FREQUENCY}}</span>
+      <span class="small label pull-right" ng-if="!changeRequest && !newMetric"><small>{{flashMessage}}</small> </span>
+
+      <span class="pull-right" style="margin-right: 10px;">
+        <div class="label label-default pull-right" layout="row" layout-align="space-between center">
+          <div class="pointer-row" uib-tooltip="Risk nodes with this control" tooltip-trigger="mouseenter" tooltip-placement="top"><strong> {{coverageStats.CVG_RN_CNT}} | </strong></div>
+          <div layout-align="space-between center" flex>
+              <span class="pointer-row" style="font-size: 12px; color: #A9F5A9;" uib-tooltip="Risk coverage contribution" tooltip-trigger="mouseenter" tooltip-placement="top"> <i class="fa fa-fw fa-umbrella" aria-hidden="true"></i> {{coverageStats.CTRL_COVERAGE | number:4}} %</span>
+              <span ng-if="coverageStats.CTRL_COVERAGE_OVERLAP > 0" class="pointer-row" style="font-size: 12px; color: #FAAC58; margin-top: 3px" uib-tooltip="Overlap with other controls" tooltip-trigger="mouseenter" tooltip-placement="top"> | <i class="fa fa-fw fa-umbrella" aria-hidden="true"></i> {{coverageStats.CTRL_COVERAGE_OVERLAP | number:4}} %</span>
+          </div>
+        </div>
+      </span>      
+    </h4> 
+
+  </div>
+
+  <div class="panel-body" ng-cloak>
+
+    <div class="form-group">
+
+      <div class="col-sm-2">
+          <label for="metricMETRIC_ID">Metric ID</label>
+          <input name="metricMETRIC_ID" type="text" class="form-control" ng-required="true" placeholder="Metric ID" ng-model="metric.METRIC_ID" ng-disabled="!changeRequest && !newMetric">
+          <div ng-messages="metricForm.metricMETRIC_ID.$error"> 
+            <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            <div ng-message="minlength" ng-message="maxlength"><small class="label label-danger">Must be exactly 3 characters long</small></div>
+          </div>            
+      </div>
+
+      <div class="col-sm-2">
+        <label for="metricFREQUENCY">Frequency</label>
+        <select name="metricFREQUENCY" class="form-control" ng-required="true" ng-model="metric.FREQUENCY" ng-disabled="!changeRequest && !newMetric" required>
+          <option value="D">Daily</option>
+          <option value="M">Monthly</option>
+          <option value="C">Bill Cycle</option>
+        </select>
+        <div ng-messages="metricForm.metricFREQUENCY.$error">
+          <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+        </div>         
+      </div>
+
+      <div class="col-sm-2">
+        <label for="metricRELEVANT">Relevant</label>
+        <select name="metricRELEVANT" class="form-control" ng-model="metric.RELEVANT" ng-disabled="!changeRequest && !newMetric" required>
+          <option>Y</option>
+          <option>N</option>
+        </select>
+        <div ng-messages="metricForm.metricRELEVANT.$error">
+          <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+        </div>         
+      </div>
+
+      <div class="col-sm-3">
+        <label for="metricSTART_DATEgroup">Valid from</label>
+        <p name="metricSTART_DATEgroup" class="input-group">
+          <input name="metricSTART_DATE" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy" datepicker-options="dp.dateOptions" ng-model="metric.START_DATE" is-open="dp.status.opened" ng-required="true" close-text="Close" ng-disabled="!changeRequest && !newMetric"/>
+          <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="dp.open($event)" ng-disabled="!changeRequest && !newMetric"><i class="glyphicon glyphicon-calendar"></i></button>
+          <div ng-messages="metricForm.metricSTART_DATE.$error"> 
+            <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            <div ng-message="date"><small class="label label-danger">Invalid date</small></div>
+          </div> 
+          </span>
+        </p>
+      </div>
+
+      <div class="col-sm-3">
+        <label for="metricAREA">Area</label>
+        <select name="metricAREA" class="form-control" ng-model="metric.AREA_ID" ng-disabled="!changeRequest && !newMetric" required>
+          <option ng-repeat="area in localEntry.lookup.areas" value="{{area.AREA_ID}}">{{area.NAME}}</option>
+        </select>
+        <div ng-messages="metricForm.metricAREA.$error">
+          <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+        </div>        
+      </div>
+
+    </div>
+
+      <div class="form-group">
+        <div class="col-sm-6">
+            <label for="metricNAME">Name</label>
+            <textarea name="metricNAME" type="text" class="form-control" placeholder="Name" ng-model="metric.NAME" ng-required="true" rows="3" ng-disabled="!changeRequest && !newMetric"></textarea>
+            <div ng-messages="metricForm.metricNAME.$error">
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            </div>   
+
+        </div>
+
+        <div class="col-sm-6">
+            <label for="metricDESCRIPTION">Description</label>
+            <textarea name="metricDESCRIPTION" type="text" class="form-control" placeholder="Description" ng-model="metric.DESCRIPTION" rows="3" ng-disabled="!changeRequest && !newMetric" required></textarea>
+            <div ng-messages="metricForm.metricDESCRIPTION.$error">
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+            </div>             
+        </div>
+      </div>
+
+    <div class="form-group">
+
+      <div  class="col-sm-6">
+          <label for="metricFORMULA">Formula</label>
+          <input name="metricFORMULA" type="text" class="form-control" ng-required="true" placeholder="Formula" ng-model="metric.FORMULA" uib-tooltip="Prefix each Dato ID with # and keep it in separate brackets e.g. abs((#001)-(#002))" uib-tooltip-trigger="focus" uib-tooltip-placement="top" ng-disabled="!changeRequest && !newMetric">
+          <div ng-messages="metricForm.metricFORMULA.$error"> 
+            <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+          </div>            
+      </div>
+
+      <div class="col-sm-2">
+          <label for="metricOBJECTIVE">Objective</label>
+          <input type="number" step="0.0001" class="form-control text-right" ng-required="true" placeholder="Objective" ng-model="metric.OBJECTIVE" ng-disabled="!changeRequest && !newMetric">
+      </div>
+    
+      <div class="col-sm-2">
+          <label for="metricTOLERANCE">Tolerance</label>
+          <input type="number" step="0.0001" class="form-control text-right" ng-required="true" placeholder="Tolerance" ng-model="metric.TOLERANCE" ng-disabled="!changeRequest && !newMetric">
+      </div>
+
+      <div class="col-sm-2">
+          <label for="metricTREND">Trend metric</label>
+          <select name="metricTREND" class="form-control" ng-model="metric.TREND" ng-disabled="!changeRequest && !newMetric">
+            <option>Y</option>
+            <option>N</option>
+          </select>
+          <br>
+      </div>
+      
+    </div>
+
+    <div class="form-group">
+      <div class="col-sm-6">
+        <label for="metricFORMULAMath">Formula <i class="fa fa-eye"></i></label>
+        <div name="metricFORMULAMath" class="panel formula-panel panel-default no-margins" ng-disabled="!changeRequest && !newMetric">
+          <div ng-if="!changeRequest && !newMetric">
+                <table class="table table-condensed table-striped no-margins">
+                    <tbody>
+                        <tr>
+                          <td ng-repeat="dato in relatedDatos">
+                            <a class="btn btn-default btn-xs btn-block" ng-class="{'btn-not-implemented': dato.RELEVANT=='Y' && dato.IMPLEMENTED=='N'}" href="/dato-info/{{dato.OPCO_ID}}/{{dato.DATO_ID}}" data-html="true" popover-title="{{dato.NAME}}" uib-popover-html="popoverHtml(dato.DESCRIPTION, dato.UNIT)" popover-trigger="mouseenter" popover-placement="top-left" popover-append-to-body="true">
+                              <i class="fa" ng-class="{'fa-cube': dato.RELEVANT=='Y', 'fa-ban btn-red': dato.RELEVANT=='N'}"></i>
+                              <strong>{{dato.DATO_ID}}</strong> 
+                            </a>
+                          </td> 
+                          <td><a class="btn btn-default btn-xs btn-block" ng-click="updateRelatedDatos()" ng-disabled="entry.isDisabled()" data-html="true" uib-popover="Parse formula / Refresh related datos" popover-trigger="mouseenter" popover-placement="top-left" popover-append-to-body="true">
+                            <i class="fa fa-refresh"></i>
+                          </a></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  <div class="panel-body">
+                    <span math="`sf({{metric.FORMULA}})`"></span>
+                  </div>
+                  
+                </div>
+                
+              </div>
+              
+              <div class="col-sm-2">
+                <!-- <div ng-if="!newMetric" > -->
+                  <label for="metricIMPLEMENTED">Metric fine-tuned</label>
+                  <select name="metricIMPLEMENTED" class="form-control" ng-model="metric.IMPLEMENTED" ng-disabled="!changeRequest && !newMetric">
+                    <option>Y</option>
+                    <option>N</option>
+                  </select>
+                  <br>
+                  <!-- </div>         -->
+              </div>     
+              
+              <div ng-if="!changeRequest && !newMetric"  class="col-sm-4">
+                <label for="metricNOTES">Implementation notes</label> 
+                <textarea name="metricNOTES" type="text" class="form-control" placeholder="Notes" ng-model="metric.NOTES" rows="5" ng-disabled="metric.OPCO_ID != entry.currentUser.userOpcoId && entry.currentUser.userOpcoId != 0" focus-me="true"></textarea>
+              </div>      
+              
+            </div>
+
+            <div class="form-group">
+              <div class="col-sm-6">
+                <label for="controlTYPE" ng-click="toggleShowBA()" style="cursor:pointer">Business Assurance Domains <i class="fa fa-fw" ng-class="{'fa-chevron-up':showBA,'fa-chevron-down':!showBA}"></i></label>
+                <div layout="row" flex ng-if="!showBA">
+                  <input type="text" class="form-control" value="{{ activeBAs?activeBAs:'No BA domains mapped' }}" disabled></input>
+                </div>
+                <div layout="row" flex ng-if="showBA" class="panel-heading no-margins">
+                    <div layout="column" flex="50">
+                      <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="metric.BUSINESS_ASSURANCE_DOMAIN.RevenueAndCostAssurance" disabled aria-label="Revenue & Cost Assurance">
+                        Revenue & Cost Assurance
+                      </md-checkbox>
+                      <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="metric.BUSINESS_ASSURANCE_DOMAIN.MarginAssurance" disabled aria-label="Margin Assurance">
+                        Margin Assurance
+                      </md-checkbox>
+                      <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="metric.BUSINESS_ASSURANCE_DOMAIN.AssetAssurance" disabled aria-label="Asset Assurance">
+                        Asset Assurance
+                      </md-checkbox>
+                      <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="metric.BUSINESS_ASSURANCE_DOMAIN.MigrationAssurance" disabled aria-label="Migration Assurance">
+                        Migration Assurance
+                      </md-checkbox>
+                      <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="metric.BUSINESS_ASSURANCE_DOMAIN.FraudManagement" disabled aria-label="Fraud Management">
+                        Fraud Management
+                      </md-checkbox>   
+                      <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="metric.BUSINESS_ASSURANCE_DOMAIN.RegulatoryAssurance" disabled aria-label="Regulatory Assurance">
+                        Regulatory Assurance
+                      </md-checkbox>                                     
+                    </div>
+      
+                    <div layout="column" flex="50">
+                      <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="metric.BUSINESS_ASSURANCE_DOMAIN.DigitalTransformationAssurance" disabled aria-label="Digital Transformation Assurance">
+                        Digital Transformation Assurance
+                      </md-checkbox>
+                      <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="metric.BUSINESS_ASSURANCE_DOMAIN.DigitalEcosystemAssurance" disabled aria-label="Digital Ecosystem Assurance">
+                        Digital Ecosystem Assurance
+                      </md-checkbox>
+                      <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="metric.BUSINESS_ASSURANCE_DOMAIN.CustomerExperience" disabled aria-label="Customer Experience">
+                        Customer Experience
+                      </md-checkbox>
+                      <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="metric.BUSINESS_ASSURANCE_DOMAIN.CustomerJourney" disabled aria-label="Customer Journey">
+                        Customer Journey
+                      </md-checkbox>
+                      <md-checkbox class="md-primary md-hue-1 xs-margins" md-no-ink ng-true-value="'Y'" ng-false-value="'N'" ng-model="metric.BUSINESS_ASSURANCE_DOMAIN.CustomerEquipmentAssurance" disabled aria-label="Customer Equipment Assurance">
+                        Customer Equipment Assurance
+                      </md-checkbox>
+                    </div>
+                </div>
+  
+              </div>
+            </div>
+    
+    <div ng-if="changeRequest || newMetric" class="form-group">
+      <div class="col-sm-12">
+        <label for="metricCHANGE_REQUEST_COMMENT">Change request comment</label>
+        <textarea name="metricCHANGE_REQUEST_COMMENT" type="text" class="form-control" placeholder="Comment" ng-model="metricAdd.CHANGE_REQUEST_COMMENT" rows="3"></textarea>
+      </div>
+    </div>   
+  </div>
+  
+  
+  <div class="panel-footer no-margins">
+    <!-- Buttons -->
+    <div class="form-group">
+      <div class="col-sm-12">
+        <button ng-if="!changeRequest && !newMetric && (metric.OPCO_ID == entry.currentUser.userOpcoId || entry.currentUser.userOpcoId == 0)" type="button" class="btn btn-primary" ng-click="addMetricChangeRequest()"><i class="fa fa-edit"></i> Create change request</button>
+        <a ng-if="!changeRequest && !newMetric && metric.RELEVANT == 'Y'" type="button" class="btn btn-default" ng-href="/metric-result/{{metric.OPCO_ID}}/{{metric.METRIC_ID}}?month={{entry.searchMDmonth}}">
+          <i class="fa fa-fw" ng-class="{'fa-area-chart': metric.RELEVANT=='Y', 'fa-ban btn-red': metric.RELEVANT=='N'}"></i> 
+          <strong>{{metric.METRIC_ID}}</strong> results        
+        </a>
+
+        <a ng-if="!changeRequest && !newMetric" class="btn btn-default" ng-href="/dataflow-graph?datasourceId=M-{{metric.METRIC_ID}}-{{metric.OPCO_ID}}"><i class="fa fa-sitemap"></i> <strong>{{metric.METRIC_ID}}</strong> dataflow</a>
+
+        <button ng-if="!changeRequest && !newMetric && (metric.OPCO_ID == entry.currentUser.userOpcoId || entry.currentUser.userOpcoId == 0)" type="button" class="btn btn-default pull-right" ng-click="newTask()"><i class="fa fa-check-square-o"></i> New task</button>
+
+        <button ng-if="changeRequest && !newMetric" type="button" class="btn btn-default" ng-click="cancelMetricChangeRequest()">Cancel</button>
+        <button ng-if="changeRequest && !newMetric" type="submit" class="btn btn-primary" ng-click="submitMetricChangeRequest(metricForm.$valid)"><i class="fa fa-envelope"></i> Submit the change request</button>
+        
+        <button ng-if="!changeRequest && newMetric" type="button" class="btn btn-default" ng-click="cancelNewMetric()">Cancel</button>
+        <button ng-if="!changeRequest && newMetric" type="submit" class="btn btn-primary" ng-click="submitNewMetric(metricForm.$valid)"><i class="fa fa-envelope"></i> Submit the request for a new metric</button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</div>
+</form>
+
+<!-- Change requests -->
+<div ng-if="!changeRequest && !newMetric && changeRequests.length>0" class="panel panel-default md-whiteframe-4dp">  
+  <div class="panel-heading no-margins">
+    <h5><strong>Change history</strong></h5>
+  </div>
+  <div class="panel-body no-margins">
+    <div class="table-responsive">
+        <table class="table table-hover borderless" ng-if="changeRequests.length > 0">
+            <tbody>
+                <tr ng-repeat="(rowId, change) in changeRequests | opcoFilter:entry.OPCO_ID" ng-click="">
+                    <td style="vertical-align:middle; text-align:left; width:100px">
+                      <strong>C_{{change.OPCO_ID}}_{{Lpad(change.CHANGE_ID, 3, '0')}}</strong><br/>
+                    </td>
+                    <td style="vertical-align:middle; text-align:left; width:80px">
+                      <span ng-if="change.CHANGE_TYPE.indexOf('dato') > 0" ng-class="{'change-approved':change.STATUS=='Approved', 'change-rejected':change.STATUS=='Rejected', 'change-requested':change.STATUS=='Requested'}" >&nbsp;<i class="fa fa-fw fa-lg" ng-class="{'fa-cube':change.CHANGE_TYPE.indexOf('dato')>0, 'fa-line-chart':change.CHANGE_TYPE.indexOf('metric')>0}"></i> <strong>{{change.OBJECT_ID}}</strong></span>
+                      <span ng-if="change.CHANGE_TYPE.indexOf('metric') > 0" ng-class="{'change-approved':change.STATUS=='Approved', 'change-rejected':change.STATUS=='Rejected', 'change-requested':change.STATUS=='Requested'}" >&nbsp;<i class="fa fa-fw fa-lg" ng-class="{'fa-cube':change.CHANGE_TYPE.indexOf('dato')>0, 'fa-line-chart':change.CHANGE_TYPE.indexOf('metric')>0}"></i> <strong>{{change.OBJECT_ID}}</strong></span>
+                    </td>                     
+                    <td style="vertical-align:middle; text-align:left; width:250px">
+                      <strong class="change-requested">Requested</strong><br>
+                      <i class="fa fa-fw fa-clock-o"></i> {{change.CREATED | date:'dd.MM.yyyy'}} <small class="btn-grey">{{change.CREATED | date:'HH:mm'}}</small><br>
+                      <i class="fa fa-fw fa-user"></i> <small>{{change.REQUESTOR}}</small><br>
+                      <span class="change-requested" ng-if="change.REQUESTOR_COMMENT != null"><strong>Comment:</strong> <small>{{change.REQUESTOR_COMMENT}}</small></span>
+                    </td>
+                    <td style="vertical-align:middle; text-align:center">
+                      <div ng-repeat="chg in change.CHANGES"><strong>{{chg.field | sentencecase}}</strong>: {{chg.oldValue}} <i class="fa fa-fw fa-long-arrow-right"></i> <strong>{{chg.newValue}}</strong> </div>
+                    </td>
+                    <td style="vertical-align:middle; text-align:left; width:250px">
+                      <strong ng-class="{'change-approved':change.STATUS=='Approved', 'change-rejected':change.STATUS=='Rejected', 'change-requested':change.STATUS=='Requested'}">{{change.STATUS}}</strong><br>
+                      <i class="fa fa-fw fa-clock-o"></i> {{change.STATUS_DATE | date:'dd.MM.yyyy'}} <small class="btn-grey">{{change.STATUS_DATE | date:'HH:mm'}}</small><br>
+                      <div ng-if="change.APPROVER"><i class="fa fa-fw fa-user"></i> <small>{{change.APPROVER}}</small></div>
+                      <span ng-class="{'change-approved':change.STATUS=='Approved', 'change-rejected':change.STATUS=='Rejected', 'change-requested':change.STATUS=='Requested'}" ng-if="change.APPROVER_COMMENT != null"><strong>Comment:</strong> <small>{{change.APPROVER_COMMENT}}</small></span>
+                    </td>
+                    <td>
+                      <span class="input-group">        
+                        <button ng-if="change.STATUS == 'Requested' && entry.currentUser.userOpcoId == 0" type="button" class="btn btn-sm btn-success " ng-click="approveChange(change.CHANGE_ID)" uib-tooltip="Approve" tooltip-trigger="mouseenter" tooltip-placement="top" tooltip-popup-delay="800"><i class="fa fa-check fa-fw"></i> </button>
+                        <button ng-if="change.STATUS == 'Requested' && entry.currentUser.userOpcoId == 0" type="button" class="btn btn-sm btn-danger" ng-click="rejectChange(change.CHANGE_ID)" uib-tooltip="Reject" tooltip-trigger="mouseenter" tooltip-placement="top" tooltip-popup-delay="800"><i class="fa fa-times fa-fw"></i> </button>
+                      </span>
+                    </td>                    
+                </tr>
+            </tbody>
+        </table>
+    </div>
+  </div>
+</div>  
+<!-- /Change requests -->
+
+<!-- Tasks -->
+<div ng-if="!changeRequest && !newMetric && tasks.length>0" class="panel panel-default md-whiteframe-4dp">  
+  <div class="panel-heading no-margins">
+    <h5>
+    <span class="input-group btn-group pull-left">
+      <a class="btn btn-primary dropdown-toggle no-margins no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-disabled="isDisabled && entry.currentUser.userOpcoId">
+        <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a ng-href="#" ng-click="newTask()"><i class="fa fa-check-square-o fa-fw"></i> New task</a></li>        
+      </ul>
+    </span> 
+    &nbsp;
+    <strong>Tasks</strong></h5>
+  </div>
+  <div class="panel-body no-margins">
+    <div class="table-responsive" >
+        <table class="table table-hover table-condensed">
+            <thead>
+                <tr>
+                    <th width="90px">ID</th>
+                    <th width="120px">Timestamp</th>
+                    <th width="80px">Object</th>
+                    <th width="5px"></th>
+                    <th>Description / Notes</th>
+                    <th width="80px">Status</th>
+                    <th width="250px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-if="!tasks.length"><td colspan="7"><h4>No tasks exist yet. </h4></td></tr>
+                <tr class="animation pointer-row" ng-class="{'btn-not-relevant':task.RELEVANT=='N'}" ng-repeat="task in tasks" ng-click="$event.originalEvent.dropdown || $event.originalEvent.menuclick || taskEditModal(task.TASK_ID)" >
+                    <td style="vertical-align:middle; text-align:left">
+                        <span ng-class="{'btn-red':task.STATUS == 'Open - OPCO', 'btn-black':task.STATUS == 'Open - TAG', 'btn-green':task.STATUS == 'Closed'}"> <i class="fa fa-lg fa-fw fa-check-square"></i></span>
+                        <strong>T_{{task.OPCO_ID}}_{{Lpad(task.TASK_ID, 3, '0')}}</strong></td>                              
+                    <td style="vertical-align:middle"><i class="fa fa-fw fa-clock-o"></i> {{task.CREATED | date:"dd.MM.yyyy"}} <small class="btn-grey">{{task.CREATED | date:"HH:mm"}}</small></td> 
+                    <td style="vertical-align:middle"><span ng-class="{'btn-red':task.STATUS == 'Open - OPCO', 'btn-black':task.STATUS == 'Open - TAG', 'btn-green':task.STATUS == 'Closed'}"> <i class="fa fa-lg fa-fw" ng-class="{'fa-cube':task.SOURCE=='DATO', 'fa-line-chart':task.SOURCE=='METRIC', 'fa-edit':task.SOURCE=='CHANGE', 'fa-file-text':task.SOURCE=='FILE'}"></i></span> | <strong >{{task.OBJECT_ID}}</strong></td>
+                    <td ng-class="{'panel-red':task.STATUS == 'Open - OPCO', 'panel-black':task.STATUS == 'Open - TAG', 'panel-green':task.STATUS == 'Closed'}"></td>                    
+                    <td style="vertical-align:middle; padding-left:10px;"><span ng-if="task.DESCRIPTION">{{task.DESCRIPTION}}</br><small ng-if="task.NOTE"><strong>Notes:</strong> {{task.NOTE}}</small></span></td>
+                    <td style="vertical-align:middle;">
+                      <span class="input-group btn-group btn-block dropdown">
+                        <button class="btn btn-sm dropdown-toggle btn-block" ng-click="$event.originalEvent.dropdown = true" data-toggle="dropdown"
+                            ng-class="{
+                                'btn-default': task.STATUS == 'Pending', 
+                                'btn-primary': (task.STATUS == 'Open - OPCO' && task.ASSIGNED_TO), 
+                                'btn-default': (task.STATUS == 'Open - TAG' || task.STATUS == 'Open - OPCO'), 
+                                'btn-success': task.STATUS == 'Closed'}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" 
+                            ng-disabled="(task.ASSIGNED_TO && task.ASSIGNED_TO != entry.currentUser.userName && entry.currentUser.userOpcoId) 
+                                        || (entry.currentUser.userOpcoId != entry.OPCO_ID && entry.currentUser.userOpcoId)
+                                        || (task.STATUS !== 'Open - OPCO' && task.ASSIGNED_TO != entry.currentUser.userName && entry.currentUser.userOpcoId)
+                                        ">
+                            <span>
+                                <i class="fa fa-fw" 
+                                    ng-class="{
+                                        'fa-hourglass-half': task.STATUS == 'Open - OPCO' && !task.ASSIGNED_TO, 
+                                        'fa-flag-checkered': task.STATUS == 'Open - TAG', 
+                                        'fa-lg fa-cog fa-spin': task.STATUS == 'Open - OPCO' && task.ASSIGNED_TO && task.STATUS !== 'Closed', 
+                                        'fa-check':task.STATUS == 'Closed'
+                                        }">
+                                </i> 
+                            </span>
+                          <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                          <!-- Open - OPCO -->
+                          <li ng-if="task.STATUS === 'Open - OPCO' && !task.ASSIGNED_TO && entry.currentUser.userOpcoId"><a href="" ng-click="$event.originalEvent.menuclick = true; assignTaskToMe(task.TASK_ID);"><i class="fa fa-user-plus fa-fw"></i> Assign task to me</a></li>
+                          <li ng-if="task.STATUS === 'Open - OPCO' && task.ASSIGNED_TO === entry.currentUser.userName && entry.currentUser.userOpcoId"><a href="" ng-click="$event.originalEvent.menuclick = true; unAssignTask(task.TASK_ID);"><i class="fa fa-user-times fa-fw"></i> Un-assign</a></li>
+                          <li ng-if="task.STATUS === 'Open - OPCO' && (!task.ASSIGNED_TO || task.ASSIGNED_TO === entry.currentUser.userName) && entry.currentUser.userOpcoId"><a href="" ng-click="$event.originalEvent.menuclick = true; closeTaskOpco(task.TASK_ID);"><i class="fa fa-check fa-fw"></i> Close</a></li>
+
+                          <!-- In progress -->
+                          <li ng-if="task.STATUS == 'Open - TAG' && !entry.currentUser.userOpcoId"><a href="" ng-click="$event.originalEvent.menuclick = true; returnTaskToOpco(task.TASK_ID);"><i class="fa fa-unlock fa-fw"></i> Return task to OPCO</a></li>
+                          <li ng-if="task.STATUS == 'Open - TAG' && entry.currentUser.userOpcoId && task.ASSIGNED_TO === entry.currentUser.userName"><a href="" ng-click="$event.originalEvent.menuclick = true; returnTaskToOpco(task.TASK_ID);"><i class="fa fa-user-plus fa-fw"></i> Re-assign task to me</a></li>
+                          <li ng-if="(task.STATUS == 'Open - OPCO' || task.STATUS == 'Open - TAG') && !entry.currentUser.userOpcoId "><a href="" ng-click="$event.originalEvent.menuclick = true; closeTaskTag(task.TASK_ID);"><i class="fa fa-check fa-fw"></i> Close</a></li>
+                                                    
+                          <!-- Closed -->
+                          <li ng-if="(task.STATUS == 'Closed' && task.ASSIGNED_TO === entry.currentUser.userName) || (task.STATUS == 'Closed' && !entry.currentUser.opcoId)"><a href="" ng-click="$event.originalEvent.menuclick = true; returnTaskToOpco(task.TASK_ID);"><i class="fa fa-unlock fa-fw"></i> Re-open & return task to OPCO</a></li>
+                        </ul>
+                      </span>
+                    </td>
+                    <td style="vertical-align:middle">
+                        <span ng-class="{'btn-red':task.STATUS == 'Open - OPCO', 'btn-black':task.STATUS == 'Open - TAG', 'btn-green':task.STATUS == 'Closed'}"> <strong>{{task.STATUS}}</strong></span></br>
+                        <i class="fa fa-fw fa-clock-o"></i> {{task.MODIFIED | date:"dd.MM.yyyy"}} <small class="btn-grey">{{task.MODIFIED | date:"HH:mm"}}</small></br>
+                        <div ng-if="task.ASSIGNED_TO"><i class="fa fa-fw fa-user"></i> <small>{{task.ASSIGNED_TO}}</small></div>
+                        <div ng-if="!task.ASSIGNED_TO"><i class="fa fa-fw fa-user-times"></i> <small>Not assigned</small></div>
+                    </td>
+              
+                </tr>
+            </tbody>
+        </table>
+    </div>
+  </div>
+</div>  
+<!-- /Tasks -->
+
+
+<!-- Risk coverage -->
+<div ng-if="coverage.length>0" class="panel panel-default md-whiteframe-4dp">  
+  <div class="panel-heading no-margins">
+    <h5>
+      <i class="fa fa-fw fa-lg fa-line-chart"></i> 
+      <strong>
+        {{metric.METRIC_ID}}
+      </strong>
+      risk coverage
+    </h5>
+  </div>
+  <div class="panel-body no-margins">
+    <div class="table-responsive">
+        <table class="table table-condensed table-hover">       
+            <tbody>
+                <tr ng-repeat="(rowId, riskNode) in coverage" class="pointer-row" ng-click="riskNodeClick(riskNode)">
+                    <td style="vertical-align: middle; text-align: left; padding: 0px !important;" ng-style="{background: getColor(riskNode.PRODUCT_SEGMENT_ID)}" width="6px">
+                      &nbsp;
+                    </td>                
+                    <td style="vertical-align:middle; text-align:left;">
+                      <div class="btn-block">
+                        <strong>{{riskNode.LOB}}</strong> 
+                        <i class="fa fa-fw fa-dot-circle-o"></i> 
+                        <span>{{riskNode.PRODUCT_GROUP}}</span> 
+                      </div>
+                      <span style="font-size: 14px">
+                        <a ng-style="{color: getColor(riskNode.PRODUCT_SEGMENT_ID)}" ng-href="/risk-nodes?productSegmentId={{riskNode.PRODUCT_SEGMENT_ID}}&riskId={{riskNode.RISK_ID}}">
+                          <strong>{{riskNode.PRODUCT_SEGMENT}}</strong>
+                        </a>
+                      </span>
+                    </td> 
+                    <td style="vertical-align: middle; text-align: left; padding: 0px !important;" class="label-process-{{riskNode.BUSINESS_PROCESS_ID}}" width="6px">
+                      &nbsp;
+                    </td>
+                    <td style="vertical-align:middle; text-align:left; padding-left:10px;">
+                      <div class="btn-process-{{riskNode.BUSINESS_PROCESS_ID}}">
+                        <strong>{{riskNode.BUSINESS_PROCESS}}</strong> 
+                        <i class="fa fa-fw fa-dot-circle-o"></i> 
+                        <span>{{riskNode.BUSINESS_SUB_PROCESS}}</span> 
+                      </div>
+                      <span style="font-size: 14px">
+                        <strong>{{riskNode.RISK}}</strong>
+                      </span>
+                    </td>
+                    <td style="vertical-align:middle; text-align:left; min-width: 100px;">
+                      <span ng-if="!riskNode.SYSTEM_NAME" class="btn btn-sm btn-block btn-danger">
+                        <span ><i class="fa fa-desktop fa-fw"></i> <strong>No system</strong></span>
+                      </span>
+                      <span ng-if="riskNode.SYSTEM_NAME" class="btn btn-sm btn-block btn-success">
+                        <div ng-if="riskNode.SYSTEM_NAME"><strong>{{riskNode.SYSTEM_NAME}}</strong></div>
+                      </span> 
+                    </td>
+                    <td style="vertical-align: middle; text-align: right;">
+                      <h4><span class="label label-default">{{riskNode.EFFECTIVENESS}} %</span></h4>
+                    </td> 
+                </tr>
+            </tbody>
+        </table>
+    </div>
+  </div>
+</div>  
+<!-- Risk coverage -->

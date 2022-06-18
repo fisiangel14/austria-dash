@@ -1,0 +1,266 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li><a href="/metric-catalogue?opcoId={{entry.OPCO_ID}}"><i class="fa fa-line-chart fa-fw"></i> Metrics catalogue</a></li>
+  <li><a href="/metric-results-overview?opcoId={{metricResult.OPCO_ID}}&month={{metricResult.DATE | date:'yyyy-MM'}}"><i class="fa fa-th-list fa-fw"></i> Metrics overview</a></li>
+  <li><a href="/metric-result-table?opcoId={{metricResult.OPCO_ID}}&month={{metricResult.DATE | date:'yyyy-MM'}}&frequency={{metricResult.FREQUENCY=='C'?'M':metricResult.FREQUENCY}}&finetuned={{entry.overviewShowFineTunedOnly}}"><i class="fa fa-fw fa-table"></i><span ng-if="metricResult.FREQUENCY=='M' || metricResult.FREQUENCY=='C'">Monthly</span><span ng-if="metricResult.FREQUENCY=='D'">Daily</span> Metric results table</a></li>
+  <li><a href="/metric-result/{{metricResult.OPCO_ID}}/{{metricResult.METRIC_ID}}?month={{metricResult.DATE | date:'yyyy-MM'}}"><i class="fa fa-area-chart fa-fw"></i> <strong>{{metricResult.METRIC_ID}}</strong> results</a></li>
+  <li class="active"><i class="fa fa-area-chart fa-fw"></i> Detailed <strong>{{metricResult.METRIC_ID}}</strong> results, <span ng-if="metricResult.FREQUENCY == 'D'">{{metricResult.DATE | date:"dd.MM.yyyy"}}</span><span ng-if="metricResult.FREQUENCY != 'D'">{{metricResult.DATE | date:"MMM yyyy"}}</span></li>
+  <li><a href="/metric-info/{{metricResult.OPCO_ID}}/{{metricResult.METRIC_ID}}"><i class="fa fa-edit fa-fw"></i> Edit <strong>{{metricResult.METRIC_ID}}</strong></a></li>
+</ol>
+<!-- Breadcrumbs -->
+
+<h3 class="sub-header">
+    <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+    <i class="fa fa-line-chart"></i>
+    <strong>{{metricResult.METRIC_ID}}</strong> 
+    <small>{{metricResult.NAME}}</small> 
+      <small>(</small>
+      <small ng-if="metricResult.FREQUENCY == 'D'">{{metricResult.DATE | date:"dd.MM.yyyy"}}</small>
+      <small ng-if="metricResult.FREQUENCY != 'D'">{{metricResult.DATE | date:"MMM yyyy"}}</small>
+      <small ng-if="metricResult.BILL_CYCLE">, <i class="fa fa-calendar-check-o fa-fw"></i><strong>{{metricResult.BILL_CYCLE}}</strong></small>
+      <small>) </small>
+       =
+      <strong ng-class="{'btn-green':(metricResult.VALUE<=metricResult.OBJECTIVE) || ((metricResult.VALUE>metricResult.OBJECTIVE && + metricResult.VALUE <=  metricResult.OBJECTIVE + metricResult.TOLERANCE) && metricResult.TREND == 'Y'), 'btn-yellow':(metricResult.VALUE>metricResult.OBJECTIVE && + metricResult.VALUE <=  metricResult.OBJECTIVE + metricResult.TOLERANCE) && metricResult.TREND == 'N', 'btn-red':(metricResult.VALUE>metricResult.OBJECTIVE + metricResult.TOLERANCE) && metricResult.TREND == 'N', 'btn-orange':(metricResult.VALUE>metricResult.OBJECTIVE + metricResult.TOLERANCE) && metricResult.TREND == 'Y'}">{{metricResult.VALUE | number:5}}</strong>
+</h3>
+
+<!-- composite table -->
+<div class="panel panel-default md-whiteframe-4dp">  
+
+  <div class="panel-body no-margins">
+
+	    <!-- Formula -->
+	    <div class="panel formula-panel panel-default">
+	      <div class="row">
+
+	          <div class="col-sm-12">
+              <div class="panel-body text-center">
+                <span math="`sf({{metricResult.METRIC_ID}} = {{metricResult.FORMULA}})`"></span>
+                <span math="`sf(= {{metricResult.FORMULA_EVAL}})`"></span>
+                <span ng-if="metricResult.VALUE !== null" math="`sf(= {{metricResult.VALUE}})`"></span>
+                <span ng-if="metricResult.VALUE === null" math="`sf(= {{metricResult.ERROR_CODE.substr(7,3)}})`"></span>
+
+                <div class="panel-body no-padding text-left">
+                  <small>Objective =</small> <strong class="btn-blue">{{metricResult.OBJECTIVE}}</strong>, 
+                  <small>Tolerance =</small> <strong class="btn-blue">{{metricResult.TOLERANCE}}</strong>
+                </div>                  
+              </div>              
+	          </div>
+
+	      </div>
+	    </div>
+	    <!-- Formula -->
+
+	    <!-- Table -->
+			<div class="table-responsive">
+        <table class="table table-condensed no-margins">
+            <thead>
+              <tr>
+                <th width="10px">#</th>
+                <th>ID</th>
+                <th>Date</th>
+                <th>LOB</th>
+                <th>Technology</th>
+                <th>Service</th>
+                <th>Freq.</th>
+                <th class="text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody ng-repeat="(datoId, datos) in datoGroups">
+              
+              <tr class="">
+                <td colspan="8">
+                  &nbsp;
+                </td>
+              </tr>
+
+              <tr class="table-segment-bottom" >
+                <td></td>
+                <td colspan="7">
+                  <strong>{{getRelatedDato(datoId).NAME}} <small>({{getRelatedDato(datoId).UNIT}})</small> </strong>
+                </td>
+              </tr>
+
+              <tr ng-repeat="dato in datos" ng-click="">
+                <td style="vertical-align:middle; text-align:right">{{$index+1}}. </td>
+                <td style="vertical-align:middle">{{datoId}}</td>
+                <td style="vertical-align:middle">
+                	<span ng-if="metricResult.FREQUENCY == 'D'">{{dato.DATE | date:"dd.MM.yyyy"}}</span>
+                	<span ng-if="metricResult.FREQUENCY != 'D'">{{dato.DATE | date:"MMM yyyy"}}</span>
+                </td>
+                <td style="vertical-align:middle">{{localEntry.lookup.getLobById(dato.LOB_ID).NAME}}</td>
+                <td style="vertical-align:middle">{{localEntry.lookup.getTechnologyById(dato.TECHNOLOGY_ID).NAME}}</td>
+                <td style="vertical-align:middle">{{localEntry.lookup.getServiceById(dato.SERVICE_ID).NAME}}</td>
+                <td style="vertical-align:middle"><span class="label" ng-class="{'btn-day':dato.PERIODICITY_ID=='1', 'btn-month':dato.PERIODICITY_ID=='3', 'btn-cycle':dato.PERIODICITY_ID=='5'}">{{localEntry.lookup.getPeriodicityById(dato.PERIODICITY_ID).PERIODICITY_CODE}}</span></td>
+                <td style="vertical-align:middle; text-align:right">
+                    <span ng-if="(dato.VALUE) != Math.round(dato.VALUE)">{{dato.VALUE | number:2}}</span>
+                    <span ng-if="(dato.VALUE) == Math.round(dato.VALUE)">{{dato.VALUE | number:0}}</span>
+                </td>
+              </tr>
+
+              <tr class="active table-segment-bottom btn-blue" ng-click="">
+                <td>
+                  &Sum;
+                </td>
+                <td colspan="4">
+                  <strong>{{datoId}}</strong> 
+                  <div ng-if="datoId.length > 4" class="no-margin btn-red"><strong>{{datoId.substr(4,2)}}</strong> - <small>{{getDerivedDatoDescription(datoId)}}</small></div> 
+                </td>
+                <td colspan="7" class="text-right">
+                  <span ng-if="getDatoDivisor(datoId) > 1">{{getDatoAgg(datoId) | number:0}} / {{getDatoDivisor(datoId) | number:0}} = </span>
+                  <span>
+                    <strong ng-if="(getDatoSum(datoId).VAL) - Math.round(getDatoSum(datoId).VAL) != 0">{{getDatoSum(datoId).VAL | number:2}}</strong>
+                    <strong ng-if="(getDatoSum(datoId).VAL) - Math.round(getDatoSum(datoId).VAL) == 0">{{getDatoSum(datoId).VAL | number:0}}</strong>
+                  </span>
+                </td>
+              </tr>
+
+            </tbody>
+        </table>
+    	</div>
+
+  </div>
+</div>  
+<!-- composite table -->
+
+
+<!-- Metric history -->
+<div ng-if="metricResultHistory.length > 0" class="panel panel-default md-whiteframe-4dp">  
+  <div class="panel-heading no-margins">
+    <h5>
+    <strong>Metric history</strong></h5>
+  </div>
+  <div class="panel-body no-margins">
+
+        <div class="row" >
+          <div class="col-sm-12">
+            <table class="table table-condensed table-hover">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>
+                      <span ng-if="metricResult.FREQUENCY=='C'" class="text-center">Bill cycle</span>
+                    </th>
+                    <th class="text-right">Calculation time</th>
+                    <th class="text-right" ng-repeat="dato in metricDatoLabelUnion">
+                      <a ng-href="/dato-result/{{metricResult.OPCO_ID}}/{{dato.substr(0,3)}}?month={{workMonth}}">
+                        <!-- <small> R:</small> -->
+                        <!-- <i class="fa fa-cube fa-fw"></i> -->
+                        <strong>#{{dato}}</strong>
+                      </a>
+                    </th>
+                    <th class="text-right">
+                      {{metricResult.METRIC_ID}} Value
+                    </th>
+                    <th></th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <tr ng-class="{'active':metricResultHistoryElement.DAY_OF_WEEK == 6 || metricResultHistoryElement.DAY_OF_WEEK == 7, 'danger':!metricResultHistoryElement.RESULT_ID && metricResultHistoryElement.DAYS_LATE > 1}" ng-click="" ng-repeat="metricResultHistoryElement in metricResultHistory">
+                    <!-- Date -->
+                    <td>
+                      <span ng-if="metricResult.FREQUENCY == 'D'"> 
+                        <strong ng-class="{'btn-grey':metricResultHistoryElement.DAY_OF_WEEK == 6 || metricResultHistoryElement.DAY_OF_WEEK == 7}">
+                          {{metricResultHistoryElement.DATE | date:"dd.MM.yyyy"}}
+                        </strong> 
+                        <small ng-class="{'btn-red':metricResultHistoryElement.DAY_OF_WEEK == 7, 'btn-orange':metricResultHistoryElement.DAY_OF_WEEK == 6, 'btn-grey':metricResultHistoryElement.DAY_OF_WEEK < 6}">{{metricResultHistoryElement.DATE | date:"EEE"}}</small>
+                      </span>
+                      <span ng-if="metricResult.FREQUENCY !== 'D'"> 
+                        <strong>{{metricResultHistoryElement.DATE | date:"MMM yyyy"}}</strong>
+                      </span>
+                    </td>
+
+                    <!-- Cycle -->
+                    <td>
+                      <span ng-if="metricResult.FREQUENCY=='C'" class="text-center">
+                        <i class="fa fa-calendar-check-o fa-fw"></i>
+                        <strong>{{metricResultHistoryElement.BILL_CYCLE}}</strong>
+                      </span>
+                    </td>
+
+                    <!-- Date calculated -->
+                    <td class="text-right">
+                      <!-- Recalcualtion not pending -->
+                      <span ng-if="metricResultHistoryElement.RESULT_ID" >
+                        <small ng-if='metricResultHistoryElement.REPLACED === null'><strong>Actual </strong> <i class="fa fa-arrow-right fa-fw"></i> </small> {{metricResultHistoryElement.MODIFIED | date:"dd.MM.yyyy"}} <small class="btn-grey">{{metricResultHistoryElement.MODIFIED | date:"HH:mm"}}</small>
+                      </span>
+                    </td>
+
+                    <!-- Dato values -->
+                    <td ng-if="metricResultHistoryElement.RESULT_ID" ng-repeat="dato in metricResultHistoryElement.JSON_DATO_SUMS" class="text-right">
+                      <span ng-if="(dato.VAL - Math.round(dato.VAL)) != 0 && Math.abs(dato.VAL) < 100">{{dato.VAL | number:2}}</span>
+                      <span ng-if="(dato.VAL - Math.round(dato.VAL)) == 0 || Math.abs(dato.VAL) >= 100">{{dato.VAL | number:0}}</span>
+                    </td>
+
+                    <!-- No Metric result found - DATOS MISSING) -->
+                    <td ng-if="!metricResultHistoryElement.RESULT_ID" class="text-center" colspan="{{metricDatoLabelUnion.length + 1}}">
+                        <!-- Expected today -->
+                        <span ng-if="metricResultHistoryElement.DAYS_LATE < 1 && metricResultHistoryElement.DAYS_LATE > -1" class="btn-orange"><small><i class="fa fa-clock-o"></i> Required datos expected <strong>today</strong>.</small></span>
+                        <!-- Delayed more than one day -->
+                        <span ng-if="metricResultHistoryElement.DATO_ID_MISSING && metricResultHistoryElement.DAYS_LATE >= 1" class="btn-red"><small><i class="fa fa-exclamation-triangle"></i> Calculation delayed <strong>{{metricResultHistoryElement.DAYS_LATE | number:0}}</strong> days.</small>
+                          <!-- List Datos which are missing -->
+                          <span ng-if="metricResultHistoryElement.DATO_ID_MISSING" class="btn-red"><small>Dato(s) missing: </small> <strong>{{metricResultHistoryElement.DATO_ID_MISSING}}</strong></span>
+                          <!-- No datos seem to be missing but Metric is not calculated - wierd?! -->
+                          <span ng-if="!metricResultHistoryElement.DATO_ID_MISSING"><i class="fa fa-question-circle fa-fw btn-red"></i> <small>No datos are missing, but Metric does not compute. Damn!</small> </span>
+                        </span>
+                    </td>
+
+                    <!-- Metric result exists -->
+                    <td ng-if="metricResultHistoryElement.RESULT_ID" class="text-right">
+                      <!-- No ERROR CODE -->
+                      <span ng-if="!metricResultHistoryElement.ERROR_CODE" ng-class="{'btn-green':(metricResultHistoryElement.VALUE<=metricResultHistoryElement.OBJECTIVE) || ((metricResultHistoryElement.VALUE>metricResultHistoryElement.OBJECTIVE && + metricResultHistoryElement.VALUE <=  metricResultHistoryElement.OBJECTIVE + metricResultHistoryElement.TOLERANCE) && metricResultHistoryElement.TREND == 'Y'), 'btn-yellow':(metricResultHistoryElement.VALUE>metricResultHistoryElement.OBJECTIVE && + metricResultHistoryElement.VALUE <=  metricResultHistoryElement.OBJECTIVE + metricResultHistoryElement.TOLERANCE) && metricResultHistoryElement.TREND == 'N', 'btn-red':(metricResultHistoryElement.VALUE>metricResultHistoryElement.OBJECTIVE + metricResultHistoryElement.TOLERANCE) && metricResultHistoryElement.TREND == 'N', 'btn-orange':(metricResultHistoryElement.VALUE>metricResultHistoryElement.OBJECTIVE + metricResultHistoryElement.TOLERANCE) && metricResultHistoryElement.TREND == 'Y'}">
+                        <strong>{{metricResultHistoryElement.VALUE | number:5}}</strong>
+                      </span>
+
+                      <!-- Metric has ERROR CODE (NaN, Inf) -->
+                      <span ng-if="metricResultHistoryElement.ERROR_CODE" class="btn-blue">
+                        <strong>{{metricResultHistoryElement.ERROR_CODE}}</strong>
+                      </span>
+
+                    </td>
+                    
+                    <!-- Incident link -->
+                    <td>
+                      <span ng-if="metricResultHistoryElement.INCIDENT_ID">
+                        <a ng-href="/incident-info/{{metricResultHistoryElement.INCIDENT_ID}}">
+                          <i class="fa fa-fw fa-exclamation-circle"></i> 
+                          I_{{metricResultHistoryElement.OPCO_ID}}_{{Lpad(metricResultHistoryElement.INCIDENT_ID, 3, '0')}}
+                        </a>
+                      </span>
+                    </td>
+                    
+                  </tr>
+                </tbody>
+            </table>    
+          </div>
+        </div>
+
+  </div>
+</div>
+<!-- Metric history -->
+
+
+<!-- Dato composition charts -->
+<div class="panel panel-default md-whiteframe-4dp">  
+  <div class="panel-heading no-margins">
+    <h5>
+    <strong>Dato composition</strong></h5>
+  </div>
+  <div class="panel-body no-margins">
+
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="panel-float-chart" ng-repeat="(datoCompositionId, datoCompositionData) in chartData" >
+            <h6 class="sub-header">
+              <strong>{{datoCompositionId}}</strong> 
+            </h6>
+              <small>{{getRelatedDato(datoCompositionId).NAME}}</small>
+            <c3-chart id="chartDecompositionPie_{{$index+1}}" config="c3configCompositePie" data="datoCompositionData"></c3-chart>
+            <c3-chart id="chartDecompositionBar_{{$index+1}}" config="c3configCompositeBar" data="datoCompositionData"></c3-chart>
+          </div> 
+        </div> 
+      </div>
+
+  </div>
+</div>
+<!-- Dato composition charts -->

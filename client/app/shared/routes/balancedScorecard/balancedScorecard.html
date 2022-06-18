@@ -1,0 +1,1432 @@
+<!-- Breadcrumbs -->
+<!-- <ol class="breadcrumb">
+  <li><a href="/incidents?opcoId={{entry.OPCO_ID}}&archive=N"><i class="fa fa-exclamation-circle fa-fw"></i>
+      Incidents</a></li>
+  <li><a href="/stakeholder-reports?opcoId={{entry.OPCO_ID}}"><i class="fa fa-wpforms fa-fw"></i> Stakeholder
+      reports</a></li>
+  <li class="active"><i class="fa fa-vcard fa-fw"></i> Balanced scorecard</a></li>
+</ol> -->
+<!-- Breadcrumbs -->
+
+<div class="row">
+  <div class="col-md-9 text-left">
+    <h3 class="sub-header">
+      <span class="input-group btn-group pull-left">
+        <a class="btn btn-primary dropdown-toggle no-margins no-padding" ng-disabled="isDisabled" data-toggle="dropdown"
+          aria-haspopup="true" aria-expanded="false">
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+          <li><a href="https://tasktrack.telekom.at/confluence/display/RACO/Balanced+Scorecard+Glossary"> <i
+                class="fa fa-fw fa-info-circle"></i> Balanced scorecard Glossary (Confluence link)</a></li>
+          <li><a href="/export-balanced-scorecard"> <i class="fa fa-fw fa-file"></i> Export</a></li>
+        </ul>
+      </span>
+      &nbsp;
+      <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+      {{entry.state.data.title}}
+    </h3>
+  </div>
+  <div class="col-md-3 text-right">
+    <md-switch class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'"
+      ng-model="entry.balancedScorecardShowAllIncidents" ng-change="reloadBalancedScorecard()" focus-me="true"
+      aria-label="Relevant Metric Switch">
+      <span ng-if="entry.balancedScorecardShowAllIncidents == 'Y'"> All incidents</span>
+      <span ng-if="entry.balancedScorecardShowAllIncidents == 'N'"> Only closed incidents</span>
+    </md-switch>
+  </div>
+</div>
+
+<!-- Navigate months -->
+<div class="row hidden-print">
+  <div class="col-md-3 text-left">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;"
+      ng-href="/balanced-scorecard?year={{prevYear}}&opcoId={{entry.OPCO_ID}}">
+      <i class="fa fa-chevron-left fa-fw"></i>
+      {{prevYear}}
+    </a>
+  </div>
+
+  <div class="col-md-6 text-center">
+
+    <div class="input-group" layout="row" layout-align="center center">
+
+      <label for="bsFROMDATE-group">From date</label>
+      <div class="col-sm-4">
+        <p name="bsFROMDATE-group" class="input-group">
+          <input name="qFROM" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy"
+            datepicker-options="dp1.dateOptions" ng-model="dtFromDate" is-open="dp1.status.opened" ng-required="true"
+            close-text="Close" ng-change="reloadBalancedScorecard()" />
+          <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="dp1.open($event)"><i
+                class="glyphicon glyphicon-calendar"></i></button>
+            <div ng-messages="reportForm.qFROM.$error">
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+              <div ng-message="date"><small class="label label-danger">Invalid date</small></div>
+            </div>
+          </span>
+        </p>
+      </div>
+
+      <label for="bsTODATE-group">To date</label>
+      <div class="col-sm-4">
+        <p name="bsTODATE-group" class="input-group">
+          <input name="qTO" datepicker-localdate type="text" class="form-control" uib-datepicker-popup="dd.MM.yyyy"
+            datepicker-options="dp2.dateOptions" ng-model="dtToDate" is-open="dp2.status.opened" close-text="Close"
+            ng-change="reloadBalancedScorecard()" />
+          <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="dp2.open($event)"><i
+                class="glyphicon glyphicon-calendar"></i></button>
+            <div ng-messages="reportForm.qTO.$error">
+              <div ng-message="required"><small class="label label-danger">This field is required</small></div>
+              <div ng-message="date"><small class="label label-danger">Invalid date</small></div>
+            </div>
+          </span>
+        </p>
+      </div>
+
+
+    </div>
+
+    <!-- <h4 class="sub-header">
+      <i class="fa fa-calendar fa-fw"></i>
+      <span ng-if="!fromDate && !toDate">{{workYear}}</span>
+      <span ng-if="fromDate && toDate">{{fromDate}} - {{toDate}}</span>
+    </h4> -->
+  </div>
+
+  <div class="col-md-3 text-right">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;"
+      ng-href="/balanced-scorecard?year={{nextYear}}&opcoId={{entry.OPCO_ID}}" ng-if="currYear >= nextYear">
+      {{nextYear}}
+      <i class="fa fa-chevron-right fa-fw"></i>
+    </a>
+  </div>
+</div>
+<!-- Navigate months -->
+
+<!-- Spinner -->
+<div ng-if="!loadFinished">
+  <div class="col-sm-12 text-center">
+    <br><br>
+    <i class="fa fa-spinner fa-pulse fa-3x"></i>
+  </div>
+</div>
+<!-- Spinner -->
+
+<div ng-if="loadFinished" layout="row" layout-sm="column" layout-wrap="">
+
+  <!-- Panel 1 -->
+  <div class="panel panel-default md-whiteframe-4dp" layout="column" layout-padding="" layout-margin="" flex="100"
+    layout-align="start stretch">
+    <div class="panel-heading no-margins">
+      <h5 class="text-center">
+        <strong>Incident summary</strong>
+      </h5>
+    </div>
+    <div class="panel-body" ng-cloak layout="row" layout-sm="column" layout-padding="">
+
+      <div layout="column" flex-gt-sm="65" flex="100">
+
+        <h5 class="sub-header text-left">
+          Top 5 Incidents
+        </h5>
+
+        <table class="table table-striped">
+          <thead>
+            <th>ID</th>
+            <th>Problem</th>
+            <th class="text-right">Impact (k€)</th>
+          </thead>
+          <tbody>
+            <tr class="pointer-row" ng-repeat="incident in balancedScorecard.topIncidents"
+              ng-click="getIncident(incident.INCIDENT_ID)">
+              <td>{{incident.INCIDENT_ID}}</td>
+              <td ng-if="incident.PROBLEM_DESCRIPTION.length > 300">{{incident.PROBLEM_DESCRIPTION.substr(0,300)}} ...
+                <small>(click for full description)</small></td>
+              <td ng-if="incident.PROBLEM_DESCRIPTION.length < 300">{{incident.PROBLEM_DESCRIPTION}}</td>
+              <td width="150px">
+                <div layout="row" layout-align="space-between center">
+                  <strong>Recovered: </strong>
+                  <strong ng-if="incident.RECOVERED"
+                    class='btn-green pull-right'>{{incident.RECOVERED/1000 | number:0}}</strong>
+                  <strong ng-if="!incident.RECOVERED">-</strong>
+                </div>
+                <div layout="row" layout-align="space-between center">
+                  <strong>Prevented: </strong>
+                  <strong ng-if="incident.PREVENTED"
+                    class='btn-blue pull-right'>{{incident.PREVENTED/1000 | number:0}}</strong>
+                  <strong ng-if="!incident.PREVENTED">-</strong>
+                </div>
+                <div layout="row" layout-align="space-between center">
+                  <strong>Loss detected: </strong>
+                  <strong ng-if="incident.IMPACT"
+                    class='btn-red pull-right'>{{incident.IMPACT/1000 | number:0}}</strong>
+                  <strong ng-if="!incident.IMPACT">-</strong>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+
+      <div layout="column" flex-gt-sm="35" flex="100">
+        <h5 class="sub-header text-center">
+          Impact Summary (k€)
+        </h5>
+        <c3-chart id="impactSummary" config="chartOptions"></c3-chart>
+      </div>
+
+    </div>
+  </div>
+
+  <div layout="row" layout-sm="column" flex="100">
+
+    <!-- Panel 2 -->
+    <div class="panel panel-default md-whiteframe-4dp" layout="column" layout-padding="" layout-margin="" flex=""
+      layout-align="start stretch">
+      <div class="panel-heading no-margins">
+        <h5 class="text-center">
+          <strong>Impact summary</strong>
+        </h5>
+      </div>
+      <div class="panel-body" ng-cloak>
+
+        <table class="table table-striped">
+          <tbody>
+            <tr>
+              <td><strong>Revenue lost</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.I_REVENUE_LOSS | number:0}} €</td>
+            </tr>
+            <tr>
+              <td><strong>Revenue recovered</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.R_REVENUE_LOSS | number:0}} €</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Revenue loss prevented</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.P_REVENUE_LOSS | number:0}} €</td>
+            </tr>
+            <tr>
+              <td><strong>Unjustified gain</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Overcharging / Underpayment of customers and partners " uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.I_OVERCHARGING | number:0}} €</td>
+            </tr>
+            <tr>
+              <td><strong>Unjustified gain corrected</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.R_OVERCHARGING | number:0}} €</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Unjustified gain prevented</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.P_OVERCHARGING | number:0}} €</td>
+            </tr>
+            <tr>
+              <td><strong>Excessive costs lost</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Overcharing of OpCo by business partners (Overpayment)" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.I_EXCESSIVE_COSTS | number:0}} €</td>
+            </tr>
+            <tr>
+              <td><strong>Excessive costs corrected</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.R_EXCESSIVE_COSTS | number:0}} €</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Excessive costs prevented</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.P_EXCESSIVE_COSTS | number:0}} €</td>
+            </tr>
+            <tr>
+              <td><strong>Financial reporting misstatement</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Used for all incidents with respect to GL and Financial reporting"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.I_FINANCIAL_REPORTING_MISSTATEMENT | number:0}} €</td>
+            </tr>
+            <tr>
+              <td><strong>Financial reporting misstatement corrected</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.R_FINANCIAL_REPORTING_MISSTATEMENT | number:0}} €</td>
+            </tr>
+            <tr>
+              <td><strong>Financial reporting misstatement prevented</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.P_FINANCIAL_REPORTING_MISSTATEMENT | number:0}} €</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+
+    <!-- Panel 3 -->
+    <div class="panel panel-default md-whiteframe-4dp" layout="column" layout-padding="" layout-margin="" flex=""
+      layout-align="start stretch">
+      <div class="panel-heading no-margins" layout="row" layout-align="space-around center">
+        <h5 class="text-center">
+          <strong>Financial impact
+            <span ng-if="!entry.balancedScorecardFinancialImpactEur">[€]</span>
+            <span ng-if="entry.balancedScorecardFinancialImpactEur">[%]</span>
+          </strong>
+        </h5>
+        <span layout="row" layout-align="center center">
+
+          <md-switch class="md-primary md-hue-1 no-margins" ng-model="entry.balancedScorecardFinancialImpactEur"
+            aria-label="Area values">
+            [ <strong ng-if="!entry.balancedScorecardFinancialImpactEur">€</strong><span ng-if="entry.balancedScorecardFinancialImpactEur">€</span> | <strong ng-if="entry.balancedScorecardFinancialImpactEur">%</strong><span ng-if="!entry.balancedScorecardFinancialImpactEur">%</span> ]
+          </md-switch>
+        </span>
+      </div>
+
+      <div class="panel-body" ng-cloak>
+
+        <table class="table table-striped" ng-if="!entry.balancedScorecardFinancialImpactEur">
+          <tbody>
+            <tr>
+              <td><strong>Total revenue loss</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="∑ ( Revenue loss + Revenue recovered + Revenue loss prevented )"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.IMPACT_REVENUE_LOSS | number:0}} €</td>
+            </tr>
+            <!-- <tr>
+                <td><strong>Total revenue lost</strong> <i class="fa fa-info-circle fa-fw pointer-row" uib-tooltip="∑ ( Revenue loss )" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+                <td class="text-right" class="text-right" width="100px">{{balancedScorecard.KPI.I_REVENUE_LOSS | number:0}} €</td>
+              </tr> -->
+            <tr>
+              <td><strong>Total excessive costs</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="∑ ( Excessive costs loss + Excessive costs recovered + Excessive costs prevented )"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS | number:0}} €</td>
+            </tr>
+            <!-- <tr>
+                <td><strong>Total excessive costs lost</strong> <i class="fa fa-info-circle fa-fw pointer-row" uib-tooltip="∑ ( Excessive costs lost )" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+                <td class="text-right" class="text-right" width="100px">{{balancedScorecard.KPI.I_EXCESSIVE_COSTS | number:0}} €</td>
+              </tr>            -->
+            <tr>
+              <td><strong>Total unjustified gain</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="∑ ( Unjustified gain + Unjustified gain corrected + Unjustified gain prevented )"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.IMPACT_OVERCHARGING | number:0}} €</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Total financial reporting misstatement</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="∑ ( Financial reporting misstatement + Financial reporting misstatement corrected + Financial reporting misstatement prevented )"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT | number:0}} €</td>
+            </tr>
+            <tr>
+              <td><strong>Total financial impact</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total revenue loss + Total excessive costs + Total unjustified gain + Total financial reporting misstatement"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS + balancedScorecard.KPI.IMPACT_OVERCHARGING + balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT | number:0}}
+                €</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Total revenue & cost impact</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total revenue loss + Total excessive costs" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS | number:0}}
+                €</td>
+            </tr>
+            <tr>
+              <td><strong>Total detected loss</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="∑ ( Revenue lost + Excessive costs lost )" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.I_REVENUE_LOSS + balancedScorecard.KPI.I_EXCESSIVE_COSTS | number:0}} €</td>
+            </tr>
+            <tr>
+              <td><strong>Total recovered / corrected impact</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="	∑ ( Revenue recovered + Excessive costs corrected + Unjustified gain corrected + Financial reporting misstatement corrected)"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.R_REVENUE_LOSS + balancedScorecard.KPI.R_EXCESSIVE_COSTS + balancedScorecard.KPI.R_OVERCHARGING + balancedScorecard.KPI.R_FINANCIAL_REPORTING_MISSTATEMENT | number:0}}
+                €</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Total prevented impact</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="∑ ( Revenue loss prevented + Excessive costs prevented + Unjustified gain prevented + Financial reporting misstatement prevented )"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.P_REVENUE_LOSS + balancedScorecard.KPI.P_EXCESSIVE_COSTS + balancedScorecard.KPI.P_OVERCHARGING + balancedScorecard.KPI.P_FINANCIAL_REPORTING_MISSTATEMENT | number:0}}
+                €</td>
+            </tr>
+            <tr>
+              <td><strong>Total positive revenue impact</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total recovered/corrected impact + Total prevented impact"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.R_REVENUE_LOSS + balancedScorecard.KPI.R_EXCESSIVE_COSTS + balancedScorecard.KPI.R_OVERCHARGING + balancedScorecard.KPI.R_FINANCIAL_REPORTING_MISSTATEMENT + balancedScorecard.KPI.P_REVENUE_LOSS + balancedScorecard.KPI.P_EXCESSIVE_COSTS + balancedScorecard.KPI.P_OVERCHARGING + balancedScorecard.KPI.P_FINANCIAL_REPORTING_MISSTATEMENT | number:0}}
+                €</td>
+            </tr>
+            <!-- <tr>
+                <td><strong>Total revenue impact</strong> <i class="fa fa-info-circle fa-fw pointer-row" uib-tooltip="Total revenue loss" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+                <td class="text-right" class="text-right" width="100px">{{balancedScorecard.KPI.IMPACT_REVENUE_LOSS | number:0}} €</td>
+              </tr>            
+              <tr>
+                <td><strong>Total cost impact</strong> <i class="fa fa-info-circle fa-fw pointer-row" uib-tooltip="Total excessive costs" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+                <td class="text-right" class="text-right" width="100px">{{balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS | number:0}} €</td>
+              </tr>             -->
+
+
+            <!-- <tr>
+                <td><strong>Total unjustified gain</strong> <i class="fa fa-info-circle fa-fw pointer-row" uib-tooltip="∑ ( Overcharging & Excessive costs underpayment )" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+                <td class="text-right" class="text-right" width="100px">{{balancedScorecard.KPI.I_OVERCHARGING | number:0}} €</td>
+              </tr>             -->
+          </tbody>
+        </table>
+
+        <!-- Percentage % -->
+
+        <table class="table table-striped" ng-if="entry.balancedScorecardFinancialImpactEur">
+          <tbody>
+            <!-- <tr>
+                <td><strong>Revenue impact</strong> <i class="fa fa-info-circle fa-fw pointer-row" uib-tooltip="(based on financial impact)" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+                <td class="text-right" class="text-right" width="70px">{{(balancedScorecard.KPI.IMPACT_REVENUE_LOSS) / (balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS + balancedScorecard.KPI.IMPACT_OVERCHARGING + balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT) * 100 | number:2}} %</td>
+              </tr> -->
+            <tr>
+              <td><strong>Revenue lost impact</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total revenue lost / Total financial impact" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.I_REVENUE_LOSS) / (balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS + balancedScorecard.KPI.IMPACT_OVERCHARGING + balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr>
+              <td><strong>Recovered / corrected impact</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total recovered/corrected impact / Total financial impact"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.R_REVENUE_LOSS + balancedScorecard.KPI.R_EXCESSIVE_COSTS + balancedScorecard.KPI.R_OVERCHARGING + balancedScorecard.KPI.R_FINANCIAL_REPORTING_MISSTATEMENT) / (balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS + balancedScorecard.KPI.IMPACT_OVERCHARGING + balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Prevented impact</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total prevented impact / Total financial impact" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.P_REVENUE_LOSS + balancedScorecard.KPI.P_EXCESSIVE_COSTS + balancedScorecard.KPI.P_OVERCHARGING + balancedScorecard.KPI.P_FINANCIAL_REPORTING_MISSTATEMENT) / (balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS + balancedScorecard.KPI.IMPACT_OVERCHARGING + balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr>
+              <td><strong>Revenue and cost impact</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total revenue & cost impact / Total financial impact" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS) / (balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS + balancedScorecard.KPI.IMPACT_OVERCHARGING + balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr>
+              <td><strong>Cost impact</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total cost impact / Total financial impact" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS) / (balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS + balancedScorecard.KPI.IMPACT_OVERCHARGING + balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr>
+              <td><strong>Excessive costs lost impact</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total excessive costs lost / Total financial impact" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.I_EXCESSIVE_COSTS) / (balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS + balancedScorecard.KPI.IMPACT_OVERCHARGING + balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Financial reporting misstatement</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total financial reporting misstatement / Total financial impact"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT) / (balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS + balancedScorecard.KPI.IMPACT_OVERCHARGING + balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr>
+              <td><strong>Positive revenue impact</strong> (over financial impact) <i
+                  class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total positive revenue impact / Total financial impact" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.R_REVENUE_LOSS + balancedScorecard.KPI.R_EXCESSIVE_COSTS + balancedScorecard.KPI.R_OVERCHARGING + balancedScorecard.KPI.R_FINANCIAL_REPORTING_MISSTATEMENT + balancedScorecard.KPI.P_REVENUE_LOSS + balancedScorecard.KPI.P_EXCESSIVE_COSTS + balancedScorecard.KPI.P_OVERCHARGING + balancedScorecard.KPI.P_FINANCIAL_REPORTING_MISSTATEMENT) / (balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS + balancedScorecard.KPI.IMPACT_OVERCHARGING + balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr>
+              <td><strong>Positive revenue impact</strong> (over covered value) <i
+                  class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total positive revenue impact / Covered value at risk" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.R_REVENUE_LOSS + balancedScorecard.KPI.R_EXCESSIVE_COSTS + balancedScorecard.KPI.R_OVERCHARGING + balancedScorecard.KPI.R_FINANCIAL_REPORTING_MISSTATEMENT + balancedScorecard.KPI.P_REVENUE_LOSS + balancedScorecard.KPI.P_EXCESSIVE_COSTS + balancedScorecard.KPI.P_OVERCHARGING + balancedScorecard.KPI.P_FINANCIAL_REPORTING_MISSTATEMENT) / (balancedScorecard.KPI.TOTAL_REVENUES * (balancedScorecard.KPI.TOTAL_COVERAGE / 100)) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Positive revenue impact</strong> (over value at risk) <i
+                  class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total positive revenue impact / Value at risk" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.R_REVENUE_LOSS + balancedScorecard.KPI.R_EXCESSIVE_COSTS + balancedScorecard.KPI.R_OVERCHARGING + balancedScorecard.KPI.R_FINANCIAL_REPORTING_MISSTATEMENT + balancedScorecard.KPI.P_REVENUE_LOSS + balancedScorecard.KPI.P_EXCESSIVE_COSTS + balancedScorecard.KPI.P_OVERCHARGING + balancedScorecard.KPI.P_FINANCIAL_REPORTING_MISSTATEMENT) / (balancedScorecard.KPI.TOTAL_REVENUES) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr>
+              <td><strong>Financial impact</strong> (over covered value) <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total financial impact / Covered value at risk" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS + balancedScorecard.KPI.IMPACT_OVERCHARGING + balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT) / (balancedScorecard.KPI.TOTAL_REVENUES * balancedScorecard.KPI.TOTAL_COVERAGE / 100) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Financial impact</strong> (over value at risk) <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total financial impact / Value at risk" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS + balancedScorecard.KPI.IMPACT_OVERCHARGING + balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT) / balancedScorecard.KPI.TOTAL_REVENUES * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr>
+              <td><strong>Detected loss</strong> (over financial impact) <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total detected loss / Total financial impact" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.I_REVENUE_LOSS + balancedScorecard.KPI.I_EXCESSIVE_COSTS) / (balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS + balancedScorecard.KPI.IMPACT_OVERCHARGING + balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr>
+              <td><strong>Detected loss</strong> (over revenue & cost impact) <i
+                  class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total detected loss / Total revenue & cost impact" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.I_REVENUE_LOSS + balancedScorecard.KPI.I_EXCESSIVE_COSTS) / (balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr>
+              <td><strong>Detected loss</strong> (over covered value) <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total detected loss / Covered value at risk" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.I_REVENUE_LOSS + balancedScorecard.KPI.I_EXCESSIVE_COSTS) / (balancedScorecard.KPI.TOTAL_REVENUES * (balancedScorecard.KPI.TOTAL_COVERAGE / 100)) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Detected loss</strong> (over value at risk) <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total detected loss / Value at risk" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.I_REVENUE_LOSS + balancedScorecard.KPI.I_EXCESSIVE_COSTS) / balancedScorecard.KPI.TOTAL_REVENUES * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr>
+              <td><strong>Unjustified gain</strong> (over financial impact) <i
+                  class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total unjustified gain / Total financial impact" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.I_OVERCHARGING) / (balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS + balancedScorecard.KPI.IMPACT_OVERCHARGING + balancedScorecard.KPI.IMPACT_FINANCIAL_REPORTING_MISSTATEMENT) * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr>
+              <td><strong>Unjustified gain</strong> (over revenue & cost impact) <i
+                  class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total unjustified gain / Total revenue & cost impact" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="70px">
+                {{(balancedScorecard.KPI.I_OVERCHARGING) / (balancedScorecard.KPI.IMPACT_REVENUE_LOSS + balancedScorecard.KPI.IMPACT_EXCESSIVE_COSTS) * 100 | number:2}}
+                %</td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- Percentage % -->
+
+      </div>
+    </div>
+
+    <!-- Panel 5 -->
+    <div class="panel panel-default md-whiteframe-4dp" layout="column" layout-padding="" layout-margin="" flex=""
+      layout-align="start stretch">
+      <div class="panel-heading no-margins">
+        <h5 class="text-center">
+          <strong>Risk Coverage</strong>
+        </h5>
+      </div>
+      <div class="panel-body" ng-cloak>
+        <table class="table table-striped">
+          <tbody>
+            <tr class="table-segment-bottom">
+              <td><strong>Value at risk</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total monetary value from the Risk coverage model" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="150px">
+                {{balancedScorecard.KPI.TOTAL_REVENUES | number:0}} €</td>
+            </tr>
+            <tr>
+              <td><strong>Risk coverage</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Total risk coverage from the Risk coverage model" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="150px">
+                {{balancedScorecard.KPI.TOTAL_COVERAGE | number:2}} %</td>
+            </tr>
+            <tr>
+              <td><strong>Residual risk</strong></td>
+              <td class="text-right" class="text-right" width="150px">
+                {{100 - balancedScorecard.KPI.TOTAL_COVERAGE | number:2}} %</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Covered value</strong></td>
+              <td class="text-right" class="text-right" width="150px">
+                {{balancedScorecard.KPI.TOTAL_COVERAGE * balancedScorecard.KPI.TOTAL_REVENUES / 100 | number:0}} €</td>
+            </tr>
+            <tr>
+              <td><strong>Unidentified leakages</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="(Residual risk [%] / Risk coverage [%]) * Total financial impact [€]"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="150px">
+                {{(100 - balancedScorecard.KPI.TOTAL_COVERAGE) / balancedScorecard.KPI.TOTAL_COVERAGE * balancedScorecard.KPI.FINANCIAL_IMPACT | number:0}}
+                €</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel-heading no-margins">
+        <h5 class="text-center">
+          <strong>Alarm statistics</strong>
+        </h5>
+      </div>
+      <div class="panel-body" ng-cloak>
+
+        <table class="table table-striped">
+          <tbody>
+            <tr>
+              <td><strong>Total number of Info alarms</strong></td>
+              <td class="text-right" class="text-right" width="100px">{{balancedScorecard.alarms.COUNT_INFO | number:0}}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Total number of Warning alarms</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.alarms.COUNT_WARNING | number:0}}</td>
+            </tr>
+            <tr>
+              <td><strong>Total number of Error alarms</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.alarms.COUNT_ERROR | number:0}}</td>
+            </tr>
+            <tr>
+              <td><strong>Average alarm resolution time</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.alarms.AVG_RESOLUTION_TIME | number:1}} days</td>
+            </tr>
+            <tr>
+              <td><strong>Open alarms remaining</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.alarms.REMAINING_OPEN_ALARMS | number:0}}</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+    <!-- Panel 5 -->
+
+
+  </div>
+
+<!-- Number of controls per BA Domain -->
+
+<div layout="row" layout-sm="column" flex="100">
+
+  <div class="panel panel-default md-whiteframe-4dp" layout="column" layout-padding="" layout-margin="" flex=""
+    layout-align="start stretch">
+    <div class="panel-heading no-margins">
+      <h5 class="text-center">
+        <strong>Active Controls / Metrics by Business Assurance Domain</strong>
+      </h5>
+    </div>
+    <div class="panel-body" layout="row" ng-cloak>
+
+      <table class="table table-striped">
+        <tbody>
+          <tr>
+            <td><strong>Revenue & Cost Assurance</strong></td>
+            <td class="text-right"> 
+              {{balancedScorecard.controls.CNT_CONTROL_BA_REVENUEANDCOSTASSURANCE}} / {{balancedScorecard.controls.CNT_METRIC_BA_REVENUEANDCOSTASSURANCE}}
+              </td>
+          </tr>
+          <tr>
+            <td><strong>Margin Assurance</strong></td>
+            <td class="text-right">
+              {{balancedScorecard.controls.CNT_CONTROL_BA_MARGINASSURANCE}} / {{balancedScorecard.controls.CNT_METRIC_BA_MARGINASSURANCE}}
+              </td>
+          </tr>
+          <tr>
+            <td><strong>Asset Assurance</strong></td>
+            <td class="text-right">
+              {{balancedScorecard.controls.CNT_CONTROL_BA_ASSETASSURANCE}} / {{balancedScorecard.controls.CNT_METRIC_BA_ASSETASSURANCE}}
+              </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="min-width: 15px;">&nbsp;</div>
+
+      <table class="table table-striped">
+        <tbody>        
+          <tr>
+            <td><strong>Migration Assurance</strong></td>
+            <td class="text-right">
+              {{balancedScorecard.controls.CNT_CONTROL_BA_MIGRATIONASSURANCE}} / {{balancedScorecard.controls.CNT_METRIC_BA_MIGRATIONASSURANCE}}
+              </td>
+          </tr>
+          <tr>
+            <td><strong>Fraud Management</strong></td>
+            <td class="text-right">
+              {{balancedScorecard.controls.CNT_CONTROL_BA_FRAUDMANAGEMENT}} / {{balancedScorecard.controls.CNT_METRIC_BA_FRAUDMANAGEMENT}}
+              </td>
+          </tr>
+          <tr>
+            <td><strong>Regulatory Assurance</strong></td>
+            <td class="text-right">
+              {{balancedScorecard.controls.CNT_CONTROL_BA_REGULATORYASSURANCE}} / {{balancedScorecard.controls.CNT_METRIC_BA_REGULATORYASSURANCE}}
+              </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      <div style="min-width: 15px;">&nbsp;</div>
+
+      <table class="table table-striped">
+        <tbody>             
+          <tr>
+            <td><strong>Digital Transformation Assurance</strong></td>
+            <td class="text-right">
+              {{balancedScorecard.controls.CNT_CONTROL_BA_DIGITALTRANSFORMATIONASSURANCE}} / {{balancedScorecard.controls.CNT_METRIC_BA_DIGITALTRANSFORMATIONASSURANCE}}
+              </td>
+          </tr>
+          <tr>
+            <td><strong>Digital Ecosystem Assurance</strong></td>
+            <td class="text-right">
+              {{balancedScorecard.controls.CNT_CONTROL_BA_DIGITALECOSYSTEMASSURANCE}} / {{balancedScorecard.controls.CNT_METRIC_BA_DIGITALECOSYSTEMASSURANCE}}
+              </td>
+          </tr>
+          <tr>
+            <td><strong>Customer Experience</strong></td>
+            <td class="text-right">
+              {{balancedScorecard.controls.CNT_CONTROL_BA_CUSTOMEREXPERIENCE}} / {{balancedScorecard.controls.CNT_METRIC_BA_CUSTOMEREXPERIENCE}}
+              </td>
+          </tr>
+
+        </tbody>
+      </table>
+
+      <div style="min-width: 15px;">&nbsp;</div>
+
+      <table class="table table-striped">
+        <tbody>   
+          <tr>
+            <td><strong>Customer Journey</strong></td>
+            <td class="text-right">
+              {{balancedScorecard.controls.CNT_CONTROL_BA_CUSTOMERJOURNEY}} / {{balancedScorecard.controls.CNT_METRIC_BA_CUSTOMERJOURNEY}}
+              </td>
+          </tr>
+
+          <tr>
+            <td><strong>Customer Equipment Assurance</strong></td>
+            <td class="text-right">
+              {{balancedScorecard.controls.CNT_CONTROL_BA_CUSTOMEREQUIPMENTASSURANCE}} / {{balancedScorecard.controls.CNT_METRIC_BA_CUSTOMEREQUIPMENTASSURANCE}}
+              </td>
+          </tr>
+          <tr>
+            <td><strong>Not assigned</strong></td>
+            <td class="text-right">
+              {{balancedScorecard.controls.CNT_CONTROL_BA_NA}} / {{balancedScorecard.controls.CNT_METRIC_BA_NA}}
+              </td>
+          </tr>
+
+      </table>
+
+    </div>
+  </div>
+
+</div>
+<!-- Number of controls per BA Domain -->
+
+
+  <div layout="row" layout-sm="column" flex="100">
+
+    <!-- Panel 6 -->
+    <div class="panel panel-default md-whiteframe-4dp" layout="column" layout-padding="" layout-margin="" flex=""
+      layout-align="start stretch">
+      <div class="panel-heading no-margins">
+        <h5 class="text-center">
+          <strong>Incident statistics</strong>
+        </h5>
+      </div>
+      <div class="panel-body" ng-cloak>
+
+        <table class="table table-striped">
+          <tbody>
+            <tr>
+              <td><strong>Total number of incidents</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.INCIDENT_COUNT_TOTAL | number:0}}</td>
+            </tr>
+            <tr>
+              <td><strong>Non-monetary incidents</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Incidents with non-monetary type of impact (e.g. customers affected, MoU etc.)"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.INCIDENT_COUNT_NON_MONETARY | number:0}}</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>No-loss incidents</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Incidents having ZERO financial impact" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.INCIDENT_COUNT_NO_LOSS | number:0}}</td>
+            </tr>
+            <tr>
+              <td><strong>Active controls / Metrics</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.controls.COUNT_ACTIVE_CONTROLS | number:0}} /
+                {{balancedScorecard.controls.COUNT_ACTIVE_METRIC | number:0}}</td>
+            </tr>
+            <tr>
+              <td><strong>Controls / Metrics triggering an alarm</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.controls.COUNT_ACTIVE_CONTROLS_ALARMS}} /
+                {{balancedScorecard.controls.COUNT_ACTIVE_METRIC_ALARMS}}</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Controls / Metrics not triggering an alarm</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.controls.COUNT_ACTIVE_CONTROLS - balancedScorecard.controls.COUNT_ACTIVE_CONTROLS_ALARMS}}
+                /
+                {{balancedScorecard.controls.COUNT_ACTIVE_METRIC - balancedScorecard.controls.COUNT_ACTIVE_METRIC_ALARMS}}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Median detection time</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Median time from problem occurrence until detection by automated RA controls"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.MEDIAN_TIME_PROBLEM_TO_DETECTION | number:0}} days</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Median resolution time</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Median time from detection by automated RA controls until problem resolution and incident closure"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.MEDIAN_TIME_DETECTION_TO_RESOLUTION | number:0}} days</td>
+            </tr>
+            <!-- <tr class="table-segment-bottom">
+                <td><strong>Median time from issue onset to resolution</strong> <i class="fa fa-info-circle fa-fw pointer-row" uib-tooltip="Median time from problem occurrence until problem resolution and incident closure" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+                <td class="text-right" class="text-right" width="100px">{{balancedScorecard.KPI.MEDIAN_TIME_PROBLEM_TO_RESOLUTION | number:0}} days</td>
+              </tr>   -->
+            <tr>
+              <td><strong>Recovered / corrected revenue cases</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.INCIDENT_COUNT_RECOVER | number:0}}
+                ({{(balancedScorecard.KPI.INCIDENT_COUNT_RECOVER / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL) * 100 | number:2}}
+                %)</td>
+            </tr>
+            <tr class="table-segment-bottom">
+              <td><strong>Repeated RA cases</strong></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.KPI.INCIDENT_COUNT_TOTAL - balancedScorecard.distinctCases.INCIDENT_COUNT_DISTINCT | number:0}}
+                ({{((balancedScorecard.KPI.INCIDENT_COUNT_TOTAL - balancedScorecard.distinctCases.INCIDENT_COUNT_DISTINCT) / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL) * 100 | number:2}}
+                %)</td>
+            </tr>
+            <tr>
+              <td><strong>Bills with error</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Average value of F6 Metric" uib-tooltip-trigger="mouseenter"
+                  uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.metricStats.F6 * 100 | number:2}} %</td>
+            </tr>
+            <tr>
+              <td><strong>Adjusted bills</strong> <i class="fa fa-info-circle fa-fw pointer-row"
+                  uib-tooltip="Average value of F11 Metric. Adjusted amount as percent from total invoiced amount"
+                  uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+              <td class="text-right" class="text-right" width="100px">
+                {{balancedScorecard.metricStats.F11 * 100 | number:2}} %</td>
+            </tr>
+            <!-- <tr>
+                <td><strong>Avg. Control / Metric effectiveness</strong> <i class="fa fa-info-circle fa-fw pointer-row" uib-tooltip="Average of control effectiveness from each risk node mapped in the coverage model" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td> 
+                <td class="text-right" class="text-right" width="100px">{{balancedScorecard.controls.AVG_CONTROL_EFFECTIVINESS | number:0}} % / {{balancedScorecard.controls.AVG_METRIC_EFFECTIVINESS | number:0}} %</td>
+              </tr>  
+              <tr>
+                <td><strong>Avg. control contribution</strong> <i class="fa fa-info-circle fa-fw pointer-row" uib-tooltip="Total risk coverage / Number of controls and metrics" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></td>
+                <td class="text-right" class="text-right" width="100px">{{balancedScorecard.KPI.TOTAL_COVERAGE / (balancedScorecard.controls.COUNT_ACTIVE_CONTROLS + balancedScorecard.controls.COUNT_ACTIVE_METRIC) | number:2}} %</td>
+              </tr>   -->
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+    <!-- Panel 6 -->
+
+
+    <!-- Panel 8 -->
+    <div class="panel panel-default md-whiteframe-4dp" layout="column" layout-padding="" layout-margin="" flex=""
+      layout-align="start stretch">
+      <div class="panel-heading no-margins" layout="row" layout-align="space-around center">
+        <h5 class="text-center">
+          <strong>Incidents by Area
+            <span ng-if="!entry.balancedScorecardAreaValues">[€]</span>
+            <span ng-if="entry.balancedScorecardAreaValues">[%]</span>
+          </strong>
+
+        </h5>
+        <span layout="row" layout-align="center center">
+          <md-switch class="md-primary md-hue-1 no-margins" ng-model="entry.balancedScorecardAreaValues"
+            aria-label="Area values">
+            [ <strong ng-if="!entry.balancedScorecardAreaValues">€</strong><span ng-if="entry.balancedScorecardAreaValues">€</span> | <strong ng-if="entry.balancedScorecardAreaValues">%</strong><span ng-if="!entry.balancedScorecardAreaValues">%</span> ]
+          </md-switch>
+        </span>
+      </div>
+      <div class="panel-body" ng-cloak>
+
+        <table class="table table-striped">
+          <tbody>
+            <tr class="pointer-row" ng-click="getAreaIncidents('Collection')">
+              <td><strong>Collection</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.COLLECTION_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.COLLECTION_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.COLLECTION_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.COLLECTION_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.COLLECTION_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.COLLECTION_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.COLLECTION_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.COLLECTION_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getAreaIncidents('Accounting')">
+              <td><strong>Accounting</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.ACCOUNTING_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.ACCOUNTING_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.ACCOUNTING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.ACCOUNTING_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.ACCOUNTING_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.ACCOUNTING_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.ACCOUNTING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.ACCOUNTING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getAreaIncidents('Value Added Services')">
+              <td><strong>Value Added Services</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.VALUE_ADDED_SERVICES_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.VALUE_ADDED_SERVICES_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.VALUE_ADDED_SERVICES_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.VALUE_ADDED_SERVICES_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.VALUE_ADDED_SERVICES_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.VALUE_ADDED_SERVICES_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.VALUE_ADDED_SERVICES_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.VALUE_ADDED_SERVICES_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getAreaIncidents('Billing')">
+              <td><strong>Billing</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.BILLING_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BILLING_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.BILLING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BILLING_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.BILLING_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BILLING_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.BILLING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BILLING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getAreaIncidents('Interconnection')">
+              <td><strong>Interconnection</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.INTERCONNECTION_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.INTERCONNECTION_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.INTERCONNECTION_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.INTERCONNECTION_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.INTERCONNECTION_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.INTERCONNECTION_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.INTERCONNECTION_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.INTERCONNECTION_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getAreaIncidents('Logistics')">
+              <td><strong>Logistics</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.LOGISTICS_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.LOGISTICS_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.LOGISTICS_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.LOGISTICS_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.LOGISTICS_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.LOGISTICS_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.LOGISTICS_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.LOGISTICS_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getAreaIncidents('Mediation')">
+              <td><strong>Mediation</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.MEDIATION_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.MEDIATION_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.MEDIATION_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.MEDIATION_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.MEDIATION_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.MEDIATION_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.MEDIATION_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.MEDIATION_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getAreaIncidents('Prepaid')">
+              <td><strong>Prepaid</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.PREPAID_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.PREPAID_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.PREPAID_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.PREPAID_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.PREPAID_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.PREPAID_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.PREPAID_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.PREPAID_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getAreaIncidents('Provisioning')">
+              <td><strong>Provisioning</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.PROVISIONING_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.PROVISIONING_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.PROVISIONING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.PROVISIONING_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.PROVISIONING_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.PROVISIONING_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.PROVISIONING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.PROVISIONING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getAreaIncidents('Roaming')">
+              <td><strong>Roaming</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.ROAMING_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.ROAMING_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.ROAMING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.ROAMING_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.ROAMING_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.ROAMING_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.ROAMING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.ROAMING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getAreaIncidents('Rating')">
+              <td><strong>Rating</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.RATING_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.RATING_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.RATING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.RATING_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.RATING_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.RATING_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.RATING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.RATING_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getAreaIncidents('Treasury')">
+              <td><strong>Treasury</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.TREASURY_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.TREASURY_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardAreaValues"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.TREASURY_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.TREASURY_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.TREASURY_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.TREASURY_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardAreaValues" class="text-right pointer-row"
+                ng-style="{background: getBgColor(balancedScorecard.KPI.TREASURY_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.TREASURY_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+    <!-- Panel 8 -->
+
+    <!-- Panel 4 -->
+    <div class="panel panel-default md-whiteframe-4dp" layout="column" layout-padding="" layout-margin="" flex=""
+      layout-align="start stretch">
+      <div class="panel-heading no-margins" layout="row" layout-align="space-around center">
+        <h5 class="text-center">
+          <strong>Incidents by BA Domain</strong>
+          <span ng-if="!entry.balancedScorecardBADomainValues">[€]</span>
+          <span ng-if="entry.balancedScorecardBADomainValues">[%]</span>
+          </strong>
+
+        </h5>
+        <span layout="row" layout-align="center center">
+          <md-switch class="md-primary md-hue-1 no-margins" ng-model="entry.balancedScorecardBADomainValues"
+            aria-label="Area values">
+            [ <strong ng-if="!entry.balancedScorecardBADomainValues">€</strong><span ng-if="entry.balancedScorecardBADomainValues">€</span> | <strong ng-if="entry.balancedScorecardBADomainValues">%</strong><span ng-if="!entry.balancedScorecardBADomainValues">%</span> ]
+          </md-switch>
+        </span>
+      </div>
+      <div class="panel-body" ng-cloak>
+
+        <table class="table table-striped">
+          <tbody>
+            <tr class="pointer-row" ng-click="getBAIncidents('RevenueAndCostAssurance')">
+              <td><strong>Revenue & Cost Assurance</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_REVENUEANDCOSTASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_REVENUEANDCOSTASSURANCE_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_REVENUEANDCOSTASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_REVENUEANDCOSTASSURANCE_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_REVENUEANDCOSTASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_REVENUEANDCOSTASSURANCE_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_REVENUEANDCOSTASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_REVENUEANDCOSTASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getBAIncidents('MarginAssurance')">
+              <td><strong>Margin Assurance</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_MARGINASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_MARGINASSURANCE_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_MARGINASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_MARGINASSURANCE_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_MARGINASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_MARGINASSURANCE_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_MARGINASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_MARGINASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getBAIncidents('AssetAssurance')">
+              <td><strong>Asset Assurance</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_ASSETASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_ASSETASSURANCE_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_ASSETASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_ASSETASSURANCE_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_ASSETASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_ASSETASSURANCE_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_ASSETASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_ASSETASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getBAIncidents('MigrationAssurance')">
+              <td><strong>Migration Assurance</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_MIGRATIONASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_MIGRATIONASSURANCE_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_MIGRATIONASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_MIGRATIONASSURANCE_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_MIGRATIONASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_MIGRATIONASSURANCE_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_MIGRATIONASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_MIGRATIONASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getBAIncidents('FraudManagement')">
+              <td><strong>Fraud Management</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_FRAUDMANAGEMENT_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_FRAUDMANAGEMENT_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_FRAUDMANAGEMENT_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_FRAUDMANAGEMENT_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_FRAUDMANAGEMENT_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_FRAUDMANAGEMENT_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_FRAUDMANAGEMENT_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_FRAUDMANAGEMENT_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getBAIncidents('RegulatoryAssurance')">
+              <td><strong>Regulatory Assurance</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_REGULATORYASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_REGULATORYASSURANCE_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_REGULATORYASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_REGULATORYASSURANCE_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_REGULATORYASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_REGULATORYASSURANCE_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_REGULATORYASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_REGULATORYASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getBAIncidents('DigitalTransformationAssurance')">
+              <td><strong>Digital Transformation Assurance</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_DIGITALTRANSFORMATIONASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_DIGITALTRANSFORMATIONASSURANCE_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_DIGITALTRANSFORMATIONASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_DIGITALTRANSFORMATIONASSURANCE_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_DIGITALTRANSFORMATIONASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_DIGITALTRANSFORMATIONASSURANCE_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_DIGITALTRANSFORMATIONASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_DIGITALTRANSFORMATIONASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getBAIncidents('DigitalEcosystemAssurance')">
+              <td><strong>Digital Ecosystem Assurance</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_DIGITALECOSYSTEMASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_DIGITALECOSYSTEMASSURANCE_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_DIGITALECOSYSTEMASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_DIGITALECOSYSTEMASSURANCE_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_DIGITALECOSYSTEMASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_DIGITALECOSYSTEMASSURANCE_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_DIGITALECOSYSTEMASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_DIGITALECOSYSTEMASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getBAIncidents('CustomerExperience')">
+              <td><strong>Customer Experience</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_CUSTOMEREXPERIENCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_CUSTOMEREXPERIENCE_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_CUSTOMEREXPERIENCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_CUSTOMEREXPERIENCE_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_CUSTOMEREXPERIENCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_CUSTOMEREXPERIENCE_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_CUSTOMEREXPERIENCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_CUSTOMEREXPERIENCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getBAIncidents('CustomerJourney')">
+              <td><strong>Customer Journey</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_CUSTOMERJOURNEY_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_CUSTOMERJOURNEY_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_CUSTOMERJOURNEY_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_CUSTOMERJOURNEY_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_CUSTOMERJOURNEY_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_CUSTOMERJOURNEY_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_CUSTOMERJOURNEY_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_CUSTOMERJOURNEY_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getBAIncidents('CustomerEquipmentAssurance')">
+              <td><strong>Customer Equipment Assurance</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_CUSTOMEREQUIPMENTASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_CUSTOMEREQUIPMENTASSURANCE_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_CUSTOMEREQUIPMENTASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_CUSTOMEREQUIPMENTASSURANCE_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_CUSTOMEREQUIPMENTASSURANCE_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_CUSTOMEREQUIPMENTASSURANCE_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_CUSTOMEREQUIPMENTASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_CUSTOMEREQUIPMENTASSURANCE_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+            <tr class="pointer-row" ng-click="getBAIncidents('NA')">
+              <td><strong>Not assigned</strong></td>
+              <td class="text-right pointer-row" ng-if="!entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_NA_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_NA_INCIDENT_COUNT}}</td>
+              <td class="text-right pointer-row" ng-if="entry.balancedScorecardBADomainValues"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_NA_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_NA_INCIDENT_COUNT}}</td>
+              <td ng-if="!entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_NA_INCIDENT_VALUE, 1)}">
+                {{balancedScorecard.KPI.BA_NA_INCIDENT_VALUE | number:0}} €</td>
+              <td ng-if="entry.balancedScorecardBADomainValues" class="text-right pointer-row"
+                ng-style="{background: getBgColorBA(balancedScorecard.KPI.BA_NA_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100)}">
+                {{balancedScorecard.KPI.BA_NA_INCIDENT_COUNT / balancedScorecard.KPI.INCIDENT_COUNT_TOTAL * 100 | number:2}}
+                %</td>
+            </tr>
+
+        </table>
+
+      </div>
+    </div>
+    <!-- Panel 4 -->
+
+  </div>
+
+</div>
+
+<!-- Incidents -->
+<div class="panel panel-default md-whiteframe-4dp" layout="column" layout-padding="" layout-margin="" flex=""
+  ng-if="incidents.length > 0">
+
+
+
+  <div class="col-sm-12">
+    <strong>{{incidents.length}}</strong> incidents in {{incidentListType}} <strong>"{{incidentListArea}}"</strong>:
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover table-condensed">
+      <thead>
+        <tr>
+          <th width="70px">ID</th>
+          <th width="150px">Info</th>
+          <th width="60px" align="center"></th>
+          <th>Description</th>
+          <th width="180px">Impact type</th>
+          <th width="90px" class="text-right">Impact</th>
+          <th width="10px"></th>
+          <th width="200px">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-if="!incidents.length && !loadFinished">
+          <td colspan="9">
+            <!-- Spinner -->
+            <div class="col-sm-12 text-center">
+              <br><br>
+              <i class="fa fa-spinner fa-pulse fa-3x"></i>
+            </div>
+            <!-- Spinner -->
+          </td>
+        </tr>
+        <tr ng-if="!incidents.length && loadFinished">
+          <td colspan="9">
+            <h4>No open incidents found.</h4>
+            Try here: <a href="#" ng-href="/incidents?opcoId={{entry.OPCO_ID}}&archive={{toggleArchive}}"><i
+                class="fa fa-fw" ng-class="{'fa-archive':showArchive=='N', 'fa-edit':showArchive=='Y'}"></i>
+              {{showArchivedLabel}}</a>
+          </td>
+        </tr>
+        <tr ng-repeat="incident in incidents" ng-click="">
+          <td>
+            <strong>I_{{incident.OPCO_ID}}_{{incident.INCIDENT_ID}}</strong><br>
+          </td>
+          <td><a class="btn btn-default btn-sm btn-block"
+              ng-class="{'btn-green':incident.STATUS == 'Closed', 'btn-red':incident.STATUS == 'Expired'}"
+              href="/incident-info/{{incident.INCIDENT_ID}}"><strong>{{incident.METRIC_ID.length>30?incident.METRIC_ID.substr(0,30)+' ...':incident.METRIC_ID}}</strong><br>{{incident.OPENING_DATE | date:'dd.MM.yyyy'}}</a>
+          </td>
+          <td style="text-align:center"><strong>{{entry.lookup.getOpcoById(incident.OPCO_ID).COUNTRY_CODE}}</strong>
+          </td>
+          <td><strong>{{incident.PROBLEM_DESCRIPTION}}</strong><br><small>{{incident.ROOT_CAUSE}}</small></td>
+          <td style="text-align:left">
+            <span
+              ng-if="!incident.IMPACT && !incident.RECOVERED && !incident.PREVENTED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 1)}})
+              {{getTypeOfImpactText(incident.IMPACT_TYPE, 1)}}<br></span>
+            <span
+              ng-if="incident.IMPACT && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 1)}})
+              {{getTypeOfImpactText(incident.IMPACT_TYPE, 1)}}<br></span>
+            <span
+              ng-if="incident.RECOVERED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 2)}})
+              {{getTypeOfImpactText(incident.IMPACT_TYPE, 2)}}<br></span>
+            <span
+              ng-if="incident.PREVENTED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 3)}})
+              {{getTypeOfImpactText(incident.IMPACT_TYPE, 3)}}</span>
+            <span ng-if="incident.IMPACT_TYPE == 'No loss'">No loss</span>
+            <span ng-if="incident.IMPACT_TYPE == 'Unknown'">Unknown</span>
+          </td>
+          <td style="text-align:left">
+            <span
+              ng-if="!incident.IMPACT && !incident.RECOVERED && !incident.PREVENTED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 1)}})
+              <strong class='btn-red pull-right'>{{0 | number:0}}</strong><br></span>
+            <span
+              ng-if="incident.IMPACT && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 1)}})
+              <strong class='btn-red pull-right'>{{incident.IMPACT | number:0}}</strong><br></span>
+            <span
+              ng-if="incident.RECOVERED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 2)}})
+              <strong class='btn-green pull-right'>{{incident.RECOVERED | number:0}}</strong><br></span>
+            <span
+              ng-if="incident.PREVENTED && incident.IMPACT_TYPE != 'No loss' && incident.IMPACT_TYPE != 'Unknown'">{{getTypeOfImpactNumber(incident.IMPACT_TYPE, 3)}})
+              <strong class='btn-blue pull-right'>{{incident.PREVENTED | number:0}}</strong></span>
+            <span ng-if="incident.IMPACT_TYPE == 'No loss'"><strong class='pull-right'>{{0 | number:0}}</strong></span>
+            <span ng-if="incident.IMPACT_TYPE == 'Unknown'"><strong class='pull-right'>Unknown</strong></span>
+          </td>
+          <td>
+          </td>
+          <td>
+            <strong
+              ng-class="{'btn-green':incident.STATUS == 'Closed', 'btn-red':incident.STATUS == 'Expired', 'btn-blue':incident.STATUS == 'In progress'}">{{incident.STATUS}}</strong></br>
+            <i class="fa fa-fw fa-clock-o"></i> {{incident.STATUS_DATE | date:'dd.MM.yyyy'}} <small
+              class="btn-grey">{{incident.STATUS_DATE | date:'HH:mm'}}</small></br>
+            <small><i class="fa fa-fw fa-user"></i> {{incident.MODIFIED_BY}}</small><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+<!-- Incidents -->

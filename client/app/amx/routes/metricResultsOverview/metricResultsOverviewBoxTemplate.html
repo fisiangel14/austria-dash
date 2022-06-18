@@ -1,0 +1,24 @@
+<div 
+  class="panel-metric-results panel-default" ng-class="{'panel-default':metric.STATUS=='0', 'panel-success':metric.STATUS=='1', 'panel-danger':metric.STATUS=='2', 'panel-warning':metric.STATUS=='10'}">  
+  <div class="panel-heading">
+    <h4 class="no-margins">
+      <i class="fa fa-line-chart fa-fw"></i>
+      <strong >{{metric.METRIC_ID}}</strong>
+      <small><small>{{entry.lookup.getOpcoById(metric.OPCO_ID).COUNTRY_CODE}}</small></small>
+      <span class="label pull-right" ng-class="{'btn-day':metric.FREQUENCY=='D', 'btn-month':metric.FREQUENCY=='M', 'btn-cycle':metric.FREQUENCY=='C'}">{{metric.FREQUENCY}}</span>
+    </h4> 
+  </div>
+
+  <div class="panel-body" ng-cloak>
+    <div class="row">
+      <div class="col-sm-12">
+        <span ng-if="metric.GREEN>0" class="label label-green label-badge pull-left">{{metric.GREEN}}</span>
+        <span ng-if="metric.YELLOW>0" class="label label-yellow label-badge pull-left">{{metric.YELLOW}}</span>
+        <span ng-if="metric.ORANGE>0" class="label label-orange label-badge pull-left">{{metric.ORANGE}}</span>
+        <span ng-if="metric.RED>0" class="label label-red label-badge pull-left">{{metric.RED}}</span>
+        <span ng-if="metric.NO_RESULT>0" class="label label-blue label-badge pull-right">{{metric.NO_RESULT}}</span>
+      </div>
+      <div class="footer-text">{{metric.NAME.substr(0,100)}}</div>
+    </div>
+  </div>
+</div>

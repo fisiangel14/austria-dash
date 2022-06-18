@@ -1,0 +1,94 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li><a href="/dato-catalogue?opcoId={{entry.OPCO_ID}}"><i class="fa fa-cubes fa-fw"></i> Dato catalogue</a></li>
+  <li><a href="/dato-results-overview?month={{entry.searchMDmonth}}&opcoId={{entry.OPCO_ID}}"><i class="fa fa-th-list fa-fw"></i> Datos overview</a></li>
+  <li class="active"><i class="fa fa-files-o fa-fw"></i> Dato files</li></ol>  
+</ol>
+<!-- Breadcrumbs -->
+
+<h3 class="sub-header">
+    <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+    {{entry.state.data.title}} 
+</h3>
+
+<!-- Navigate months -->
+<div class="row">
+  <div class="col-md-4 text-left">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/dato-file?month={{prevMonth}}"> 
+      <i class="fa fa-chevron-left fa-fw"></i>
+      {{prevMonthText}}
+    </a>
+  </div>
+  <div class="col-md-4 text-center">
+    <h4 class="sub-header">
+      <i class="fa fa-calendar fa-fw"></i>
+      {{workMonthText}}
+    </h4>
+  </div>
+  <div class="col-md-4 text-right">
+    <a class="btn btn-primary" style="padding-top:3px;padding-bottom:2px;" ng-href="/dato-file?month={{nextMonth}}"> 
+      {{nextMonthText}}
+      <i class="fa fa-chevron-right fa-fw"></i>
+    </a>
+  </div>
+</div>
+<!-- Navigate months -->
+
+<div class="panel panel-default md-whiteframe-4dp md-padding">
+
+<!-- Table -->
+<div class="table-responsive">
+    <table class="table table-hover table-striped table-condensed">
+        <thead>
+            <tr>
+                <th width="10px" style="text-align:right">#</th>
+                <th><strong>Filename</strong></th>
+                <th class="text-right">Size (B)</th>
+                <th class="text-center" width="180px" colspan="2">File created</th>
+                <th class="text-center">File loaded</th>
+                <th class="text-right" width="80px">Header count</th>
+                <th class="text-right" width="80px">Rows in file</th>
+                <th class="text-right" width="80px">Datos loaded</th>
+                <th class="text-right" width="80px"># New layout</th>
+                <th width="10px" style="text-align:right" width="50px">Load status</th>
+            </tr>
+            <tr>
+                <th colspan="11"><input class="no-borders-title" type="text" ng-model="searchFiles" placeholder="Search" focus-me="true"/></th>
+            </tr>            
+        </thead>
+        <tbody>
+            <tr ng-if="!files.length && !loadFinished">
+                <td colspan="11">
+                    <!-- Spinner -->
+                      <div class="col-sm-12 text-center">
+                        <br><br>
+                        <i class="fa fa-spinner fa-pulse fa-3x"></i>
+                      </div>
+                    <!-- Spinner -->                
+                </td>
+            </tr>   
+            <tr ng-if="!files.length && loadFinished">
+                <td colspan="11">
+                    <h4>No files found.</h4>
+                </td>
+            </tr>            
+            <tr ng-class="{'danger':file.STATUS==0 || !file.SUCCESS_ROWS || Number(file.SUCCESS_ROWS)-Number(file.FILE_HEADER_ROWS) != 0}" ng-repeat="file in files | opcoFilter:entry.OPCO_ID | filter:searchFiles" ng-click="">
+                <td style="vertical-align:middle; text-align:right">{{$index + 1}}. </td>
+                <td style="vertical-align:middle; text-align:left"><a ng-href="/files/{{file.FILE_NAME}}" target="_blank">{{file.FILE_NAME}}</a></td>
+                <td style="vertical-align:middle; text-align:right">{{file.FILE_SIZE | number:0}}</td>
+                <td style="vertical-align:middle; text-align:right">{{file.FILE_MODIFY_DATE | date:"dd.MM.yyyy"}} <small class="btn-grey">{{file.FILE_MODIFY_DATE | date:"HH:mm"}}</small></td>
+                <td style="vertical-align:middle; text-align:left"><small>({{file.FILE_AGE | number:1}} days ago</small>)</td>
+                <td style="vertical-align:middle; text-align:center">{{file.CREATED | date:"dd.MM.yyyy"}} <small class="btn-grey">{{file.CREATED | date:"HH:mm"}}</small></td>
+                <td style="vertical-align:middle; text-align:right">{{file.FILE_HEADER_ROWS | number:0}}</td>
+                <td style="vertical-align:middle; text-align:right">{{file.TOTAL_ROWS | number:0}}</td>
+                <td style="vertical-align:middle; text-align:right">{{file.SUCCESS_ROWS | number:0}}</td>
+                <td style="vertical-align:middle; text-align:right" ng-class="{'font-bold':file.NEW_LAYOUT>0}">{{file.NEW_LAYOUT | number:0}}</td>
+                <td style="vertical-align:middle; text-align:right">
+                    <i ng-if="file.STATUS && file.SUCCESS_ROWS-file.FILE_HEADER_ROWS == 0" class="btn-green fa fa-check-circle"></i>
+                    <i ng-if="!file.STATUS || file.SUCCESS_ROWS-file.FILE_HEADER_ROWS != 0" class="btn-red fa fa-times-circle"></i>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>

@@ -1,0 +1,102 @@
+<div class="row">
+  <div class="col-md-9 text-left">
+    <h3 class="sub-header">
+        <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+        {{entry.state.data.title}} 
+    </h3> 
+  </div>
+  <div class="col-md-3 text-right">
+    <md-switch class="md-primary md-hue-1" ng-true-value="'Y'" ng-false-value="'N'" ng-model="entry.overviewShowFineTunedOnly" ng-change="reloadOverview()" focus-me="true" aria-label="Relevant Metric Switch">
+        <span ng-if="entry.overviewShowFineTunedOnly == 'Y'"> Fine-tuned metrics</span>
+        <span ng-if="entry.overviewShowFineTunedOnly == 'N'"> All relevant metrics</span>
+    </md-switch>
+  </div>  
+</div>
+
+<!-- <div class="panel panel-default md-whiteframe-4dp md-padding"> -->
+
+    <!-- Chart -->
+    <div class="row">
+      <div class="col-sm-6">
+        <div ng-if="overviewDailyChart">
+          <h4 class="sub-header">
+              Daily metrics  
+          </h4>      
+          <c3-chart id="overviewDaily" config="overviewChartOptions" data="overviewDailyChart"></c3-chart>
+        </div>   
+        <!-- Table overview -->
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th class="text-right" width="5%"># Metrics</th>
+                        <th class="text-right" width="7%"># Due results</th>
+                        <th class="text-right" width="10%">Green</th>
+                        <th class="text-right" width="10%">Yellow</th>
+                        <th class="text-right" width="10%">Red</th>
+                        <th class="text-right" width="10%">Orange</th>
+                        <th class="text-right" width="10%">No result</th>
+                    </tr>
+                </thead>
+                <tbody >
+                    <tr ng-repeat="result in overviewDailyTable" ng-click="">
+                        <td> <a ng-href="/metric-result-table?opcoId={{entry.OPCO_ID}}&month={{result.MONTH | date:'yyyy-MM'}}&frequency=D&finetuned={{entry.overviewShowFineTunedOnly != '%'?entry.overviewShowFineTunedOnly:'%25'}}"> {{result.MONTH | date:"MMMM, yyyy"}} </a></td>
+                        <td class="text-right"><strong>{{result.DISTINCT_CNT | number:0}}</strong></td>
+                        <td class="text-right">{{result.CNT | number:0}}</td>
+                        <td class="text-right" ng-class="{'btn-green font-bold':result.GREEN>0}">{{result.GREEN | number:2}}%</td>
+                        <td class="text-right" ng-class="{'btn-yellow font-bold':result.YELLOW>0}">{{result.YELLOW | number:2}}%</td>                    
+                        <td class="text-right" ng-class="{'btn-red font-bold':result.RED>0}">{{result.RED | number:2}}%</td>
+                        <td class="text-right" ng-class="{'btn-orange font-bold':result.ORANGE>0}">{{result.ORANGE | number:2}}%</td>
+                        <td class="text-right" ng-class="{'btn-blue font-bold':result.NO_RESULT>0}">{{result.NO_RESULT | number:2}}%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Table overview -->
+
+      </div>    
+      
+      <div class="col-sm-6">
+        <div ng-if="overviewMonthlyChart">
+          <h4 class="sub-header">
+              Monthly metrics  
+          </h4>       
+          <c3-chart id="overviewMonthly" config="overviewChartOptions" data="overviewMonthlyChart"></c3-chart>
+        </div>      
+        <!-- Table overview -->
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th class="text-right" width="5%"># Metrics</th>
+                        <th class="text-right" width="7%"># Due results</th>
+                        <th class="text-right" width="10%">Green</th>
+                        <th class="text-right" width="10%">Yellow</th>
+                        <th class="text-right" width="10%">Red</th>
+                        <th class="text-right" width="10%">Orange</th>
+                        <th class="text-right" width="10%">No result</th>
+                    </tr>
+                </thead>
+                <tbody >
+                    <tr ng-repeat="result in overviewMonthlyTable" ng-click="">
+                        <td> <a ng-href="/metric-result-table?opcoId={{entry.OPCO_ID}}&month={{result.MONTH | date:'yyyy-MM'}}&frequency=M&finetuned={{entry.overviewShowFineTunedOnly != '%'?entry.overviewShowFineTunedOnly:'%25'}}"> {{result.MONTH | date:"MMMM, yyyy"}} </a></td>
+                        <td class="text-right"><strong>{{result.DISTINCT_CNT | number:0}}</strong></td>
+                        <td class="text-right">{{result.CNT | number:0}}</td>
+                        <td class="text-right" ng-class="{'btn-green font-bold':result.GREEN>0}">{{result.GREEN | number:2}}%</td>
+                        <td class="text-right" ng-class="{'btn-yellow font-bold':result.YELLOW>0}">{{result.YELLOW | number:2}}%</td>
+                        <td class="text-right" ng-class="{'btn-red font-bold':result.RED>0}">{{result.RED | number:2}}%</td>
+                        <td class="text-right" ng-class="{'btn-orange font-bold':result.ORANGE>0}">{{result.ORANGE | number:2}}%</td>
+                        <td class="text-right" ng-class="{'btn-blue font-bold':result.NO_RESULT>0}">{{result.NO_RESULT | number:2}}%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!-- Table overview -->
+
+      </div>  
+    </div>
+<!-- Chart -->
+
+<!-- </div> -->

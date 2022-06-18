@@ -1,0 +1,76 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li><a href="/incidents?opcoId={{entry.OPCO_ID}}&archive=N"><i class="fa fa-exclamation-circle fa-fw"></i> Incidents</a></li>
+  <li class="active"><i class="fa fa-wpforms fa-fw"></i> Stakeholder reports</a></li>
+  <li><a href="/balanced-scorecard?year={{entry.currYear}}&opcoId={{entry.OPCO_ID}}"><i class="fa fa-vcard fa-fw"></i> Balanced scorecard</a></li>
+</ol>
+<!-- Breadcrumbs -->
+
+<h3 class="sub-header">
+    <span class="input-group btn-group pull-left">
+      <a class="btn btn-primary dropdown-toggle no-margins no-padding" ng-disabled="isDisabled" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a ui-sref="stakeholderReportInfo({stakeholderReportId:'newStakeholderReport'})"><i class="fa fa-wpforms fa-fw"></i> New Stakeholder Report</a></li>
+      </ul>
+    </span> 
+    &nbsp;
+    <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+    {{entry.state.data.title}} 
+</h3> 
+
+<div class="panel panel-default md-whiteframe-4dp md-padding">
+
+        <div class="small no-margins" ng-if="search">
+            <ul class="list-inline no-margins">
+                <li><strong>Filters: </strong></li>
+                <li ng-repeat="(element, filter) in search" class="filter-alert" ng-if="filter">
+                    <a ng-click="removeFilter(element)" class="btn-xs  close" style="font-size: 10px; vertical-align: text-top;" data-dismiss="alert"><i class="fa fa-times"></i></a>
+                    {{element}} <em>is like</em> <strong>"{{filter}}"</strong>
+                </li>
+            </ul>
+        </div>
+        <!-- Filters -->
+
+        <table class="table table-hover table-condensed">
+            <thead>
+                <tr>
+                    <th width="10px" style="text-align:right">#</th>
+                    <th>Control / Description</th>
+                    <th width="150px" style="vertical-align:middle; text-align: center"></th>
+                    <th width="50px" style="vertical-align:middle; text-align: center">Controls</th>
+                    <th width="50px" style="vertical-align:middle; text-align: center">Visits</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-if="!stakeholderReports.length && !loadFinished">
+                    <td colspan="7">
+                        <!-- Spinner -->
+                          <div class="col-sm-12 text-center">
+                            <br><br>
+                            <i class="fa fa-spinner fa-pulse fa-3x"></i>
+                          </div>
+                        <!-- Spinner -->                
+                    </td>
+                </tr>            
+                <tr ng-if="!stakeholderReports.length && loadFinished"><td colspan="5"><h4>No reports found</h4></td></tr>
+                <tr class="animation pointer-row" ng-class="{'btn-not-relevant':stakeholderReport.CNT_CONTROLS === 0}" ng-repeat="stakeholderReport in stakeholderReports | filter: search" ng-click="$event.originalEvent.getURLButton || stakeholderReportInfo(stakeholderReport.STAKEHOLDER_REPORT_ID)" >
+                    <td style="vertical-align:middle; text-align:right">{{$index + 1}}. </td>                
+                    <td style="vertical-align:middle; padding-left:10px;">                            
+                        <span class="key-risk-area-title"><strong>{{stakeholderReport.STAKEHOLDER_REPORT}}</strong></span> <small class="btn-blue">(ID: {{stakeholderReport.STAKEHOLDER_REPORT_ID}})</small></br>
+                        <span ng-if="stakeholderReport.STAKEHOLDER_REPORT_DESCRIPTION">{{stakeholderReport.STAKEHOLDER_REPORT_DESCRIPTION}}</br></span>
+                    </td>
+                    {{entry.isDisabled()}}
+                    <td style="vertical-align:middle;"><button class="btn btn-default btn-block" ng-click="($event.originalEvent.getURLButton = true) && getToken(stakeholderReport)" ng-disabled="isDisabled"> <i class="fa fa-share-alt fa-fw"></i> Generate key</button></td>
+                    <td style="vertical-align:middle;"><button class="btn btn-block" ng-class="{'btn-success':stakeholderReport.CNT_CONTROLS > 0, 'btn-default':stakeholderReport.CNT_CONTROLS == 0}"><strong>{{stakeholderReport.CNT_CONTROLS}}</strong></button></td>
+                    <td style="vertical-align:middle;"><button class="btn btn-block" ng-class="{'btn-primary':stakeholderReport.HITS > 0, 'btn-default':stakeholderReport.HITS == 0}"><strong>{{stakeholderReport.HITS}}</strong></button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div ng-if="stakeholderReports.length > pageSize" class="no-margins" layout="row" layout-align="center">
+            <ul uib-pagination total-items="stakeholderReports.length" items-per-page="pageSize" max-size="10" ng-model="currentPage" ng-change="setCurrentPage(currentPage)" boundary-link-numbers="true" previous-text="<" next-text=">"></ul>
+        </div>
+
+</div>

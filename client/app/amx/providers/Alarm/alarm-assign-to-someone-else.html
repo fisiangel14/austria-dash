@@ -1,0 +1,30 @@
+<div class="md-whiteframe-4dp">
+  <form ng-submit="submit()">
+
+    <div class="modal-body">
+      <div class="row form-group">
+        <div class="col-sm-12">
+          <label for="alarmUserAssign">
+            Assign alarm
+            <i class="fa fa-lg fa-fw"
+              ng-class="{'fa-cube':alarm.SOURCE=='DATO', 'fa-line-chart':alarm.SOURCE=='METRIC', 'fa-area-chart':alarm.SOURCE=='CONTROL', 'fa-edit':alarm.SOURCE=='CHANGE', 'fa-file-text':alarm.SOURCE=='FILE'}"></i>
+            <strong>{{alarm.OBJECT_ID}} <i class="fa fa-calendar fa-fw"></i> {{alarm.OBJECT_DATE |date:'dd.MM.yyyy'}}
+            </strong> (ID#: {{alarm.ALARM_ID}}) to:
+          </label>
+          <select name="alarmUserAssign" class="form-control" ng-model="alarm.ASSIGNED_TO"
+            ng-disabled="entry.isDisabled()" required>
+            <option ng-repeat="user in users" value="{{user.EMAIL}}">{{user.USERNAME}}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <div class="input-group">
+        <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+        <button type="submit" class="btn btn-primary" ng-hide="entry.isDisabled()">Assign</button>
+      </div>
+    </div>
+
+  </form>
+</div>

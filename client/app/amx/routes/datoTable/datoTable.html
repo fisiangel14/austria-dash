@@ -1,0 +1,104 @@
+<!-- Breadcrumbs -->
+<ol class="breadcrumb">
+  <li class="active"><i class="fa fa-cubes fa-fw"></i> Dato catalogue</li>
+  <li><a href="/dato-results-overview?month={{entry.searchMDmonth}}&opcoId={{entry.OPCO_ID}}"><i class="fa fa-th-list fa-fw"></i> Datos overview</a></li>
+  <li><a href="/dato-file?month={{entry.searchMDmonth}}"><i class="fa fa-files-o fa-fw"> </i> Dato files</a></li></ol>  
+</ol>
+<!-- Breadcrumbs -->
+
+
+<h3 class="sub-header">
+    <span class="input-group btn-group pull-left">
+      <a class="btn btn-primary dropdown-toggle no-margins no-padding" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <li><a ui-sref="datoNew"><i class="fa fa-plus fa-fw"></i> New dato</a></li>
+      </ul>
+    </span> 
+    &nbsp;
+    <strong class="btn-blue">{{entry.OPCO_NAME}}</strong>
+    {{entry.state.data.title}} 
+</h3> 
+
+<div class="panel panel-default md-whiteframe-4dp md-padding">
+
+    <div class="small no-margins" ng-if="!entry.searchDato">
+        <ul class="list-inline no-margins">
+            <li><strong>Filters: </strong></li>
+            <li class="filter-alert"> None </li>
+        </ul>
+    </div>
+
+    <div class="small no-margins" ng-if="entry.searchDato">
+        <ul class="list-inline no-margins">
+            <li><strong>Filters: </strong></li>
+            <li ng-repeat="(element, filter) in entry.searchDato" class="filter-alert" ng-if="filter">
+                <a ng-click="removeFilter(element)" class="btn-xs  close" style="font-size: 10px; vertical-align: text-top;" data-dismiss="alert"><i class="fa fa-times"></i></a>
+                {{element}} <em>is like</em> <strong>"{{filter}}"</strong>
+            </li>
+        </ul>
+    </div>
+
+
+    <div class="table-responsive">
+        <table class="table table-hover table-condensed">
+            <thead>
+                <tr>
+                    <th width="10px" style="text-align:right">#</th>
+                    <th width="80px">Dato ID</th>
+                    <th width="60px" align="center"></th>
+                    <th width="60px" style="text-align:center">Area</th>
+                    <th>Description</th>
+                    <th width="110px">Related metrics</th>
+                    <th width="50px" style="text-align:center">Relevant</th>
+                    <th width="50px" style="text-align:center">Implemented</th>
+                    <th width="50px" style="text-align:center">Freq.</th>
+                </tr>
+                <tr>                
+                    <th></th>
+                    <th><input class="no-borders-title" type="text" ng-model="entry.searchDato.DATO_ID" ng-change="filterChanged()" placeholder="Search" focus-me="true"/></th>
+                    <th></th>
+                    <th><input class="no-borders-title" type="text" ng-model="entry.searchDato.AREA_ID" ng-change="filterChanged()" placeholder="Search" /></th>
+                    <th><input class="no-borders-title" type="text" ng-model="entry.searchDato.DESCRIPTION" ng-change="filterChanged()" placeholder="Search" /></th>
+                    <th><input class="no-borders-title" type="text" ng-model="entry.searchDato.METRICS" ng-change="filterChanged()" placeholder="Search" /></th>
+                    <th>
+                        <md-switch class="md-primary md-hue-1 no-margins" ng-true-value="'Y'" ng-false-value="'N'" ng-model="entry.searchDato.RELEVANT" aria-label="RELEVANT"></md-switch>                    
+                    </th>
+                    <th>
+                        <md-switch class="md-primary md-hue-1 no-margins" ng-true-value="'Y'" ng-false-value="'N'" ng-model="entry.searchDato.IMPLEMENTED" aria-label="IMPLEMENTED"></md-switch>                    
+                    </th>
+                    <th><input class="no-borders-title" type="text" ng-model="entry.searchDato.FREQUENCY" ng-change="filterChanged()" placeholder="D/M/C" /></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-if="!datos.length && !loadFinished">
+                    <td colspan="9">
+                        <!-- Spinner -->
+                          <div class="col-sm-12 text-center">
+                            <br><br>
+                            <i class="fa fa-spinner fa-pulse fa-3x"></i>
+                          </div>
+                        <!-- Spinner -->                
+                    </td>
+                </tr>   
+                <tr ng-if="!datos.length && loadFinished">
+                    <td colspan="9">
+                        <h4>No datos found.</h4>
+                    </td>
+                </tr>                
+                <tr ng-class="{'btn-not-relevant':dato.RELEVANT=='N'}" ng-repeat="dato in datos | filter:entry.searchDato" ng-click="">
+                    <td style="vertical-align:middle; text-align:right">{{$index + 1}}. </td>                
+                    <td style="vertical-align:middle"><a class="btn btn-default btn-block" ng-class="{'btn-not-implemented': dato.IMPLEMENTED=='N', 'btn-not-relevant': dato.RELEVANT=='N', 'btn-implemented': dato.IMPLEMENTED=='Y'}" href="/dato-info/{{dato.OPCO_ID}}/{{dato.DATO_ID}}">&nbsp;<i class="fa" ng-class="{'fa-cube': dato.RELEVANT=='Y', 'fa-ban': dato.RELEVANT=='N'}"></i> <strong>{{dato.DATO_ID}}</strong></a></td>
+                    <td style="text-align:center; vertical-align:middle"><strong>{{entry.lookup.getOpcoById(dato.OPCO_ID).COUNTRY_CODE}}</strong></td>
+                    <td style="text-align:center; vertical-align:middle"><h4><span class="label label-default">{{dato.AREA_ID}}</span></h4></td>
+                    <td style="vertical-align:middle"><strong>{{dato.NAME}}</strong> <span ng-if="dato.NOTES.length > 0"><i class="fa fa-lg fa-fw fa-comments" uib-tooltip="{{dato.NOTES}}" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top"></i></span><br><small>{{dato.DESCRIPTION}}</small></td>
+                    <td style="vertical-align:middle"><a class="btn btn-default btn-xs" ng-repeat="metric in dato.METRICS | split:', '" href="/metric-info/{{dato.OPCO_ID}}/{{metric}}"><i class="fa fa-line-chart fa-fw"></i>{{metric}}</a></td>
+                    <td style="vertical-align:middle; text-align: center"><i class="fa fa-2x fa-fw btn-grey" ng-class="{'fa-check-square':dato.RELEVANT=='Y', 'fa-square-o':dato.RELEVANT=='N'}"></i></td>                
+                    <td style="vertical-align:middle; text-align: center"><i class="fa fa-2x fa-fw" ng-class="{'fa-check-square btn-green':dato.IMPLEMENTED=='Y', 'fa-square-o btn-red':dato.IMPLEMENTED=='N' && dato.RELEVANT=='Y', 'fa-square-o btn-grey':dato.IMPLEMENTED=='N' && dato.RELEVANT=='N'}"></i></td>
+                    <td style="vertical-align:middle; text-align: center"><h4><span class="label" ng-class="{'btn-day':dato.FREQUENCY=='D', 'btn-month':dato.FREQUENCY=='M', 'btn-cycle':dato.FREQUENCY=='C'}">{{dato.FREQUENCY}}</span></h4></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
